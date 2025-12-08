@@ -19,24 +19,24 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
 
-    <meta name="description" content="为什么需要委托(Delegate)">
+    <meta name="description" content="什么是委托(Delegate)游戏系统中存在大量跨对象的交互事件——事件发起者执行某个行为后，其他对象需要对该行为做出响应。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Delegate">
-<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/06/ProgrammingSkills/Delegate/index.html">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/08/ProgrammingSkills/Delegate/index.html">
 <meta property="og:site_name" content="UE5学习笔记博客">
-<meta property="og:description" content="为什么需要委托(Delegate)">
+<meta property="og:description" content="什么是委托(Delegate)游戏系统中存在大量跨对象的交互事件——事件发起者执行某个行为后，其他对象需要对该行为做出响应。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2025-12-05T16:00:00.000Z">
-<meta property="article:modified_time" content="2025-12-08T12:38:08.931Z">
+<meta property="article:published_time" content="2025-12-07T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-08T15:51:11.884Z">
 <meta property="article:author" content="Larry-lyx">
 <meta property="article:tag" content="Delegate">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/06/ProgrammingSkills/Delegate/">
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/08/ProgrammingSkills/Delegate/">
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/06/ProgrammingSkills/Delegate/","path":"2025/12/06/ProgrammingSkills/Delegate/","title":"Delegate"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/08/ProgrammingSkills/Delegate/","path":"2025/12/08/ProgrammingSkills/Delegate/","title":"Delegate"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>Delegate | UE5学习笔记博客</title>
@@ -158,7 +158,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%A7%94%E6%89%98-Delegate"><span class="nav-number">1.</span> <span class="nav-text">为什么需要委托(Delegate)</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%A7%94%E6%89%98-Delegate"><span class="nav-number">1.</span> <span class="nav-text">什么是委托(Delegate)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E4%BE%8B"><span class="nav-number">2.</span> <span class="nav-text">代码实例</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -209,7 +209,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/06/ProgrammingSkills/Delegate/">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/08/ProgrammingSkills/Delegate/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
@@ -237,15 +237,9 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2025-12-06 00:00:00" itemprop="dateCreated datePublished" datetime="2025-12-06T00:00:00+08:00">2025-12-06</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-12-08 20:38:08" itemprop="dateModified" datetime="2025-12-08T20:38:08+08:00">2025-12-08</time>
+      <time title="创建时间：2025-12-08 00:00:00 / 修改时间：23:51:11" itemprop="dateCreated datePublished" datetime="2025-12-08T00:00:00+08:00">2025-12-08</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -266,7 +260,23 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="为什么需要委托-Delegate"><a href="#为什么需要委托-Delegate" class="headerlink" title="为什么需要委托(Delegate)"></a>为什么需要委托(Delegate)</h1>
+    <div class="post-body" itemprop="articleBody"><h1 id="什么是委托-Delegate"><a href="#什么是委托-Delegate" class="headerlink" title="什么是委托(Delegate)"></a>什么是委托(Delegate)</h1><p>游戏系统中存在大量跨对象的交互事件——事件发起者执行某个行为后，其他对象需要对该行为做出响应。</p>
+<span id="more"></span>
+
+<p>以“子弹击中敌人”为例：子弹触发Overlap事件是行为发起端，若直接在子弹代码中修改敌人血量、硬直等属性，会导致代码扩展性极差（比如不同敌人有不同的减伤、免硬直等差异化逻辑）。核心问题在于：子弹无需知晓被击中对象的具体类型和响应逻辑，所有“受击后的处理”都应归属于被击中对象自身。</p>
+<p>委托（Delegate）正是解决这类问题的核心机制，其本质是一套“事件通信管道”：</p>
+<ul>
+<li>事件发起者只需负责向“管道”发送消息，无需关心谁会接收、如何处理；</li>
+<li>事件接收者提前将处理逻辑（回调函数）绑定到“管道”，当收到消息时自动执行逻辑。</li>
+</ul>
+<p>需明确委托机制的三个核心要素：</p>
+<ol>
+<li>委托事件（即“通信管道”）：通常定义在事件发起方的类中；</li>
+<li>消息发送：事件发起方在合适的时机触发委托、广播消息；</li>
+<li>回调绑定：事件接收方需在事件发生前，将处理函数绑定到委托上。</li>
+</ol>
+<p>这里的核心易错点是<strong>绑定时机</strong>：回调函数的绑定必须早于委托广播，否则接收方无法响应。即便在“自身向自身发消息”的场景中，代码层面仍需先定义回调逻辑、完成绑定，再执行委托广播——回调函数的代码书写顺序在前，实际执行却在收到消息后，这也是委托使用中易混淆的点。</p>
+<h1 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Sender.h</span></span><br><span class="line">DECLRE_DELEGATE_</span><br></pre></td></tr></table></figure>
     </div>
 
     
@@ -282,9 +292,12 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilitySystemComponent/" rel="prev" title="AbilitySystemComponent">
+                  <i class="fa fa-angle-left"></i> AbilitySystemComponent
+                </a>
             </div>
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/06/ProgrammingSkills/Singleton/" rel="next" title="">
+                <a href="/ue5-blog/2025/12/08/ProgrammingSkills/Networking/" rel="next" title="">
                    <i class="fa fa-angle-right"></i>
                 </a>
             </div>

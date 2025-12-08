@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Reflection/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Lock/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/07/ProgrammingSkills/Interface/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
     <title>Delegate</title>
-    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Delegate/</url>
-    <content><![CDATA[<h1 id="为什么需要委托-Delegate"><a href="#为什么需要委托-Delegate" class="headerlink" title="为什么需要委托(Delegate)"></a>为什么需要委托(Delegate)</h1>]]></content>
+    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Delegate/</url>
+    <content><![CDATA[<h1 id="什么是委托-Delegate"><a href="#什么是委托-Delegate" class="headerlink" title="什么是委托(Delegate)"></a>什么是委托(Delegate)</h1><p>游戏系统中存在大量跨对象的交互事件——事件发起者执行某个行为后，其他对象需要对该行为做出响应。</p>
+<span id="more"></span>
+
+<p>以“子弹击中敌人”为例：子弹触发Overlap事件是行为发起端，若直接在子弹代码中修改敌人血量、硬直等属性，会导致代码扩展性极差（比如不同敌人有不同的减伤、免硬直等差异化逻辑）。核心问题在于：子弹无需知晓被击中对象的具体类型和响应逻辑，所有“受击后的处理”都应归属于被击中对象自身。</p>
+<p>委托（Delegate）正是解决这类问题的核心机制，其本质是一套“事件通信管道”：</p>
+<ul>
+<li>事件发起者只需负责向“管道”发送消息，无需关心谁会接收、如何处理；</li>
+<li>事件接收者提前将处理逻辑（回调函数）绑定到“管道”，当收到消息时自动执行逻辑。</li>
+</ul>
+<p>需明确委托机制的三个核心要素：</p>
+<ol>
+<li>委托事件（即“通信管道”）：通常定义在事件发起方的类中；</li>
+<li>消息发送：事件发起方在合适的时机触发委托、广播消息；</li>
+<li>回调绑定：事件接收方需在事件发生前，将处理函数绑定到委托上。</li>
+</ol>
+<p>这里的核心易错点是<strong>绑定时机</strong>：回调函数的绑定必须早于委托广播，否则接收方无法响应。即便在“自身向自身发消息”的场景中，代码层面仍需先定义回调逻辑、完成绑定，再执行委托广播——回调函数的代码书写顺序在前，实际执行却在收到消息后，这也是委托使用中易混淆的点。</p>
+<h1 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h1><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Sender.h</span></span><br><span class="line">DECLRE_DELEGATE_</span><br></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>ProgrammingSkills</category>
       </categories>
@@ -28,7 +29,7 @@
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Singleton/</url>
+    <url>/ue5-blog/2025/12/07/ProgrammingSkills/Interface/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -38,12 +39,17 @@
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/DataDriven/Data/</url>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Load/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVC/</url>
+    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVVM/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/DataDriven/Data/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -53,17 +59,7 @@
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayAbility/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/AttributeSet/</url>
+    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Lock/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -80,17 +76,7 @@
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayCue/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVVM/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayEffect/</url>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -100,17 +86,47 @@
   </entry>
   <entry>
     <title></title>
+    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/AttributeSet/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Singleton/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVC/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Reflection/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayAbility/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayCue/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayTag/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Load/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/</url>
+    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayEffect/</url>
     <content><![CDATA[]]></content>
   </entry>
 </search>
