@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/ue5-blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/ue5-blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/ue5-blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/ue5-blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/ue5-blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
+
+    <meta name="description" content="核心总结委托的核心价值可概括为两点：  解耦：发送方仅负责在合适时机广播事件，无需知晓接收方逻辑；接收方专注实现回调，无需关联发送方细节，双方独立扩展逻辑。  异步：接收方无需预判事件触发时间，只需提前绑定回调函数，事件广播时自动执行，降低时机同步成本。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="委托 (Delegate)">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/index.html">
+<meta property="og:site_name" content="UE5学习笔记博客">
+<meta property="og:description" content="核心总结委托的核心价值可概括为两点：  解耦：发送方仅负责在合适时机广播事件，无需知晓接收方逻辑；接收方专注实现回调，无需关联发送方细节，双方独立扩展逻辑。  异步：接收方无需预判事件触发时间，只需提前绑定回调函数，事件广播时自动执行，降低时机同步成本。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-12-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-09T05:33:28.114Z">
+<meta property="article:author" content="Larry-lyx">
+<meta property="article:tag" content="Delegate">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/","path":"2025/12/09/ProgrammingSkills/Delegate/","title":"委托 (Delegate)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>委托 (Delegate) | UE5学习笔记博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/utils.js" defer></script><script src="/ue5-blog/js/motion.js" defer></script><script src="/ue5-blog/js/sidebar.js" defer></script><script src="/ue5-blog/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/ue5-blog/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/ue5-blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">UE5学习笔记博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">从入门到精通，持续更新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/ue5-blog/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/ue5-blog/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/ue5-blog/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/ue5-blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%A7%94%E6%89%98-Delegate"><span class="nav-number">2.</span> <span class="nav-text">什么是委托(Delegate)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E4%BE%8B"><span class="nav-number">3.</span> <span class="nav-text">代码实例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%96%91%E9%9A%BE%E8%A7%A3%E9%87%8A"><span class="nav-number">4.</span> <span class="nav-text">疑难解释</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%A7%94%E6%89%98%E7%9A%84%E5%AE%9A%E4%B9%89%E4%BD%8D%E7%BD%AE%EF%BC%9A%E5%B9%B6%E9%9D%9E%E5%BF%85%E9%A1%BB%E7%BB%91%E5%AE%9A%E5%8F%91%E9%80%81%E6%96%B9"><span class="nav-number">4.1.</span> <span class="nav-text">1. 委托的定义位置：并非必须绑定发送方</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E8%A7%A3%E8%80%A6%E6%96%B9%E6%A1%88%EF%BC%9A%E5%A7%94%E6%89%98%E5%BD%92%E5%B1%9E%E4%BA%8E%E2%80%9C%E9%80%9A%E7%94%A8%E5%9F%BA%E7%B1%BB%E2%80%9D"><span class="nav-number">4.2.</span> <span class="nav-text">2. 解耦方案：委托归属于“通用基类”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%9C%BA%E6%99%AF%E9%80%82%E9%85%8D%EF%BC%9A%E5%A7%94%E6%89%98-vs-GAS%E7%9A%84GE%EF%BC%88GameplayEffect%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">3. 场景适配：委托 vs GAS的GE（GameplayEffect）</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Larry-lyx</p>
+  <div class="site-description" itemprop="description">分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/ue5-blog/archives/">
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/ue5-blog/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/ue5-blog/tags/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="委托 (Delegate) | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          委托 (Delegate)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-09 00:00:00 / 修改时间：13:33:28" itemprop="dateCreated datePublished" datetime="2025-12-09T00:00:00+08:00">2025-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/ProgrammingSkills/" itemprop="url" rel="index"><span itemprop="name">ProgrammingSkills</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>委托的核心价值可概括为两点：</p>
+<ol>
+<li><p><strong>解耦：</strong><br>发送方仅负责在合适时机广播事件，无需知晓接收方逻辑；接收方专注实现回调，无需关联发送方细节，双方独立扩展逻辑。</p>
+</li>
+<li><p><strong>异步：</strong><br>接收方无需预判事件触发时间，只需提前绑定回调函数，事件广播时自动执行，降低时机同步成本。</p>
+</li>
+</ol>
+<span id="more"></span>
+
+<h1 id="什么是委托-Delegate"><a href="#什么是委托-Delegate" class="headerlink" title="什么是委托(Delegate)"></a>什么是委托(Delegate)</h1><p>游戏系统中存在大量跨对象的交互事件——事件发起者执行某个行为后，其他对象需要对该行为做出响应。</p>
+<p>以“子弹击中敌人”为例：子弹触发Overlap事件是行为发起端，若直接在子弹代码中修改敌人血量、硬直等属性，会导致代码扩展性极差（比如不同敌人有不同的减伤、免硬直等差异化逻辑）。核心问题在于：子弹无需知晓被击中对象的具体类型和响应逻辑，所有“受击后的处理”都应归属于被击中对象自身。</p>
+<p>委托（Delegate）正是解决这类问题的核心机制，其本质是一套“事件通信管道”：</p>
+<ul>
+<li>事件发起者只需负责向“管道”发送消息，无需关心谁会接收、如何处理；</li>
+<li>事件接收者提前将处理逻辑（回调函数）绑定到“管道”，当收到消息时自动执行逻辑。</li>
+</ul>
+<p>需明确委托机制的三个核心要素：</p>
+<ol>
+<li>委托事件（即“通信管道”）：需要定义在某个通用类中；</li>
+<li>消息发送：事件发起方在合适的时机触发委托、广播消息；</li>
+<li>回调绑定：事件接收方需在事件发生前，将处理函数绑定到委托上。</li>
+</ol>
+<p>这里的核心易错点是<strong>绑定时机</strong>：回调函数的绑定必须早于委托广播，否则接收方无法响应。即便在“自身向自身发消息”的场景中，代码层面仍需先定义回调逻辑、完成绑定，再执行委托广播——回调函数的代码书写顺序在前，实际执行却在收到消息后，这也是委托使用中易混淆的点。</p>
+<h1 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DelegateSender.h</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 1. 动态多播委托（支持蓝图绑定）：需声明参数类型+参数名</span></span><br><span class="line"><span class="built_in">DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam</span>(FOnSingleParamEvent, int32, DamageValue); </span><br><span class="line"><span class="comment">// 2. 普通多播委托（仅C++可用）：只需参数类型，参数名用注释说明（提升可读性）</span></span><br><span class="line"><span class="built_in">DECLARE_MULTICAST_DELEGATE_TwoParams</span>(FOnTwoParamEvent, FVector, <span class="comment">/* HitLocation */</span>, AActor*, <span class="comment">/* HitActor */</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// MULTICAST表示有多个接受方，多个接收方都会自动执行回调</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 委托发送方类（示例：子弹类）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAME_API</span> UDelegateSender : <span class="keyword">public</span> UObject</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 声明委托实例（供外部绑定回调）</span></span><br><span class="line">    FOnSingleParamEvent OnDamageEvent;       <span class="comment">// 单参数委托实例（如传递伤害值）</span></span><br><span class="line">    FOnTwoParamEvent OnHitEvent;             <span class="comment">// 双参数委托实例（如传递击中位置+击中对象）</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DelegateSender.cpp</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 委托发送方：在事件触发时机广播委托（示例：子弹检测到击中时）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UDelegateSender::TriggerHitEvent</span><span class="params">(int32 Damage, FVector HitLoc, AActor* HitActor)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 广播委托：所有绑定的回调函数会自动执行</span></span><br><span class="line">    OnDamageEvent.<span class="built_in">Broadcast</span>(Damage);</span><br><span class="line">    OnHitEvent.<span class="built_in">Broadcast</span>(HitLoc, HitActor);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DelegateReceiver.cpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;DelegateReceiver.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;DelegateSender.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 委托接收方：绑定回调函数到发送方的委托（需在事件触发前完成绑定）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UDelegateReceiver::BindToDelegate</span><span class="params">(UDelegateSender* Sender)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!Sender) <span class="keyword">return</span>; <span class="comment">// 空指针校验</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 方式1：绑定成员函数（最常用）</span></span><br><span class="line">    <span class="comment">// AddUObject：接收方为UObject子类时使用，自动处理生命周期（对象销毁时解绑）</span></span><br><span class="line">    Sender-&gt;OnDamageEvent.<span class="built_in">AddUObject</span>(<span class="keyword">this</span>, &amp;UDelegateReceiver::OnReceiveDamage);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 方式2：绑定Lambda表达式（适合简单逻辑，无需单独写成员函数）</span></span><br><span class="line">    Sender-&gt;OnHitEvent.<span class="built_in">AddLambda</span>(</span><br><span class="line">        [<span class="keyword">this</span>](FVector HitLocation, AActor* HitActor) <span class="comment">// 捕获this以访问接收方成员</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// 击中事件的回调逻辑</span></span><br><span class="line">            <span class="built_in">UE_LOG</span>(LogTemp, Log, <span class="built_in">TEXT</span>(<span class="string">&quot;击中位置：%s&quot;</span>), *HitLocation.<span class="built_in">ToString</span>());</span><br><span class="line">        &#125;</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 委托回调函数（对应OnDamageEvent）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UDelegateReceiver::OnReceiveDamage</span><span class="params">(int32 DamageValue)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 接收方的处理逻辑</span></span><br><span class="line">    <span class="built_in">UE_LOG</span>(LogTemp, Log, <span class="built_in">TEXT</span>(<span class="string">&quot;收到伤害值：%d&quot;</span>), DamageValue);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="疑难解释"><a href="#疑难解释" class="headerlink" title="疑难解释"></a>疑难解释</h1><h2 id="1-委托的定义位置：并非必须绑定发送方"><a href="#1-委托的定义位置：并非必须绑定发送方" class="headerlink" title="1. 委托的定义位置：并非必须绑定发送方"></a>1. 委托的定义位置：并非必须绑定发送方</h2><p>委托的声明位置可灵活调整——既可以定义在事件发送方，也可以定义在接收方，但核心前提是：<strong>委托的广播方（实际触发者）必须能获取到委托所属类的实例</strong>。</p>
+<p>这一点容易引发“解耦不彻底”的疑问：绑定回调时，接收方需要包含委托定义类的头文件，看似仍存在耦合。以子弹击中敌人的场景为例：若委托定义在子弹类（发送方），敌人需持有子弹指针才能绑定回调，这意味着“敌人必须知道触发伤害的具体类型”；即便委托定义在敌人类（接收方），子弹需知道敌人的类型才能广播委托——两种方式都违背“敌人无需知晓攻击来源、子弹无需知晓被击目标”的解耦原则（尤其当子弹&#x2F;敌人类型扩展后，代码修改成本会急剧增加）。</p>
+<h2 id="2-解耦方案：委托归属于“通用基类”"><a href="#2-解耦方案：委托归属于“通用基类”" class="headerlink" title="2. 解耦方案：委托归属于“通用基类”"></a>2. 解耦方案：委托归属于“通用基类”</h2><p>为进一步解耦，实战中会将委托定义在<strong>通用基类</strong>中：</p>
+<ul>
+<li>发送方（如子弹）仅需依赖该通用基类，无需知晓具体接收方类型，只需在事件触发时调用基类的委托广播接口；</li>
+<li>接收方（如不同类型的敌人、道具）继承该通用基类，重写&#x2F;绑定自定义回调函数，实现差异化的事件处理；</li>
+<li>核心优势：发送方和接收方仅依赖“通用基类”，彼此完全隔离，新增子弹&#x2F;敌人类型时无需修改原有逻辑。</li>
+</ul>
+<p>需要注意的是，委托代表的通信管道是和<strong>实例</strong>同级的，一个实例代表一个单独的通信管道。</p>
+<h2 id="3-场景适配：委托-vs-GAS的GE（GameplayEffect）"><a href="#3-场景适配：委托-vs-GAS的GE（GameplayEffect）" class="headerlink" title="3. 场景适配：委托 vs GAS的GE（GameplayEffect）"></a>3. 场景适配：委托 vs GAS的GE（GameplayEffect）</h2><p>子弹击中造成伤害、附加Debuff、击飞（Knockback）等战斗事件，看似可用委托实现，但这类事件的上下文（伤害数值、Debuff类型、击飞力度等）复杂且需支持扩展，纯委托方案会因参数膨胀、逻辑分散变得难以维护。</p>
+<p>在GAS框架中，这类战斗事件更适合用 <strong>GE</strong> 处理：GE天然封装了属性修改、效果叠加、持续时间等战斗逻辑，且通过GameplayTag实现灵活的触发&#x2F;取消规则，比委托更贴合“技能-属性-状态”的联动需求。</p>
+<p>而简单的多播委托更适配<strong>UI交互场景</strong>：比如角色属性（血量、蓝量）变化时更新UI、技能冷却完成时刷新按钮状态——此时可将委托定义在ASC中，所有UI组件绑定该委托，当属性&#x2F;状态变更时广播委托，UI组件自动更新显示，无需业务逻辑层关心具体UI实现。这也是GAS框架中ASC、AS的核心作用之一：作为“通用事件枢纽”，统一管理属性变更、技能状态等事件的广播与回调，兼顾解耦与扩展性。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/ue5-blog/tags/Delegate/" rel="tag"># Delegate</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/" rel="prev" title="">
+                  <i class="fa fa-angle-left"></i> 
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Larry-lyx</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
