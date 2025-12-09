@@ -19,24 +19,27 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
 
-    <meta name="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
-<meta property="og:type" content="website">
-<meta property="og:title" content="UE5学习笔记博客">
-<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/page/3/index.html">
+    <meta name="description" content="核心总结锁的作用是保护临界资源避免并发读写冲突，FScopedAbilityListLock是针对GAS中ActivatableAbilities的轻量级封装锁，只要遍历GetActivatableAbilities(),就需要申请锁进行保护。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="游戏开发中的锁：以FScopedAbilityListLock为例">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Lock/index.html">
 <meta property="og:site_name" content="UE5学习笔记博客">
-<meta property="og:description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+<meta property="og:description" content="核心总结锁的作用是保护临界资源避免并发读写冲突，FScopedAbilityListLock是针对GAS中ActivatableAbilities的轻量级封装锁，只要遍历GetActivatableAbilities(),就需要申请锁进行保护。">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-12-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-09T08:41:52.651Z">
 <meta property="article:author" content="Larry-lyx">
+<meta property="article:tag" content="Lock">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/page/3/">
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Lock/">
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":true,"isPost":false,"lang":"zh-CN","comments":"","permalink":"","path":"page/3/index.html","title":""}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Lock/","path":"2025/12/09/ProgrammingSkills/Lock/","title":"游戏开发中的锁：以FScopedAbilityListLock为例"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>UE5学习笔记博客</title>
+<title>游戏开发中的锁：以FScopedAbilityListLock为例 | UE5学习笔记博客</title>
   
 
 
@@ -88,7 +91,7 @@
 
     <a href="/ue5-blog/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <h1 class="site-title">UE5学习笔记博客</h1>
+      <p class="site-title">UE5学习笔记博客</p>
       <i class="logo-line"></i>
     </a>
       <p class="site-subtitle" itemprop="description">从入门到精通，持续更新</p>
@@ -142,7 +145,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -155,6 +158,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B"><span class="nav-number">2.</span> <span class="nav-text">代码示例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E"><span class="nav-number">3.</span> <span class="nav-text">使用说明</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -167,7 +171,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/ue5-blog/archives/">
-          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-count">20</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -178,7 +182,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/ue5-blog/tags/">
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">5</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -194,17 +198,18 @@
 
     </div>
 
-    <div class="main-inner index posts-expand">
+    <div class="main-inner post posts-expand">
 
-    
+
+  
 
 
 <div class="post-block">
   
   
 
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/06/ProgrammingSkills/Singleton/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Lock/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
@@ -217,13 +222,13 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | UE5学习笔记博客">
+      <meta itemprop="name" content="游戏开发中的锁：以FScopedAbilityListLock为例 | UE5学习笔记博客">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/06/ProgrammingSkills/Singleton/" class="post-title-link" itemprop="url">未命名</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          游戏开发中的锁：以FScopedAbilityListLock为例
+        </h1>
 
         <div class="post-meta-container">
           <div class="post-meta">
@@ -232,8 +237,18 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2025-12-06 23:39:06" itemprop="dateCreated datePublished" datetime="2025-12-06T23:39:06+08:00">2025-12-06</time>
+      <time title="创建时间：2025-12-09 00:00:00 / 修改时间：16:41:52" itemprop="dateCreated datePublished" datetime="2025-12-09T00:00:00+08:00">2025-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/ProgrammingSkills/" itemprop="url" rel="index"><span itemprop="name">ProgrammingSkills</span></a>
+        </span>
     </span>
 
   
@@ -245,9 +260,18 @@
     
     
     
-    <div class="post-body" itemprop="articleBody">
-          
-      
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>锁的作用是保护<strong>临界资源</strong>避免并发读写冲突，<code>FScopedAbilityListLock</code>是针对GAS中ActivatableAbilities的轻量级封装锁，只要遍历<code>GetActivatableAbilities()</code>,就需要申请锁进行保护。</p>
+<span id="more"></span>
+
+<h1 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAbilitySystemComponent::ClearAbilityOfSlot</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; Slot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="function">FScopedAbilityListLock <span class="title">ActiveScopLock</span><span class="params">(*<span class="keyword">this</span>)</span></span>;</span><br><span class="line">	<span class="keyword">for</span> (FGameplayAbilitySpec&amp; Spec : <span class="built_in">GetActivatableAbilities</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="built_in">AbilityHasSlot</span>(&amp;Spec , Slot))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">ClearSlot</span>(&amp;Spec);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h1><p><code>GetActivatableAbilities()</code> 返回的技能列表在游戏运行中会被高频修改（如技能锁定、添加、冷却禁用等），若读取列表时被其他代码路径修改，会导致迭代器失效、程序崩溃，因此需通过锁保护该临界资源。</p>
+<p>这一设计与操作系统中的互斥锁思想一致，但存在两点关键差异：</p>
+<ol>
+<li>此处使用的是“作用域锁”，会随作用域结束（如函数执行完毕）自动析构解锁，无需手动调用<code>Unlock()</code>；</li>
+<li>列表遍历操作耗时极短，无“线程等待资源”场景，因此锁的底层采用自旋锁实现——让线程短暂自旋等待锁释放，而非执行休眠&#x2F;唤醒操作，兼顾效率与安全性。</li>
+</ol>
+
     </div>
 
     
@@ -255,8 +279,24 @@
     
 
     <footer class="post-footer">
-        <div class="post-eof"></div>
-      
+          <div class="post-tags">
+              <a href="/ue5-blog/tags/Lock/" rel="tag"># Lock</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/" rel="prev" title="">
+                  <i class="fa fa-angle-left"></i> 
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Interface/" rel="next" title="接口 (Interface)">
+                  接口 (Interface) <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
     </footer>
   </article>
 </div>
@@ -264,9 +304,7 @@
 
 
 
-  <nav class="pagination">
-    <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/ue5-blog/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/ue5-blog/">1</a><a class="page-number" href="/ue5-blog/page/2/">2</a><span class="page-number current">3</span>
-  </nav>
+
 
 </div>
   </main>

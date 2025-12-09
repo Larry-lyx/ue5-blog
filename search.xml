@@ -142,17 +142,39 @@
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Networking/</url>
+    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Reflection/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title>游戏开发中的锁：以FScopedAbilityListLock为例</title>
+    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Lock/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>锁的作用是保护<strong>临界资源</strong>避免并发读写冲突，<code>FScopedAbilityListLock</code>是针对GAS中ActivatableAbilities的轻量级封装锁，只要遍历<code>GetActivatableAbilities()</code>,就需要申请锁进行保护。</p>
+<span id="more"></span>
+
+<h1 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h1><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAbilitySystemComponent::ClearAbilityOfSlot</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; Slot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="function">FScopedAbilityListLock <span class="title">ActiveScopLock</span><span class="params">(*<span class="keyword">this</span>)</span></span>;</span><br><span class="line">	<span class="keyword">for</span> (FGameplayAbilitySpec&amp; Spec : <span class="built_in">GetActivatableAbilities</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="built_in">AbilityHasSlot</span>(&amp;Spec , Slot))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">ClearSlot</span>(&amp;Spec);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h1><p><code>GetActivatableAbilities()</code> 返回的技能列表在游戏运行中会被高频修改（如技能锁定、添加、冷却禁用等），若读取列表时被其他代码路径修改，会导致迭代器失效、程序崩溃，因此需通过锁保护该临界资源。</p>
+<p>这一设计与操作系统中的互斥锁思想一致，但存在两点关键差异：</p>
+<ol>
+<li>此处使用的是“作用域锁”，会随作用域结束（如函数执行完毕）自动析构解锁，无需手动调用<code>Unlock()</code>；</li>
+<li>列表遍历操作耗时极短，无“线程等待资源”场景，因此锁的底层采用自旋锁实现——让线程短暂自旋等待锁释放，而非执行休眠&#x2F;唤醒操作，兼顾效率与安全性。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Lock</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/07/ProgrammingSkills/Serialize/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title></title>
     <url>/ue5-blog/2025/12/06/ProgrammingSkills/Singleton/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Lock/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -169,27 +191,17 @@
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/07/ProgrammingSkills/Serialize/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/DataDriven/Data/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
     <url>/ue5-blog/2025/12/06/SystemDesigns/GAS/GAS/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayAbility/</url>
+    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/AttributeSet/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/AttributeSet/</url>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayTag/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -204,12 +216,7 @@
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVC/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayTag/</url>
+    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayAbility/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -219,7 +226,12 @@
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Reflection/</url>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/DataDriven/Data/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVC/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
