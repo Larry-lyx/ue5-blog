@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/ue5-blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/ue5-blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/ue5-blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/ue5-blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/ue5-blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
+
+    <meta name="description" content="核心总结UE的反射系统是突破C++静态编译限制的核心机制，通过一系列宏为C++代码注入“运行时类型信息”，实现蓝图交互、序列化、编辑器可视化、属性自动同步等关键功能；在实际应用中最需要的，就是熟悉一些常用的反射宏。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="反射系统 (Reflection)">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Reflection/index.html">
+<meta property="og:site_name" content="UE5学习笔记博客">
+<meta property="og:description" content="核心总结UE的反射系统是突破C++静态编译限制的核心机制，通过一系列宏为C++代码注入“运行时类型信息”，实现蓝图交互、序列化、编辑器可视化、属性自动同步等关键功能；在实际应用中最需要的，就是熟悉一些常用的反射宏。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-12-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-09T12:03:28.673Z">
+<meta property="article:author" content="Larry-lyx">
+<meta property="article:tag" content="Reflection">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Reflection/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Reflection/","path":"2025/12/09/ProgrammingSkills/Reflection/","title":"反射系统 (Reflection)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>反射系统 (Reflection) | UE5学习笔记博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/utils.js" defer></script><script src="/ue5-blog/js/motion.js" defer></script><script src="/ue5-blog/js/sidebar.js" defer></script><script src="/ue5-blog/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/ue5-blog/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/ue5-blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">UE5学习笔记博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">从入门到精通，持续更新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/ue5-blog/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/ue5-blog/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/ue5-blog/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/ue5-blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%8F%8D%E5%B0%84-Reflection"><span class="nav-number">2.</span> <span class="nav-text">为什么需要反射(Reflection)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#UE%E4%B8%AD%E7%9A%84%E5%8F%8D%E5%B0%84%E5%AE%8F"><span class="nav-number">3.</span> <span class="nav-text">UE中的反射宏</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#UCLASS"><span class="nav-number">3.1.</span> <span class="nav-text">UCLASS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UPROPERTY"><span class="nav-number">3.2.</span> <span class="nav-text">UPROPERTY</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UFUNCTION"><span class="nav-number">3.3.</span> <span class="nav-text">UFUNCTION</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#USTRUCT"><span class="nav-number">3.4.</span> <span class="nav-text">USTRUCT</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Larry-lyx</p>
+  <div class="site-description" itemprop="description">分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/ue5-blog/archives/">
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/ue5-blog/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/ue5-blog/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Reflection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="反射系统 (Reflection) | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          反射系统 (Reflection)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-09 00:00:00 / 修改时间：20:03:28" itemprop="dateCreated datePublished" datetime="2025-12-09T00:00:00+08:00">2025-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/ProgrammingSkills/" itemprop="url" rel="index"><span itemprop="name">ProgrammingSkills</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>UE的反射系统是突破C++静态编译限制的核心机制，通过一系列宏为C++代码注入“运行时类型信息”，实现蓝图交互、序列化、编辑器可视化、属性自动同步等关键功能；<br>在实际应用中最需要的，就是熟悉一些常用的反射宏。</p>
+<span id="more"></span>
+
+<h1 id="为什么需要反射-Reflection"><a href="#为什么需要反射-Reflection" class="headerlink" title="为什么需要反射(Reflection)"></a>为什么需要反射(Reflection)</h1><p>原生C++是静态编译型语言，编译后丢失类、属性、函数的元信息，无法在运行时动态获取&#x2F;修改类的成员（比如无法通过字符串“Health”直接找到角色的血量变量）。</p>
+<p>而游戏开发中，大量场景需要“运行时动态操作类成员”：</p>
+<ul>
+<li>蓝图要访问C++定义的血量、技能函数；</li>
+<li>存档系统要自动序列化&#x2F;反序列化角色属性；</li>
+<li>编辑器要可视化显示C++变量（如Mesh、数值参数）并支持实时修改；</li>
+<li>GAS要动态遍历角色的Attribute属性，实现技能效果计算。</li>
+</ul>
+<p>UE的反射系统正是为解决这些问题而生：通过反射宏标记C++元素，让UE在编译时生成额外的“元信息表”，运行时可通过该表动态访问、修改类的成员，无需硬编码关联。</p>
+<h1 id="UE中的反射宏"><a href="#UE中的反射宏" class="headerlink" title="UE中的反射宏"></a>UE中的反射宏</h1><h2 id="UCLASS"><a href="#UCLASS" class="headerlink" title="UCLASS"></a>UCLASS</h2><p>创建类时自动生成核心宏（<code>GENERATED_BODY()</code>），无需手动修改；</p>
+<h2 id="UPROPERTY"><a href="#UPROPERTY" class="headerlink" title="UPROPERTY"></a>UPROPERTY</h2><ol>
+<li><strong>编辑器权限</strong><ul>
+<li><code>EditDefaultsOnly</code>：仅蓝图&#x2F;类的默认值面板可修改，场景实例不可改；</li>
+<li><code>EditAnywhere</code>：蓝图默认值+场景实例面板均可修改。</li>
+</ul>
+</li>
+<li><strong>蓝图权限</strong><ul>
+<li><code>BlueprintReadOnly</code>：蓝图仅可读，不可修改；</li>
+<li><code>BlueprintReadWrite</code>：蓝图可读写，仅在蓝图需操作该变量时使用。</li>
+</ul>
+</li>
+<li><strong>分类管理</strong><ul>
+<li><code>Category = &quot;父类 | 子类&quot;</code>：用<code>|</code>分割层级（如<code>Category = &quot;Enemy | Combat&quot;</code>），让编辑器面板属性归类更清晰。</li>
+</ul>
+</li>
+<li><strong>委托专属</strong><ul>
+<li><code>BlueprintAssignable</code>：蓝图可绑定委托回调；</li>
+<li><code>BlueprintCallable</code>：蓝图可主动触发委托广播；</li>
+<li>注：仅<code>DECLARE_DYNAMIC_*</code>系列动态委托支持上述关键字，原生委托（无DYNAMIC）无效。</li>
+</ul>
+</li>
+<li><strong>存档序列化</strong><ul>
+<li><code>SaveGame</code>：标记变量需纳入存档系统，读档时自动恢复值。</li>
+</ul>
+</li>
+<li><strong>私有变量暴露</strong><ul>
+<li><code>meta = (AllowPrivateAccess = &quot;true&quot;)</code>：private中的变量需加此元数据，才能被反射系统识别（蓝图&#x2F;编辑器可见）。</li>
+</ul>
+</li>
+<li><strong>网络同步</strong></li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 基础同步：服务器修改后自动同步到客户端</span></span><br><span class="line"><span class="built_in">UPROPERTY</span>(Replicated)</span><br><span class="line"><span class="type">float</span> CurrentHealth = <span class="number">100.0f</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 同步+回调：变量同步后触发指定函数（更新UI/逻辑）</span></span><br><span class="line"><span class="built_in">UPROPERTY</span>(ReplicatedUsing=OnRep_HealthChanged)</span><br><span class="line"><span class="type">float</span> SyncHealth = <span class="number">100.0f</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 同步回调函数（必须加UFUNCTION()）</span></span><br><span class="line"><span class="built_in">UFUNCTION</span>()</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">OnRep_HealthChanged</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 必须重写该函数完成同步注册</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAttributeSet::GetLifetimeReplicatedProps</span><span class="params">(TArray&lt;FLifetimeProperty&gt;&amp; OutLifetimeProps)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Super::<span class="built_in">GetLifetimeReplicatedProps</span>(OutLifetimeProps);</span><br><span class="line">    <span class="comment">// 注册同步变量（COND_None=无条件同步，REPNOTIFY_Always=始终触发回调）</span></span><br><span class="line">    <span class="built_in">DOREPLIFETIME_CONDITION_NOTIFY</span>(UAttributeSet, Health, COND_None, REPNOTIFY_Always);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// GAS属性同步回调</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAttributeSet::OnRep_Health</span><span class="params">(<span class="type">const</span> FGameplayAttributeData&amp; OldHealth)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">GAMEPLAYATTRIBUTE_REPNOTIFY</span>(UAttributeSet, Health, OldHealth);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键注意点:</strong><br>空<code>UPROPERTY()</code>并非无意义：所有<code>UObject</code>子类指针（如<code>UComponent*</code>&#x2F;<code>AActor*</code>）必须添加，否则 UE 的 GC（垃圾回收）无法追踪指针，可能导致内存泄漏（无引用时不回收）或野指针（被误回收）。</p>
+<h2 id="UFUNCTION"><a href="#UFUNCTION" class="headerlink" title="UFUNCTION"></a>UFUNCTION</h2><ol>
+<li><strong>蓝图执行</strong></li>
+</ol>
+<ul>
+<li><code>BlueprintCallable</code>：蓝图可调用，有执行引脚，可修改对象状态；</li>
+<li><code>BlueprintPure</code>：蓝图可调用，无执行引脚，仅用于状态获取 &#x2F; 纯计算（不修改变量）。</li>
+</ul>
+<ol start="2">
+<li><strong>蓝图实现 &#x2F; 扩展</strong></li>
+</ol>
+<ul>
+<li><code>BlueprintImplementableEvent</code>：C++ 声明函数，蓝图中实现逻辑（无 C++ 实现体）；</li>
+<li><code>BlueprintNativeEvent</code>：C++ 提供基础实现（函数名加<code>_Implementation</code>后缀），蓝图可重写扩展；调用时用<code>Execute_XXX()</code>。</li>
+</ul>
+<ol start="3">
+<li><strong>网络同步</strong></li>
+</ol>
+<ul>
+<li><code>NetMulticast</code>：服务器调用，所有客户端（含服务器）执行；需搭配<code>Reliable</code>（可靠传输）&#x2F;<code>Unreliable</code>（高频低优先级）；</li>
+<li><code>Server</code>（客户端调、服务器执行）、<code>Client</code>（服务器调、客户端执行），需搭配<code>WithValidation</code>（参数验证）。</li>
+</ul>
+<ol start="4">
+<li><strong>元数据扩展</strong></li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DefaultToSelf：参数默认值为自身；DisplayName：自定义蓝图节点名称</span></span><br><span class="line"><span class="built_in">UFUNCTION</span>(BlueprintCallable, meta=(DefaultToSelf=<span class="string">&quot;WorldContextObject&quot;</span>, DisplayName=<span class="string">&quot;自定义函数名&quot;</span>))</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">CustomFunction</span><span class="params">(UObject* WorldContextObject)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="USTRUCT"><a href="#USTRUCT" class="headerlink" title="USTRUCT"></a>USTRUCT</h2><ul>
+<li>BlueprintType ，标记自定义结构体，允许蓝图中声明该结构体变量、作为函数参数 &#x2F; 返回值；</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/ue5-blog/tags/Reflection/" rel="tag"># Reflection</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/" rel="prev" title="">
+                  <i class="fa fa-angle-left"></i> 
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Lock/" rel="next" title="游戏开发中的锁：以FScopedAbilityListLock为例">
+                  游戏开发中的锁：以FScopedAbilityListLock为例 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Larry-lyx</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
