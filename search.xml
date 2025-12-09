@@ -105,13 +105,54 @@
       </tags>
   </entry>
   <entry>
+    <title>接口 (Interface)</title>
+    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Interface/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>接口是游戏开发中“按功能归类”的核心手段，可突破类继承的层级限制，让不同类型的对象实现同一套功能逻辑；<br>在UE中结合<code>BlueprintNativeEvent</code>使用，既能保证功能统一，又能避免频繁类型转换(Cast)，提升代码效率与扩展性。</p>
+<span id="more"></span>
+
+<h1 id="为什么需要接口-Interface"><a href="#为什么需要接口-Interface" class="headerlink" title="为什么需要接口(Interface)"></a>为什么需要接口(Interface)</h1><p>按“对象类型”的继承体系（如EnemyBase→Enemy1、ItemBase→Collectible）能解决同类对象的复用问题，但无法满足“跨类型共享功能”的需求：<br>例如开发“鼠标指向目标高亮”功能时，敌人、收集物、地图出入口等完全不同的对象，都需要实现高亮逻辑——这些对象类型差异极大，无法通过继承复用代码，而接口正是解决这类问题的核心方案。</p>
+<p>从调用方视角（如PlayerController），实现高亮功能无需知晓目标是“敌人”还是“收集物”，只需明确两个核心：</p>
+<ol>
+<li>目标是否支持高亮功能；</li>
+<li>如何触发目标的高亮逻辑。</li>
+</ol>
+<p>接口的本质是功能约定：</p>
+<ul>
+<li>接口类仅声明功能（如<code>HighlightActor()</code>），不实现具体逻辑；</li>
+<li>任意对象只要继承该接口，就必须实现对应的功能逻辑；</li>
+<li>调用方只需针对接口编程，无需关注对象具体类型，且子类实现接口函数时，可直接使用自身的成员变量（如敌人的Mesh、收集物的Sprite）。</li>
+</ul>
+<h1 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h1><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Interface.h</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// UE接口必须用此宏声明（替代GENERATED_BODY）</span></span><br><span class="line"><span class="built_in">UINTERFACE</span>(MinimalAPI)</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">UHighlightInterface</span> : <span class="keyword">public</span> UInterface</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">GENERATED_BODY</span>()</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAME_API</span> IHighlightInterface</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">UFUNCTION</span>(BlueprintNativeEvent)</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">HighlightActor</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Enemy.h</span></span><br><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAME_API</span> AEnemy : <span class="keyword">public</span> IHighlightInterface</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">HighlightActor_Implementation</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Enemy.cpp</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AEnemy::HighlightActor_Implementation</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">GetMesh</span>()-&gt;<span class="built_in">SetRenderCustomDepth</span>(<span class="literal">true</span>);</span><br><span class="line">	Weapon-&gt;<span class="built_in">SetRenderCustomDepth</span>(<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// PlayerController.cpp</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">APlayerController::HighlightActor</span><span class="params">(AActor* InActor)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">IsValid</span>(InActor) &amp;&amp; InActor-&gt;<span class="built_in">Implements</span>&lt;UHighlightInterface&gt;())</span><br><span class="line">	&#123;</span><br><span class="line">		IHighlightInterface::<span class="built_in">Execute_HighlightActor</span>(InActor);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="补充说明"><a href="#补充说明" class="headerlink" title="补充说明"></a>补充说明</h1><h2 id="使用BlueprintNativeEvent避免频繁Cast"><a href="#使用BlueprintNativeEvent避免频繁Cast" class="headerlink" title="使用BlueprintNativeEvent避免频繁Cast"></a>使用BlueprintNativeEvent避免频繁Cast</h2><p>Cast 操作会产生类型检查开销，尤其在高频调用（如每帧检测鼠标指向）时，直接用<code>Implements&lt;&gt;+Execute_</code>调用接口函数，效率远高于<code>Cast&lt;IHighlightInterface&gt;(InActor)</code>后调用函数。</p>
+<h2 id="接口的继承特性"><a href="#接口的继承特性" class="headerlink" title="接口的继承特性"></a>接口的继承特性</h2><p>若父类实现了某接口，其子类会自动继承该接口（如 EnemyBase 实现 IHighlightInterface，Enemy1&#x2F;Enemy2 无需重复声明即可使用高亮功能）。</p>
+]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Interface</tag>
+      </tags>
+  </entry>
+  <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Lock/</url>
+    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Networking/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/07/ProgrammingSkills/Interface/</url>
+    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Singleton/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Lock/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -133,32 +174,7 @@
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Reflection/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Networking/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/DataDriven/Data/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/AttributeSet/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayAbility/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayEffect/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -168,7 +184,27 @@
   </entry>
   <entry>
     <title></title>
+    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayAbility/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/AttributeSet/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
     <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayCue/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayEffect/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVC/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -183,12 +219,12 @@
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/</url>
+    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Reflection/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Singleton/</url>
+    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVVM/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -198,12 +234,7 @@
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVC/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVVM/</url>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/</url>
     <content><![CDATA[]]></content>
   </entry>
 </search>
