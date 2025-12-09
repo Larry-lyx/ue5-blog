@@ -19,26 +19,27 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
 
-    <meta name="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    <meta name="description" content="核心总结类的继承是游戏开发中实现代码复用、逻辑扩展的核心手段，其核心价值在于：  通过基类统一抽象通用逻辑，子类定制差异化行为； 保证代码可维护性，尤其在C++&#x2F;蓝图混合开发中，需兼顾封装性与灵活扩展。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="UE5学习笔记博客">
-<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/index.html">
+<meta property="og:title" content="类的继承 (Inheritance)">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/index.html">
 <meta property="og:site_name" content="UE5学习笔记博客">
-<meta property="og:description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+<meta property="og:description" content="核心总结类的继承是游戏开发中实现代码复用、逻辑扩展的核心手段，其核心价值在于：  通过基类统一抽象通用逻辑，子类定制差异化行为； 保证代码可维护性，尤其在C++&#x2F;蓝图混合开发中，需兼顾封装性与灵活扩展。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2025-12-08T12:06:29.325Z">
-<meta property="article:modified_time" content="2025-12-08T12:06:29.325Z">
+<meta property="article:published_time" content="2025-12-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-09T06:24:58.007Z">
 <meta property="article:author" content="Larry-lyx">
+<meta property="article:tag" content="Inheritance">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/">
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/">
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/","path":"2025/12/08/SystemDesigns/SaveAndLoad/Save/","title":""}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/","path":"2025/12/09/ProgrammingSkills/Inheritance/","title":"类的继承 (Inheritance)"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title> | UE5学习笔记博客</title>
+<title>类的继承 (Inheritance) | UE5学习笔记博客</title>
   
 
 
@@ -144,7 +145,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -157,6 +158,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E7%B1%BB"><span class="nav-number">2.</span> <span class="nav-text">基类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB"><span class="nav-number">3.</span> <span class="nav-text">继承关系</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98%EF%BC%9A%E4%B8%BA%E4%BD%95%E8%A6%81%E5%8C%BA%E5%88%86-public-protected-private-%E8%AE%BF%E9%97%AE%E6%9D%83%E9%99%90%EF%BC%9F"><span class="nav-number">3.1.</span> <span class="nav-text">核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B1%BB%E4%B8%8E%E5%AE%9E%E4%BE%8B"><span class="nav-number">4.</span> <span class="nav-text">类与实例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E6%88%90%E5%91%98%E7%9A%84%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">4.1.</span> <span class="nav-text">静态成员的适用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E6%B3%A8%E6%84%8F%E7%82%B9"><span class="nav-number">4.2.</span> <span class="nav-text">关键注意点</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -207,7 +209,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
@@ -220,12 +222,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | UE5学习笔记博客">
+      <meta itemprop="name" content="类的继承 (Inheritance) | UE5学习笔记博客">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          
+          类的继承 (Inheritance)
         </h1>
 
         <div class="post-meta-container">
@@ -235,8 +237,18 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2025-12-08 20:06:29" itemprop="dateCreated datePublished" datetime="2025-12-08T20:06:29+08:00">2025-12-08</time>
+      <time title="创建时间：2025-12-09 00:00:00 / 修改时间：14:24:58" itemprop="dateCreated datePublished" datetime="2025-12-09T00:00:00+08:00">2025-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/ProgrammingSkills/" itemprop="url" rel="index"><span itemprop="name">ProgrammingSkills</span></a>
+        </span>
     </span>
 
   
@@ -248,7 +260,48 @@
     
     
     
-    <div class="post-body" itemprop="articleBody">
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>类的继承是游戏开发中实现代码复用、逻辑扩展的核心手段，其核心价值在于：</p>
+<ul>
+<li>通过基类统一抽象通用逻辑，子类定制差异化行为；</li>
+<li>保证代码可维护性，尤其在C++&#x2F;蓝图混合开发中，需兼顾封装性与灵活扩展。</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="基类"><a href="#基类" class="headerlink" title="基类"></a>基类</h1><p>游戏开发中，为同类对象构建基类是提升开发效率的核心习惯，核心原因有二：</p>
+<ol>
+<li><strong>通用逻辑复用</strong>：大量游戏对象（如敌人、道具、技能）存在共性属性&#x2F;行为（如血量、受击逻辑、销毁逻辑），基类可集中封装这些通用逻辑，避免重复编码；</li>
+<li><strong>批量扩展便捷</strong>：后续需为某类对象新增功能（如所有敌人添加“被击硬直”）时，只需修改基类，所有子类自动继承，无需逐个调整。</li>
+</ol>
+<p>在UE开发中，几乎所有自定义C++类都会配套创建<strong>蓝图基类</strong>，核心优势在于：</p>
+<ul>
+<li>配置灵活：无需硬编码&#x2F;重新编译，即可调整Mesh、数值参数（如敌人血量、技能冷却时间），快速验证效果；</li>
+<li>轻量逻辑快速迭代：简单逻辑（如UI提示、音效触发）可直接在蓝图中实现，开发效率高，且非密集计算类逻辑几乎无性能损耗。</li>
+</ul>
+<p>但蓝图也有明确的使用边界：</p>
+<ul>
+<li>复杂逻辑易因节点布线混乱导致维护成本高；</li>
+<li>版本控制中难以追踪蓝图的具体修改内容。<br>因此最佳实践是：蓝图仅处理“配置+极简逻辑”，复杂逻辑仍放在C++中实现。</li>
+</ul>
+<h1 id="继承关系"><a href="#继承关系" class="headerlink" title="继承关系"></a>继承关系</h1><p>丰富的功能实现依赖灵活的继承体系：子类可继承父类的变量&#x2F;函数，也可重写函数逻辑，极大提升代码扩展性。</p>
+<h2 id="核心问题：为何要区分-public-protected-private-访问权限？"><a href="#核心问题：为何要区分-public-protected-private-访问权限？" class="headerlink" title="核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？"></a>核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？</h2><p>个人开发中，若类的规模小、仅自己维护，权限区分的影响不明显；但在团队协作或源码复用场景下，权限划分是“降低理解成本、避免逻辑混乱”的关键：</p>
+<ul>
+<li><strong>public</strong>：对外暴露的核心接口（如<code>GetHealth()</code>），使用者无需关注内部实现，直接调用即可；</li>
+<li><strong>protected</strong>：仅子类可访问&#x2F;重写的逻辑（如<code>OnTakeDamage()</code>），保证子类可定制，又避免外部随意调用；</li>
+<li><strong>private</strong>：父类纯内部逻辑（如辅助计算的临时变量），完全隐藏实现细节，防止意外篡改。</li>
+</ul>
+<p>因此，当类的逻辑逐渐复杂时，需梳理头文件：明确权限划分、添加注释说明接口用途，让使用者快速知晓“哪些可调用、哪些可重写、哪些不可触碰”，无需深挖实现细节。</p>
+<h1 id="类与实例"><a href="#类与实例" class="headerlink" title="类与实例"></a>类与实例</h1><p>类是“模板”，实例是基于模板创建的“具体对象”：类中定义的非静态变量&#x2F;函数，会在每个实例中独立存在（如两个Enemy实例的血量、位置相互独立）。</p>
+<h2 id="静态成员的适用场景"><a href="#静态成员的适用场景" class="headerlink" title="静态成员的适用场景"></a>静态成员的适用场景</h2><p>对无需区分实例的通用逻辑&#x2F;数据（如全局配置、工具函数），可添加<code>static</code>关键字绑定到类上，核心优势：</p>
+<ol>
+<li>性能优化：无需创建实例即可调用，减少内存占用；</li>
+<li>逻辑统一：所有实例共享同一数据&#x2F;逻辑。</li>
+</ol>
+<h2 id="关键注意点"><a href="#关键注意点" class="headerlink" title="关键注意点"></a>关键注意点</h2><p>UE开发中需牢记：继承后的属性&#x2F;函数始终归属于“具体实例”，而非类本身。例如：</p>
+<ul>
+<li>为<code>Enemy1</code>实例绑定的受击回调，仅会响应该实例的受击事件；</li>
+<li>修改<code>Enemy2</code>实例的血量，不会影响其他Enemy实例的状态。<br>即使IDE的自动提示已经十分完善，也需时刻明确“操作的是类模板还是实例对象”，避免因边界混淆导致逻辑错误。</li>
+</ul>
+
     </div>
 
     
@@ -256,18 +309,21 @@
     
 
     <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/ue5-blog/tags/Inheritance/" rel="tag"># Inheritance</a>
+          </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayTag/" rel="prev" title="">
+                <a href="/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/" rel="prev" title="">
                   <i class="fa fa-angle-left"></i> 
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Load/" rel="next" title="">
-                   <i class="fa fa-angle-right"></i>
+                <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/" rel="next" title="委托 (Delegate)">
+                  委托 (Delegate) <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>

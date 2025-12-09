@@ -1,21 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Networking/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Reflection/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/07/ProgrammingSkills/Interface/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
     <title>委托 (Delegate)</title>
     <url>/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>委托的核心价值可概括为两点：</p>
@@ -68,8 +53,65 @@
       </tags>
   </entry>
   <entry>
+    <title>类的继承 (Inheritance)</title>
+    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>类的继承是游戏开发中实现代码复用、逻辑扩展的核心手段，其核心价值在于：</p>
+<ul>
+<li>通过基类统一抽象通用逻辑，子类定制差异化行为；</li>
+<li>保证代码可维护性，尤其在C++&#x2F;蓝图混合开发中，需兼顾封装性与灵活扩展。</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="基类"><a href="#基类" class="headerlink" title="基类"></a>基类</h1><p>游戏开发中，为同类对象构建基类是提升开发效率的核心习惯，核心原因有二：</p>
+<ol>
+<li><strong>通用逻辑复用</strong>：大量游戏对象（如敌人、道具、技能）存在共性属性&#x2F;行为（如血量、受击逻辑、销毁逻辑），基类可集中封装这些通用逻辑，避免重复编码；</li>
+<li><strong>批量扩展便捷</strong>：后续需为某类对象新增功能（如所有敌人添加“被击硬直”）时，只需修改基类，所有子类自动继承，无需逐个调整。</li>
+</ol>
+<p>在UE开发中，几乎所有自定义C++类都会配套创建<strong>蓝图基类</strong>，核心优势在于：</p>
+<ul>
+<li>配置灵活：无需硬编码&#x2F;重新编译，即可调整Mesh、数值参数（如敌人血量、技能冷却时间），快速验证效果；</li>
+<li>轻量逻辑快速迭代：简单逻辑（如UI提示、音效触发）可直接在蓝图中实现，开发效率高，且非密集计算类逻辑几乎无性能损耗。</li>
+</ul>
+<p>但蓝图也有明确的使用边界：</p>
+<ul>
+<li>复杂逻辑易因节点布线混乱导致维护成本高；</li>
+<li>版本控制中难以追踪蓝图的具体修改内容。<br>因此最佳实践是：蓝图仅处理“配置+极简逻辑”，复杂逻辑仍放在C++中实现。</li>
+</ul>
+<h1 id="继承关系"><a href="#继承关系" class="headerlink" title="继承关系"></a>继承关系</h1><p>丰富的功能实现依赖灵活的继承体系：子类可继承父类的变量&#x2F;函数，也可重写函数逻辑，极大提升代码扩展性。</p>
+<h2 id="核心问题：为何要区分-public-protected-private-访问权限？"><a href="#核心问题：为何要区分-public-protected-private-访问权限？" class="headerlink" title="核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？"></a>核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？</h2><p>个人开发中，若类的规模小、仅自己维护，权限区分的影响不明显；但在团队协作或源码复用场景下，权限划分是“降低理解成本、避免逻辑混乱”的关键：</p>
+<ul>
+<li><strong>public</strong>：对外暴露的核心接口（如<code>GetHealth()</code>），使用者无需关注内部实现，直接调用即可；</li>
+<li><strong>protected</strong>：仅子类可访问&#x2F;重写的逻辑（如<code>OnTakeDamage()</code>），保证子类可定制，又避免外部随意调用；</li>
+<li><strong>private</strong>：父类纯内部逻辑（如辅助计算的临时变量），完全隐藏实现细节，防止意外篡改。</li>
+</ul>
+<p>因此，当类的逻辑逐渐复杂时，需梳理头文件：明确权限划分、添加注释说明接口用途，让使用者快速知晓“哪些可调用、哪些可重写、哪些不可触碰”，无需深挖实现细节。</p>
+<h1 id="类与实例"><a href="#类与实例" class="headerlink" title="类与实例"></a>类与实例</h1><p>类是“模板”，实例是基于模板创建的“具体对象”：类中定义的非静态变量&#x2F;函数，会在每个实例中独立存在（如两个Enemy实例的血量、位置相互独立）。</p>
+<h2 id="静态成员的适用场景"><a href="#静态成员的适用场景" class="headerlink" title="静态成员的适用场景"></a>静态成员的适用场景</h2><p>对无需区分实例的通用逻辑&#x2F;数据（如全局配置、工具函数），可添加<code>static</code>关键字绑定到类上，核心优势：</p>
+<ol>
+<li>性能优化：无需创建实例即可调用，减少内存占用；</li>
+<li>逻辑统一：所有实例共享同一数据&#x2F;逻辑。</li>
+</ol>
+<h2 id="关键注意点"><a href="#关键注意点" class="headerlink" title="关键注意点"></a>关键注意点</h2><p>UE开发中需牢记：继承后的属性&#x2F;函数始终归属于“具体实例”，而非类本身。例如：</p>
+<ul>
+<li>为<code>Enemy1</code>实例绑定的受击回调，仅会响应该实例的受击事件；</li>
+<li>修改<code>Enemy2</code>实例的血量，不会影响其他Enemy实例的状态。<br>即使IDE的自动提示已经十分完善，也需时刻明确“操作的是类模板还是实例对象”，避免因边界混淆导致逻辑错误。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Inheritance</tag>
+      </tags>
+  </entry>
+  <entry>
     <title></title>
     <url>/ue5-blog/2025/12/08/ProgrammingSkills/Lock/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/07/ProgrammingSkills/Interface/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -86,37 +128,17 @@
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Singleton/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayAbility/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/06/SystemDesigns/GAS/GAS/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
     <url>/ue5-blog/2025/12/07/ProgrammingSkills/Serialize/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/AttributeSet/</url>
+    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Reflection/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayCue/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/</url>
+    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Networking/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -126,12 +148,12 @@
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVC/</url>
+    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/AttributeSet/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Load/</url>
+    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayAbility/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -141,12 +163,42 @@
   </entry>
   <entry>
     <title></title>
+    <url>/ue5-blog/2025/12/06/SystemDesigns/GAS/GAS/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayCue/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayTag/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title></title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Singleton/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Load/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVC/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
