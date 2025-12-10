@@ -19,26 +19,27 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
 
-    <meta name="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    <meta name="description" content="核心总结UE中的智能指针是管理对象生命周期、避免裸指针风险的核心工具，分为适配引擎GC的UObject专属指针（TObjectPtr&#x2F;TWeakObjectPtr等）和管理非UObject的通用共享指针（TSharedPtr）； 在实际使用中，最常见的是TObjectPtr，但有时调用引擎内置的函数时可能需使用 &#x2F; 返回特定指针类型，需了解相关转换规则和其中异同。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="UE5学习笔记博客">
+<meta property="og:title" content="智能指针 (Pointer)">
 <meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/10/ProgrammingSkills/Pointer/index.html">
 <meta property="og:site_name" content="UE5学习笔记博客">
-<meta property="og:description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+<meta property="og:description" content="核心总结UE中的智能指针是管理对象生命周期、避免裸指针风险的核心工具，分为适配引擎GC的UObject专属指针（TObjectPtr&#x2F;TWeakObjectPtr等）和管理非UObject的通用共享指针（TSharedPtr）； 在实际使用中，最常见的是TObjectPtr，但有时调用引擎内置的函数时可能需使用 &#x2F; 返回特定指针类型，需了解相关转换规则和其中异同。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2025-12-10T00:56:27.687Z">
-<meta property="article:modified_time" content="2025-12-10T00:56:27.687Z">
+<meta property="article:published_time" content="2025-12-09T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-10T01:44:53.539Z">
 <meta property="article:author" content="Larry-lyx">
+<meta property="article:tag" content="Pointer">
 <meta name="twitter:card" content="summary">
 
 
 <link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/10/ProgrammingSkills/Pointer/">
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/10/ProgrammingSkills/Pointer/","path":"2025/12/10/ProgrammingSkills/Pointer/","title":""}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/10/ProgrammingSkills/Pointer/","path":"2025/12/10/ProgrammingSkills/Pointer/","title":"智能指针 (Pointer)"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title> | UE5学习笔记博客</title>
+<title>智能指针 (Pointer) | UE5学习笔记博客</title>
   
 
 
@@ -144,7 +145,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -157,6 +158,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88"><span class="nav-number">2.</span> <span class="nav-text">为什么使用智能指针</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97"><span class="nav-number">3.</span> <span class="nav-text">使用指南</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#TObjectPtr"><span class="nav-number">3.1.</span> <span class="nav-text">TObjectPtr</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F"><span class="nav-number">3.1.1.</span> <span class="nav-text">注意</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TWeakObjectPtr"><span class="nav-number">3.2.</span> <span class="nav-text">TWeakObjectPtr</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TSharedPtr"><span class="nav-number">3.3.</span> <span class="nav-text">TSharedPtr</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TSubclassOf"><span class="nav-number">3.4.</span> <span class="nav-text">TSubclassOf</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F-1"><span class="nav-number">3.4.1.</span> <span class="nav-text">注意</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%87%E9%92%88%E8%BD%AC%E6%8D%A2-Get"><span class="nav-number">3.5.</span> <span class="nav-text">指针转换 (.Get())</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -180,7 +182,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/ue5-blog/tags/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -220,12 +222,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | UE5学习笔记博客">
+      <meta itemprop="name" content="智能指针 (Pointer) | UE5学习笔记博客">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          
+          智能指针 (Pointer)
         </h1>
 
         <div class="post-meta-container">
@@ -235,8 +237,18 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2025-12-10 08:56:27" itemprop="dateCreated datePublished" datetime="2025-12-10T08:56:27+08:00">2025-12-10</time>
+      <time title="创建时间：2025-12-10 00:00:00 / 修改时间：09:44:53" itemprop="dateCreated datePublished" datetime="2025-12-10T00:00:00+08:00">2025-12-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/ProgrammingSkills/" itemprop="url" rel="index"><span itemprop="name">ProgrammingSkills</span></a>
+        </span>
     </span>
 
   
@@ -248,7 +260,41 @@
     
     
     
-    <div class="post-body" itemprop="articleBody">
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>UE中的智能指针是管理对象生命周期、避免裸指针风险的核心工具，分为适配引擎GC的UObject专属指针（TObjectPtr&#x2F;TWeakObjectPtr等）和管理非UObject的通用共享指针（TSharedPtr）；</p>
+<p>在实际使用中，最常见的是TObjectPtr，但有时调用引擎内置的函数时可能需使用 &#x2F; 返回特定指针类型，需了解相关转换规则和其中异同。</p>
+<span id="more"></span>
+
+<h1 id="为什么使用智能指针"><a href="#为什么使用智能指针" class="headerlink" title="为什么使用智能指针"></a>为什么使用智能指针</h1><p>原生C++裸指针存在三大核心问题：</p>
+<ol>
+<li><strong>野指针风险</strong>：对象被销毁后，裸指针未置空，访问时导致程序崩溃；</li>
+<li><strong>内存泄漏</strong>：UObject指针未被GC追踪，无引用时无法自动回收；</li>
+<li><strong>GC兼容问题</strong>：裸指针无法被UE垃圾回收系统识别，易出现“对象误回收”或“内存泄漏”。</li>
+</ol>
+<p>智能指针的核心价值：</p>
+<ul>
+<li>自动管理指针生命周期，适配UE GC机制；</li>
+<li>避免手动管理内存（new&#x2F;delete），减少人为失误；</li>
+<li>区分“强引用&#x2F;弱引用”，灵活控制对象回收逻辑。</li>
+</ul>
+<h1 id="使用指南"><a href="#使用指南" class="headerlink" title="使用指南"></a>使用指南</h1><h2 id="TObjectPtr"><a href="#TObjectPtr" class="headerlink" title="TObjectPtr"></a>TObjectPtr</h2><p>适用于所有UObject子类实例指针（Actor&#x2F;Component&#x2F;Widget等），替代原生裸指针（UComponent* → TObjectPtr<UComponent>）。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 声明</span></span><br><span class="line">TObjectPtr&lt;UStaticMeshComponent&gt; MeshComp;</span><br><span class="line"><span class="comment">// 赋值</span></span><br><span class="line">MeshComp = <span class="built_in">CreateDefaultSubobject</span>&lt;UStaticMeshComponent&gt;(<span class="built_in">TEXT</span>(<span class="string">&quot;Mesh&quot;</span>));</span><br><span class="line"><span class="comment">// 访问：直接使用，无需额外解引用</span></span><br><span class="line"><span class="keyword">if</span> (MeshComp) &#123; MeshComp-&gt;<span class="built_in">SetVisibility</span>(<span class="literal">true</span>); &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h3><p>无需手动释放，GC自动管理；支持与裸指针互转，完全兼容原有UObject逻辑。</p>
+<h2 id="TWeakObjectPtr"><a href="#TWeakObjectPtr" class="headerlink" title="TWeakObjectPtr"></a>TWeakObjectPtr</h2><p>UObject弱引用指针，不阻止GC回收对象，仅“观察”对象是否存活。<br>适用于需引用对象但不希望阻止其回收（如UI引用场景Actor、技能引用目标Enemy）。<br>核心优点是<strong>多线程</strong>访问时安全，而TObjectPtr仅在主线程中使用，并未设计线程安全。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 主线程持有</span></span><br><span class="line"><span class="built_in">UPROPERTY</span>()</span><br><span class="line">TObjectPtr&lt;AActor&gt; MyActor;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 多线程使用安全缓存弱引用</span></span><br><span class="line">TWeakObjectPtr&lt;AActor&gt; WeakActor = MyActor;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">SomeThreadFunction</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (WeakActor.<span class="built_in">IsValid</span>())</span><br><span class="line">    &#123;</span><br><span class="line">        AActor* ValidActor = WeakActor.<span class="built_in">Get</span>();</span><br><span class="line">        <span class="comment">// 线程安全读操作</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="TSharedPtr"><a href="#TSharedPtr" class="headerlink" title="TSharedPtr"></a>TSharedPtr</h2><p>通用共享指针，基于引用计数管理<strong>非UObject类型</strong>（原生C++类、结构体），自动释放内存。用于管理非UObject类型（如自定义数据结构、第三方库对象）。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">TSharedPtr&lt;FMyData&gt; Ptr = <span class="built_in">MakeShared</span>&lt;FMyData&gt;();</span><br><span class="line"></span><br><span class="line">TSharedPtr&lt;FMyData&gt; Ptr2 = Ptr; <span class="comment">// 引用计数+1</span></span><br><span class="line">Ptr.<span class="built_in">Reset</span>();                    <span class="comment">// 引用计数-1</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="TSubclassOf"><a href="#TSubclassOf" class="headerlink" title="TSubclassOf"></a>TSubclassOf</h2><p>类引用指针（而非实例指针），限制仅能指向指定类及其子类，编译期校验类型。<br>适用于动态生成Actor&#x2F;创建对象时指定类（如Spawn Actor、创建Component）。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 声明：仅允许指向AEnemy及其子类</span></span><br><span class="line"><span class="built_in">UPROPERTY</span>(EditAnywhere)</span><br><span class="line">TSubclassOf&lt;AEnemy&gt; EnemyClass;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用：生成指定类的实例</span></span><br><span class="line">AEnemy* NewEnemy = <span class="built_in">GetWorld</span>()-&gt;<span class="built_in">SpawnActor</span>&lt;AEnemy&gt;(EnemyClass, SpawnLoc, FRotator::ZeroRotator);</span><br></pre></td></tr></table></figure>
+
+<h3 id="注意-1"><a href="#注意-1" class="headerlink" title="注意"></a>注意</h3><p>存储的是类的UClass对象，非实例；蓝图中可通过下拉框选择子类，类型安全。</p>
+<h2 id="指针转换-Get"><a href="#指针转换-Get" class="headerlink" title="指针转换 (.Get())"></a>指针转换 (.Get())</h2><ul>
+<li><strong>作用</strong>：从智能指针中提取原生裸指针，适用于所有UE智能指针；</li>
+<li><strong>注意</strong>：仅临时使用，不改变智能指针的生命周期，避免长期持有返回的裸指针。</li>
+</ul>
+
     </div>
 
     
@@ -256,16 +302,22 @@
     
 
     <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/ue5-blog/tags/Pointer/" rel="tag"># Pointer</a>
+          </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/10/ProgrammingSkills/Library/" rel="prev" title="函数库 (Library)">
-                  <i class="fa fa-angle-left"></i> 函数库 (Library)
+                <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/" rel="prev" title="类的继承 (Inheritance)">
+                  <i class="fa fa-angle-left"></i> 类的继承 (Inheritance)
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/10/ProgrammingSkills/Library/" rel="next" title="函数库 (Library)">
+                  函数库 (Library) <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
