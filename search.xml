@@ -1,6 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>类的继承 (Inheritance)</title>
+    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>类的继承是游戏开发中实现代码复用、逻辑扩展的核心手段，其核心价值在于：</p>
+<ul>
+<li>通过基类统一抽象通用逻辑，子类定制差异化行为；</li>
+<li>保证代码可维护性，尤其在C++&#x2F;蓝图混合开发中，需兼顾封装性与灵活扩展。</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="基类"><a href="#基类" class="headerlink" title="基类"></a>基类</h1><p>游戏开发中，为同类对象构建基类是提升开发效率的核心习惯，核心原因有二：</p>
+<ol>
+<li><strong>通用逻辑复用</strong>：大量游戏对象（如敌人、道具、技能）存在共性属性&#x2F;行为（如血量、受击逻辑、销毁逻辑），基类可集中封装这些通用逻辑，避免重复编码；</li>
+<li><strong>批量扩展便捷</strong>：后续需为某类对象新增功能（如所有敌人添加“被击硬直”）时，只需修改基类，所有子类自动继承，无需逐个调整。</li>
+</ol>
+<p>在UE开发中，几乎所有自定义C++类都会配套创建<strong>蓝图基类</strong>，核心优势在于：</p>
+<ul>
+<li>配置灵活：无需硬编码&#x2F;重新编译，即可调整Mesh、数值参数（如敌人血量、技能冷却时间），快速验证效果；</li>
+<li>轻量逻辑快速迭代：简单逻辑（如UI提示、音效触发）可直接在蓝图中实现，开发效率高，且非密集计算类逻辑几乎无性能损耗。</li>
+</ul>
+<p>但蓝图也有明确的使用边界：</p>
+<ul>
+<li>复杂逻辑易因节点布线混乱导致维护成本高；</li>
+<li>版本控制中难以追踪蓝图的具体修改内容。<br>因此最佳实践是：蓝图仅处理“配置+极简逻辑”，复杂逻辑仍放在C++中实现。</li>
+</ul>
+<h1 id="继承关系"><a href="#继承关系" class="headerlink" title="继承关系"></a>继承关系</h1><p>丰富的功能实现依赖灵活的继承体系：子类可继承父类的变量&#x2F;函数，也可重写函数逻辑，极大提升代码扩展性。</p>
+<h2 id="核心问题：为何要区分-public-protected-private-访问权限？"><a href="#核心问题：为何要区分-public-protected-private-访问权限？" class="headerlink" title="核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？"></a>核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？</h2><p>个人开发中，若类的规模小、仅自己维护，权限区分的影响不明显；但在团队协作或源码复用场景下，权限划分是“降低理解成本、避免逻辑混乱”的关键：</p>
+<ul>
+<li><strong>public</strong>：对外暴露的核心接口（如<code>GetHealth()</code>），使用者无需关注内部实现，直接调用即可；</li>
+<li><strong>protected</strong>：仅子类可访问&#x2F;重写的逻辑（如<code>OnTakeDamage()</code>），保证子类可定制，又避免外部随意调用；</li>
+<li><strong>private</strong>：父类纯内部逻辑（如辅助计算的临时变量），完全隐藏实现细节，防止意外篡改。</li>
+</ul>
+<p>因此，当类的逻辑逐渐复杂时，需梳理头文件：明确权限划分、添加注释说明接口用途，让使用者快速知晓“哪些可调用、哪些可重写、哪些不可触碰”，无需深挖实现细节。</p>
+<h1 id="类与实例"><a href="#类与实例" class="headerlink" title="类与实例"></a>类与实例</h1><p>类是“模板”，实例是基于模板创建的“具体对象”：类中定义的非静态变量&#x2F;函数，会在每个实例中独立存在（如两个Enemy实例的血量、位置相互独立）。</p>
+<h2 id="静态成员的适用场景"><a href="#静态成员的适用场景" class="headerlink" title="静态成员的适用场景"></a>静态成员的适用场景</h2><p>对无需区分实例的通用逻辑&#x2F;数据（如全局配置、工具函数），可添加<code>static</code>关键字绑定到类上，核心优势：</p>
+<ol>
+<li>性能优化：无需创建实例即可调用，减少内存占用；</li>
+<li>逻辑统一：所有实例共享同一数据&#x2F;逻辑。</li>
+</ol>
+<h2 id="关键注意点"><a href="#关键注意点" class="headerlink" title="关键注意点"></a>关键注意点</h2><p>UE开发中需牢记：继承后的属性&#x2F;函数始终归属于“具体实例”，而非类本身。例如：</p>
+<ul>
+<li>为<code>Enemy1</code>实例绑定的受击回调，仅会响应该实例的受击事件；</li>
+<li>修改<code>Enemy2</code>实例的血量，不会影响其他Enemy实例的状态。<br>即使IDE的自动提示已经十分完善，也需时刻明确“操作的是类模板还是实例对象”，避免因边界混淆导致逻辑错误。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Inheritance</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>函数库 (Library)</title>
+    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Library/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>自定义函数库是UE开发中解耦跨类通用逻辑、提升代码复用性的核心手段，通过封装静态通用函数，可避免重复编码、减少性能损耗（如频繁Cast），同时让跨模块&#x2F;无继承关系的类高效共享算法与工具逻辑。</p>
+<span id="more"></span>
+
+<h1 id="自定义函数库的优势"><a href="#自定义函数库的优势" class="headerlink" title="自定义函数库的优势"></a>自定义函数库的优势</h1><ol>
+<li><strong>解耦跨类复用逻辑</strong>：许多通用算法（如位置计算、数据校验）的使用方无明显继承关系（如敌人召唤逻辑、战利品生成、弹道计算），函数库可作为“公共逻辑容器”，脱离类的继承层级限制；</li>
+<li><strong>提升开发效率</strong>：将可复用逻辑（如角色周围随机位置生成）提前封装为通用函数，后续开发无需重复编写&#x2F;调试，直接调用即可；</li>
+<li><strong>全局高效访问</strong>：函数库中的函数需声明为<code>static</code>（静态），无需创建类实例即可调用，兼顾全局访问性与性能；</li>
+<li><strong>统一维护入口</strong>：通用逻辑集中管理，后续修改（如调整位置算法的精度）只需改函数库，所有调用方自动生效，降低维护成本。</li>
+</ol>
+<h1 id="自定义函数库的核心内容"><a href="#自定义函数库的核心内容" class="headerlink" title="自定义函数库的核心内容"></a>自定义函数库的核心内容</h1><h2 id="1-通用算法（通用化参数设计）"><a href="#1-通用算法（通用化参数设计）" class="headerlink" title="1. 通用算法（通用化参数设计）"></a>1. 通用算法（通用化参数设计）</h2><p>封装无业务耦合的纯算法逻辑，参数设计需足够通用，避免硬编码，适配多场景调用。</p>
+<h3 id="2-轻量化类型转换（封装static-cast的Setter-Getter）"><a href="#2-轻量化类型转换（封装static-cast的Setter-Getter）" class="headerlink" title="2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）"></a>2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）</h3><p>UE中<code>Cast</code>操作（动态类型转换）性能开销大，需尽量避免；对于自定义扩展的框架类型（如GAS的<code>GameplayEffectContext</code>），可将<code>static_cast</code>封装到函数库，减少重复转换逻辑，提升调用效率。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemLibrary::SetIsBlockedHit</span><span class="params">(FGameplayEffectContextHandle&amp; EffectContextHandle, <span class="type">bool</span> bInIsBlockedHit)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (FCustomGameplayEffectContext* CustomContext = <span class="built_in">static_cast</span>&lt;FCustomGameplayEffectContext*&gt;(EffectContextHandle.<span class="built_in">Get</span>()))</span><br><span class="line">	&#123;</span><br><span class="line">		CustomContext-&gt;<span class="built_in">SetBlockedHit</span>(bInIsBlockedHit);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="自定义函数库的关键规范"><a href="#自定义函数库的关键规范" class="headerlink" title="自定义函数库的关键规范"></a>自定义函数库的关键规范</h3><ol>
+<li><strong>类继承要求</strong>：必须继承<code>UBlueprintFunctionLibrary</code>，否则无法作为全局函数库使用；</li>
+<li><strong>函数声明规则</strong>：<ul>
+<li>函数需为<code>static</code> + <code>UFUNCTION(BlueprintCallable)</code>，支持C++&#x2F;蓝图双端调用；</li>
+<li>加<code>Category</code>分类，便于蓝图中搜索和管理；</li>
+</ul>
+</li>
+<li><strong>参数设计原则</strong>：<ul>
+<li>通用算法参数“按需开放”（如角度范围设默认值），适配多场景；</li>
+<li>避免传入冗余参数，核心参数前置，可选参数后置并设默认值；</li>
+</ul>
+</li>
+<li><strong>性能注意</strong>：<ul>
+<li>函数库仅封装轻量逻辑（算法、类型转换），不存放状态变量；</li>
+<li>避免在函数库中执行耗时操作（如加载资源、遍历大量数据）；</li>
+</ul>
+</li>
+<li><strong>头文件循环引用提醒</strong>：<br>函数库中若直接引用其他类的头文件，这些被引用的类将无法反向包含函数库头文件（触发循环引用报错）。建议通过“前向声明”替代直接包含：仅在函数库头文件中对所需类做前向声明（如<code>class FCustomGameplayEffectContext;</code>），函数具体实现放在cpp文件中，且仅在cpp里包含对应类的头文件，避免循环引用问题。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Library</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>委托 (Delegate)</title>
     <url>/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>委托的核心价值可概括为两点：</p>
@@ -53,46 +148,70 @@
       </tags>
   </entry>
   <entry>
-    <title>函数库 (Library)</title>
-    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Library/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>自定义函数库是UE开发中解耦跨类通用逻辑、提升代码复用性的核心手段，通过封装静态通用函数，可避免重复编码、减少性能损耗（如频繁Cast），同时让跨模块&#x2F;无继承关系的类高效共享算法与工具逻辑。</p>
+    <title>游戏开发中的锁：以FScopedAbilityListLock为例</title>
+    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Lock/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>锁的作用是保护<strong>临界资源</strong>避免并发读写冲突，<code>FScopedAbilityListLock</code>是针对GAS中ActivatableAbilities的轻量级封装锁，只要遍历<code>GetActivatableAbilities()</code>,就需要申请锁进行保护。</p>
 <span id="more"></span>
 
-<h1 id="自定义函数库的优势"><a href="#自定义函数库的优势" class="headerlink" title="自定义函数库的优势"></a>自定义函数库的优势</h1><ol>
-<li><strong>解耦跨类复用逻辑</strong>：许多通用算法（如位置计算、数据校验）的使用方无明显继承关系（如敌人召唤逻辑、战利品生成、弹道计算），函数库可作为“公共逻辑容器”，脱离类的继承层级限制；</li>
-<li><strong>提升开发效率</strong>：将可复用逻辑（如角色周围随机位置生成）提前封装为通用函数，后续开发无需重复编写&#x2F;调试，直接调用即可；</li>
-<li><strong>全局高效访问</strong>：函数库中的函数需声明为<code>static</code>（静态），无需创建类实例即可调用，兼顾全局访问性与性能；</li>
-<li><strong>统一维护入口</strong>：通用逻辑集中管理，后续修改（如调整位置算法的精度）只需改函数库，所有调用方自动生效，降低维护成本。</li>
-</ol>
-<h1 id="自定义函数库的核心内容"><a href="#自定义函数库的核心内容" class="headerlink" title="自定义函数库的核心内容"></a>自定义函数库的核心内容</h1><h2 id="1-通用算法（通用化参数设计）"><a href="#1-通用算法（通用化参数设计）" class="headerlink" title="1. 通用算法（通用化参数设计）"></a>1. 通用算法（通用化参数设计）</h2><p>封装无业务耦合的纯算法逻辑，参数设计需足够通用，避免硬编码，适配多场景调用。</p>
-<h3 id="2-轻量化类型转换（封装static-cast的Setter-Getter）"><a href="#2-轻量化类型转换（封装static-cast的Setter-Getter）" class="headerlink" title="2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）"></a>2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）</h3><p>UE中<code>Cast</code>操作（动态类型转换）性能开销大，需尽量避免；对于自定义扩展的框架类型（如GAS的<code>GameplayEffectContext</code>），可将<code>static_cast</code>封装到函数库，减少重复转换逻辑，提升调用效率。</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemLibrary::SetIsBlockedHit</span><span class="params">(FGameplayEffectContextHandle&amp; EffectContextHandle, <span class="type">bool</span> bInIsBlockedHit)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (FCustomGameplayEffectContext* CustomContext = <span class="built_in">static_cast</span>&lt;FCustomGameplayEffectContext*&gt;(EffectContextHandle.<span class="built_in">Get</span>()))</span><br><span class="line">	&#123;</span><br><span class="line">		CustomContext-&gt;<span class="built_in">SetBlockedHit</span>(bInIsBlockedHit);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h1><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAbilitySystemComponent::ClearAbilityOfSlot</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; Slot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="function">FScopedAbilityListLock <span class="title">ActiveScopLock</span><span class="params">(*<span class="keyword">this</span>)</span></span>;</span><br><span class="line">	<span class="keyword">for</span> (FGameplayAbilitySpec&amp; Spec : <span class="built_in">GetActivatableAbilities</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="built_in">AbilityHasSlot</span>(&amp;Spec , Slot))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">ClearSlot</span>(&amp;Spec);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h3 id="自定义函数库的关键规范"><a href="#自定义函数库的关键规范" class="headerlink" title="自定义函数库的关键规范"></a>自定义函数库的关键规范</h3><ol>
-<li><strong>类继承要求</strong>：必须继承<code>UBlueprintFunctionLibrary</code>，否则无法作为全局函数库使用；</li>
-<li><strong>函数声明规则</strong>：<ul>
-<li>函数需为<code>static</code> + <code>UFUNCTION(BlueprintCallable)</code>，支持C++&#x2F;蓝图双端调用；</li>
-<li>加<code>Category</code>分类，便于蓝图中搜索和管理；</li>
-</ul>
-</li>
-<li><strong>参数设计原则</strong>：<ul>
-<li>通用算法参数“按需开放”（如角度范围设默认值），适配多场景；</li>
-<li>避免传入冗余参数，核心参数前置，可选参数后置并设默认值；</li>
-</ul>
-</li>
-<li><strong>性能注意</strong>：<ul>
-<li>函数库仅封装轻量逻辑（算法、类型转换），不存放状态变量；</li>
-<li>避免在函数库中执行耗时操作（如加载资源、遍历大量数据）；</li>
-</ul>
-</li>
-<li><strong>头文件循环引用提醒</strong>：<br>函数库中若直接引用其他类的头文件，这些被引用的类将无法反向包含函数库头文件（触发循环引用报错）。建议通过“前向声明”替代直接包含：仅在函数库头文件中对所需类做前向声明（如<code>class FCustomGameplayEffectContext;</code>），函数具体实现放在cpp文件中，且仅在cpp里包含对应类的头文件，避免循环引用问题。</li>
+<h1 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h1><p><code>GetActivatableAbilities()</code> 返回的技能列表在游戏运行中会被高频修改（如技能锁定、添加、冷却禁用等），若读取列表时被其他代码路径修改，会导致迭代器失效、程序崩溃，因此需通过锁保护该临界资源。</p>
+<p>这一设计与操作系统中的互斥锁思想一致，但存在两点关键差异：</p>
+<ol>
+<li>此处使用的是“作用域锁”，会随作用域结束（如函数执行完毕）自动析构解锁，无需手动调用<code>Unlock()</code>；</li>
+<li>列表遍历操作耗时极短，无“线程等待资源”场景，因此锁的底层采用自旋锁实现——让线程短暂自旋等待锁释放，而非执行休眠&#x2F;唤醒操作，兼顾效率与安全性。</li>
 </ol>
 ]]></content>
       <categories>
         <category>ProgrammingSkills</category>
       </categories>
       <tags>
-        <tag>Library</tag>
+        <tag>Lock</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>智能指针 (Pointer)</title>
+    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Pointer/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>UE中的智能指针是管理对象生命周期、避免裸指针风险的核心工具，分为适配引擎GC的UObject专属指针（TObjectPtr&#x2F;TWeakObjectPtr等）和管理非UObject的通用共享指针（TSharedPtr）；</p>
+<p>在实际使用中，最常见的是TObjectPtr，但有时调用引擎内置的函数时可能需使用 &#x2F; 返回特定指针类型，需了解相关转换规则和其中异同。</p>
+<span id="more"></span>
+
+<h1 id="为什么使用智能指针"><a href="#为什么使用智能指针" class="headerlink" title="为什么使用智能指针"></a>为什么使用智能指针</h1><p>原生C++裸指针存在三大核心问题：</p>
+<ol>
+<li><strong>野指针风险</strong>：对象被销毁后，裸指针未置空，访问时导致程序崩溃；</li>
+<li><strong>内存泄漏</strong>：UObject指针未被GC追踪，无引用时无法自动回收；</li>
+<li><strong>GC兼容问题</strong>：裸指针无法被UE垃圾回收系统识别，易出现“对象误回收”或“内存泄漏”。</li>
+</ol>
+<p>智能指针的核心价值：</p>
+<ul>
+<li>自动管理指针生命周期，适配UE GC机制；</li>
+<li>避免手动管理内存（new&#x2F;delete），减少人为失误；</li>
+<li>区分“强引用&#x2F;弱引用”，灵活控制对象回收逻辑。</li>
+</ul>
+<h1 id="使用指南"><a href="#使用指南" class="headerlink" title="使用指南"></a>使用指南</h1><h2 id="TObjectPtr"><a href="#TObjectPtr" class="headerlink" title="TObjectPtr"></a>TObjectPtr</h2><p>适用于所有UObject子类实例指针（Actor&#x2F;Component&#x2F;Widget等），替代原生裸指针（UComponent* → TObjectPtr<UComponent>）。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 声明</span></span><br><span class="line">TObjectPtr&lt;UStaticMeshComponent&gt; MeshComp;</span><br><span class="line"><span class="comment">// 赋值</span></span><br><span class="line">MeshComp = <span class="built_in">CreateDefaultSubobject</span>&lt;UStaticMeshComponent&gt;(<span class="built_in">TEXT</span>(<span class="string">&quot;Mesh&quot;</span>));</span><br><span class="line"><span class="comment">// 访问：直接使用，无需额外解引用</span></span><br><span class="line"><span class="keyword">if</span> (MeshComp) &#123; MeshComp-&gt;<span class="built_in">SetVisibility</span>(<span class="literal">true</span>); &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h3><p>无需手动释放，GC自动管理；支持与裸指针互转，完全兼容原有UObject逻辑。</p>
+<h2 id="TWeakObjectPtr"><a href="#TWeakObjectPtr" class="headerlink" title="TWeakObjectPtr"></a>TWeakObjectPtr</h2><p>UObject弱引用指针，不阻止GC回收对象，仅“观察”对象是否存活。<br>适用于需引用对象但不希望阻止其回收（如UI引用场景Actor、技能引用目标Enemy）。<br>核心优点是<strong>多线程</strong>访问时安全，而TObjectPtr仅在主线程中使用，并未设计线程安全。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 主线程持有</span></span><br><span class="line"><span class="built_in">UPROPERTY</span>()</span><br><span class="line">TObjectPtr&lt;AActor&gt; MyActor;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 多线程使用安全缓存弱引用</span></span><br><span class="line">TWeakObjectPtr&lt;AActor&gt; WeakActor = MyActor;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">SomeThreadFunction</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (WeakActor.<span class="built_in">IsValid</span>())</span><br><span class="line">    &#123;</span><br><span class="line">        AActor* ValidActor = WeakActor.<span class="built_in">Get</span>();</span><br><span class="line">        <span class="comment">// 线程安全读操作</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="TSharedPtr"><a href="#TSharedPtr" class="headerlink" title="TSharedPtr"></a>TSharedPtr</h2><p>通用共享指针，基于引用计数管理<strong>非UObject类型</strong>（原生C++类、结构体），自动释放内存。用于管理非UObject类型（如自定义数据结构、第三方库对象）。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">TSharedPtr&lt;FMyData&gt; Ptr = <span class="built_in">MakeShared</span>&lt;FMyData&gt;();</span><br><span class="line"></span><br><span class="line">TSharedPtr&lt;FMyData&gt; Ptr2 = Ptr; <span class="comment">// 引用计数+1</span></span><br><span class="line">Ptr.<span class="built_in">Reset</span>();                    <span class="comment">// 引用计数-1</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="TSubclassOf"><a href="#TSubclassOf" class="headerlink" title="TSubclassOf"></a>TSubclassOf</h2><p>类引用指针（而非实例指针），限制仅能指向指定类及其子类，编译期校验类型。<br>适用于动态生成Actor&#x2F;创建对象时指定类（如Spawn Actor、创建Component）。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 声明：仅允许指向AEnemy及其子类</span></span><br><span class="line"><span class="built_in">UPROPERTY</span>(EditAnywhere)</span><br><span class="line">TSubclassOf&lt;AEnemy&gt; EnemyClass;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用：生成指定类的实例</span></span><br><span class="line">AEnemy* NewEnemy = <span class="built_in">GetWorld</span>()-&gt;<span class="built_in">SpawnActor</span>&lt;AEnemy&gt;(EnemyClass, SpawnLoc, FRotator::ZeroRotator);</span><br></pre></td></tr></table></figure>
+
+<h3 id="注意-1"><a href="#注意-1" class="headerlink" title="注意"></a>注意</h3><p>存储的是类的UClass对象，非实例；蓝图中可通过下拉框选择子类，类型安全。</p>
+<h2 id="指针转换-Get"><a href="#指针转换-Get" class="headerlink" title="指针转换 (.Get())"></a>指针转换 (.Get())</h2><ul>
+<li><strong>作用</strong>：从智能指针中提取原生裸指针，适用于所有UE智能指针；</li>
+<li><strong>注意</strong>：仅临时使用，不改变智能指针的生命周期，避免长期持有返回的裸指针。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Pointer</tag>
       </tags>
   </entry>
   <entry>
@@ -183,165 +302,6 @@
       </tags>
   </entry>
   <entry>
-    <title>智能指针 (Pointer)</title>
-    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Pointer/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>UE中的智能指针是管理对象生命周期、避免裸指针风险的核心工具，分为适配引擎GC的UObject专属指针（TObjectPtr&#x2F;TWeakObjectPtr等）和管理非UObject的通用共享指针（TSharedPtr）；</p>
-<p>在实际使用中，最常见的是TObjectPtr，但有时调用引擎内置的函数时可能需使用 &#x2F; 返回特定指针类型，需了解相关转换规则和其中异同。</p>
-<span id="more"></span>
-
-<h1 id="为什么使用智能指针"><a href="#为什么使用智能指针" class="headerlink" title="为什么使用智能指针"></a>为什么使用智能指针</h1><p>原生C++裸指针存在三大核心问题：</p>
-<ol>
-<li><strong>野指针风险</strong>：对象被销毁后，裸指针未置空，访问时导致程序崩溃；</li>
-<li><strong>内存泄漏</strong>：UObject指针未被GC追踪，无引用时无法自动回收；</li>
-<li><strong>GC兼容问题</strong>：裸指针无法被UE垃圾回收系统识别，易出现“对象误回收”或“内存泄漏”。</li>
-</ol>
-<p>智能指针的核心价值：</p>
-<ul>
-<li>自动管理指针生命周期，适配UE GC机制；</li>
-<li>避免手动管理内存（new&#x2F;delete），减少人为失误；</li>
-<li>区分“强引用&#x2F;弱引用”，灵活控制对象回收逻辑。</li>
-</ul>
-<h1 id="使用指南"><a href="#使用指南" class="headerlink" title="使用指南"></a>使用指南</h1><h2 id="TObjectPtr"><a href="#TObjectPtr" class="headerlink" title="TObjectPtr"></a>TObjectPtr</h2><p>适用于所有UObject子类实例指针（Actor&#x2F;Component&#x2F;Widget等），替代原生裸指针（UComponent* → TObjectPtr<UComponent>）。</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 声明</span></span><br><span class="line">TObjectPtr&lt;UStaticMeshComponent&gt; MeshComp;</span><br><span class="line"><span class="comment">// 赋值</span></span><br><span class="line">MeshComp = <span class="built_in">CreateDefaultSubobject</span>&lt;UStaticMeshComponent&gt;(<span class="built_in">TEXT</span>(<span class="string">&quot;Mesh&quot;</span>));</span><br><span class="line"><span class="comment">// 访问：直接使用，无需额外解引用</span></span><br><span class="line"><span class="keyword">if</span> (MeshComp) &#123; MeshComp-&gt;<span class="built_in">SetVisibility</span>(<span class="literal">true</span>); &#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h3><p>无需手动释放，GC自动管理；支持与裸指针互转，完全兼容原有UObject逻辑。</p>
-<h2 id="TWeakObjectPtr"><a href="#TWeakObjectPtr" class="headerlink" title="TWeakObjectPtr"></a>TWeakObjectPtr</h2><p>UObject弱引用指针，不阻止GC回收对象，仅“观察”对象是否存活。<br>适用于需引用对象但不希望阻止其回收（如UI引用场景Actor、技能引用目标Enemy）。<br>核心优点是<strong>多线程</strong>访问时安全，而TObjectPtr仅在主线程中使用，并未设计线程安全。</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 主线程持有</span></span><br><span class="line"><span class="built_in">UPROPERTY</span>()</span><br><span class="line">TObjectPtr&lt;AActor&gt; MyActor;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 多线程使用安全缓存弱引用</span></span><br><span class="line">TWeakObjectPtr&lt;AActor&gt; WeakActor = MyActor;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">SomeThreadFunction</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (WeakActor.<span class="built_in">IsValid</span>())</span><br><span class="line">    &#123;</span><br><span class="line">        AActor* ValidActor = WeakActor.<span class="built_in">Get</span>();</span><br><span class="line">        <span class="comment">// 线程安全读操作</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="TSharedPtr"><a href="#TSharedPtr" class="headerlink" title="TSharedPtr"></a>TSharedPtr</h2><p>通用共享指针，基于引用计数管理<strong>非UObject类型</strong>（原生C++类、结构体），自动释放内存。用于管理非UObject类型（如自定义数据结构、第三方库对象）。</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">TSharedPtr&lt;FMyData&gt; Ptr = <span class="built_in">MakeShared</span>&lt;FMyData&gt;();</span><br><span class="line"></span><br><span class="line">TSharedPtr&lt;FMyData&gt; Ptr2 = Ptr; <span class="comment">// 引用计数+1</span></span><br><span class="line">Ptr.<span class="built_in">Reset</span>();                    <span class="comment">// 引用计数-1</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="TSubclassOf"><a href="#TSubclassOf" class="headerlink" title="TSubclassOf"></a>TSubclassOf</h2><p>类引用指针（而非实例指针），限制仅能指向指定类及其子类，编译期校验类型。<br>适用于动态生成Actor&#x2F;创建对象时指定类（如Spawn Actor、创建Component）。</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 声明：仅允许指向AEnemy及其子类</span></span><br><span class="line"><span class="built_in">UPROPERTY</span>(EditAnywhere)</span><br><span class="line">TSubclassOf&lt;AEnemy&gt; EnemyClass;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用：生成指定类的实例</span></span><br><span class="line">AEnemy* NewEnemy = <span class="built_in">GetWorld</span>()-&gt;<span class="built_in">SpawnActor</span>&lt;AEnemy&gt;(EnemyClass, SpawnLoc, FRotator::ZeroRotator);</span><br></pre></td></tr></table></figure>
-
-<h3 id="注意-1"><a href="#注意-1" class="headerlink" title="注意"></a>注意</h3><p>存储的是类的UClass对象，非实例；蓝图中可通过下拉框选择子类，类型安全。</p>
-<h2 id="指针转换-Get"><a href="#指针转换-Get" class="headerlink" title="指针转换 (.Get())"></a>指针转换 (.Get())</h2><ul>
-<li><strong>作用</strong>：从智能指针中提取原生裸指针，适用于所有UE智能指针；</li>
-<li><strong>注意</strong>：仅临时使用，不改变智能指针的生命周期，避免长期持有返回的裸指针。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>ProgrammingSkills</category>
-      </categories>
-      <tags>
-        <tag>Pointer</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>类的继承 (Inheritance)</title>
-    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>类的继承是游戏开发中实现代码复用、逻辑扩展的核心手段，其核心价值在于：</p>
-<ul>
-<li>通过基类统一抽象通用逻辑，子类定制差异化行为；</li>
-<li>保证代码可维护性，尤其在C++&#x2F;蓝图混合开发中，需兼顾封装性与灵活扩展。</li>
-</ul>
-<span id="more"></span>
-
-<h1 id="基类"><a href="#基类" class="headerlink" title="基类"></a>基类</h1><p>游戏开发中，为同类对象构建基类是提升开发效率的核心习惯，核心原因有二：</p>
-<ol>
-<li><strong>通用逻辑复用</strong>：大量游戏对象（如敌人、道具、技能）存在共性属性&#x2F;行为（如血量、受击逻辑、销毁逻辑），基类可集中封装这些通用逻辑，避免重复编码；</li>
-<li><strong>批量扩展便捷</strong>：后续需为某类对象新增功能（如所有敌人添加“被击硬直”）时，只需修改基类，所有子类自动继承，无需逐个调整。</li>
-</ol>
-<p>在UE开发中，几乎所有自定义C++类都会配套创建<strong>蓝图基类</strong>，核心优势在于：</p>
-<ul>
-<li>配置灵活：无需硬编码&#x2F;重新编译，即可调整Mesh、数值参数（如敌人血量、技能冷却时间），快速验证效果；</li>
-<li>轻量逻辑快速迭代：简单逻辑（如UI提示、音效触发）可直接在蓝图中实现，开发效率高，且非密集计算类逻辑几乎无性能损耗。</li>
-</ul>
-<p>但蓝图也有明确的使用边界：</p>
-<ul>
-<li>复杂逻辑易因节点布线混乱导致维护成本高；</li>
-<li>版本控制中难以追踪蓝图的具体修改内容。<br>因此最佳实践是：蓝图仅处理“配置+极简逻辑”，复杂逻辑仍放在C++中实现。</li>
-</ul>
-<h1 id="继承关系"><a href="#继承关系" class="headerlink" title="继承关系"></a>继承关系</h1><p>丰富的功能实现依赖灵活的继承体系：子类可继承父类的变量&#x2F;函数，也可重写函数逻辑，极大提升代码扩展性。</p>
-<h2 id="核心问题：为何要区分-public-protected-private-访问权限？"><a href="#核心问题：为何要区分-public-protected-private-访问权限？" class="headerlink" title="核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？"></a>核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？</h2><p>个人开发中，若类的规模小、仅自己维护，权限区分的影响不明显；但在团队协作或源码复用场景下，权限划分是“降低理解成本、避免逻辑混乱”的关键：</p>
-<ul>
-<li><strong>public</strong>：对外暴露的核心接口（如<code>GetHealth()</code>），使用者无需关注内部实现，直接调用即可；</li>
-<li><strong>protected</strong>：仅子类可访问&#x2F;重写的逻辑（如<code>OnTakeDamage()</code>），保证子类可定制，又避免外部随意调用；</li>
-<li><strong>private</strong>：父类纯内部逻辑（如辅助计算的临时变量），完全隐藏实现细节，防止意外篡改。</li>
-</ul>
-<p>因此，当类的逻辑逐渐复杂时，需梳理头文件：明确权限划分、添加注释说明接口用途，让使用者快速知晓“哪些可调用、哪些可重写、哪些不可触碰”，无需深挖实现细节。</p>
-<h1 id="类与实例"><a href="#类与实例" class="headerlink" title="类与实例"></a>类与实例</h1><p>类是“模板”，实例是基于模板创建的“具体对象”：类中定义的非静态变量&#x2F;函数，会在每个实例中独立存在（如两个Enemy实例的血量、位置相互独立）。</p>
-<h2 id="静态成员的适用场景"><a href="#静态成员的适用场景" class="headerlink" title="静态成员的适用场景"></a>静态成员的适用场景</h2><p>对无需区分实例的通用逻辑&#x2F;数据（如全局配置、工具函数），可添加<code>static</code>关键字绑定到类上，核心优势：</p>
-<ol>
-<li>性能优化：无需创建实例即可调用，减少内存占用；</li>
-<li>逻辑统一：所有实例共享同一数据&#x2F;逻辑。</li>
-</ol>
-<h2 id="关键注意点"><a href="#关键注意点" class="headerlink" title="关键注意点"></a>关键注意点</h2><p>UE开发中需牢记：继承后的属性&#x2F;函数始终归属于“具体实例”，而非类本身。例如：</p>
-<ul>
-<li>为<code>Enemy1</code>实例绑定的受击回调，仅会响应该实例的受击事件；</li>
-<li>修改<code>Enemy2</code>实例的血量，不会影响其他Enemy实例的状态。<br>即使IDE的自动提示已经十分完善，也需时刻明确“操作的是类模板还是实例对象”，避免因边界混淆导致逻辑错误。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>ProgrammingSkills</category>
-      </categories>
-      <tags>
-        <tag>Inheritance</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>单例 (Singleton)</title>
-    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Singleton/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>单例的核心是确保类&#x2F;结构体在程序运行期间仅有<strong>一个全局实例</strong>，并提供统一的静态访问入口。<br>实际应用中，最常见的场景式采用原生C++单例实现GameplayTag的集中管理，避免多实例导致Tag重复注册、数值不一致，保证各个模块共享一套Tag。</p>
-<span id="more"></span>
-
-<h1 id="单例的使用场景"><a href="#单例的使用场景" class="headerlink" title="单例的使用场景"></a>单例的使用场景</h1><p>单例适用于“需全局统一访问、仅初始化一次”的场景：</p>
-<ol>
-<li><strong>全局常量&#x2F;配置管理</strong>：GameplayTag是游戏内通用标记（属性、技能、状态等），需全局唯一注册、跨模块共享，单例可确保所有模块使用同一套Tag，避免重复定义；</li>
-<li><strong>全局状态管理</strong>：如游戏全局开关（音效、无敌模式）、跨场景共享的核心参数，单例保证状态唯一且修改可全局感知；</li>
-<li><strong>全局服务类</strong>：如日志管理、网络请求封装，单例避免多实例导致的资源冲突（如重复创建网络连接）。</li>
-</ol>
-<h1 id="单例的构建和引用"><a href="#单例的构建和引用" class="headerlink" title="单例的构建和引用"></a>单例的构建和引用</h1><h2 id="1-单例的核心构建规则"><a href="#1-单例的核心构建规则" class="headerlink" title="1. 单例的核心构建规则"></a>1. 单例的核心构建规则</h2><h3 id="头文件（-h）设计：封闭实例-开放访问"><a href="#头文件（-h）设计：封闭实例-开放访问" class="headerlink" title="头文件（.h）设计：封闭实例+开放访问"></a>头文件（.h）设计：封闭实例+开放访问</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 核心：私有静态实例 + 公有静态Get方法，确保唯一实例 + 全局访问</span></span><br><span class="line"><span class="keyword">struct</span>  <span class="title class_">FCustomGameplayTags</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 全局访问入口：返回const引用，避免外部修改实例</span></span><br><span class="line">	<span class="function"><span class="type">static</span> <span class="type">const</span> FCustomGameplayTags&amp; <span class="title">Get</span><span class="params">()</span></span>&#123;<span class="keyword">return</span> GameplayTags;&#125;</span><br><span class="line">    <span class="comment">// 初始化方法：单独封装Tag注册逻辑，在游戏启动时执行</span></span><br><span class="line">	<span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">InitializeNativeGameplayTags</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 需全局共享的GameplayTag变量</span></span><br><span class="line">    FGameplayTag Attributes_Primary_Strength;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 私有静态实例：仅类内可访问，避免外部创建多实例</span></span><br><span class="line">	<span class="type">static</span> FCustomGameplayTags GameplayTags;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<h3 id="源文件（-cpp）实现：初始化实例-注册逻辑"><a href="#源文件（-cpp）实现：初始化实例-注册逻辑" class="headerlink" title="源文件（.cpp）实现：初始化实例+注册逻辑"></a>源文件（.cpp）实现：初始化实例+注册逻辑</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 初始化静态实例（程序启动时创建，全局唯一）</span></span><br><span class="line">FCustomGameplayTags FCustomGameplayTags::GameplayTags;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 封装GameplayTag的注册逻辑，仅需执行一次</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">FCustomGameplayTags::InitializeNativeGameplayTags</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 向UE引擎注册自定义Native GameplayTag，绑定标记名和说明</span></span><br><span class="line">	GameplayTags.Attributes_Primary_Strength = UGameplayTagsManager::<span class="built_in">Get</span>().<span class="built_in">AddNativeGameplayTag</span>(</span><br><span class="line">		<span class="built_in">FName</span>(<span class="string">&quot;Attributes.Primary.Strength&quot;</span>) ,</span><br><span class="line">		<span class="built_in">FString</span>(<span class="string">&quot;Increases physical damage&quot;</span>)</span><br><span class="line">	);</span><br><span class="line">	<span class="comment">// 可扩展：注册更多Tag</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="2-单例的全局引用方式"><a href="#2-单例的全局引用方式" class="headerlink" title="2. 单例的全局引用方式"></a>2. 单例的全局引用方式</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 任意模块/类中，通过Get()获取唯一实例，访问已注册的Tag</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AEnemy::CalculateDamage</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 全局访问单例中的Tag，无需创建FCustomGameplayTags实例</span></span><br><span class="line">    <span class="type">const</span> FGameplayTag StrengthTag = FCustomGameplayTags::<span class="built_in">Get</span>().Attributes_Primary_Strength;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>ProgrammingSkills</category>
-      </categories>
-      <tags>
-        <tag>Singleton</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>数据驱动系统 (DataDriven)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/DataDriven/Data/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>DataDriven</category>
-      </categories>
-      <tags>
-        <tag>DataAsset</tag>
-        <tag>DataTable</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>GameplayAbilitySystem (GAS)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GAS/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>GAS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>AttributeSet (AS)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/AttributeSet/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>GAS</tag>
-        <tag>AS</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>接口 (Interface)</title>
     <url>/ue5-blog/2025/12/09/ProgrammingSkills/Interface/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>接口是游戏开发中“按功能归类”的核心手段，可突破类继承的层级限制，让不同类型的对象实现同一套功能逻辑；<br>在UE中结合<code>BlueprintNativeEvent</code>使用，既能保证功能统一，又能避免频繁类型转换(Cast)，提升代码效率与扩展性。</p>
@@ -378,114 +338,52 @@
       </tags>
   </entry>
   <entry>
-    <title>GameplayEffect (GE)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayEffect/</url>
+    <title>行为树 (BehaviorTree)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/AI/BehaviorTree/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>AI</category>
+      </categories>
+      <tags>
+        <tag>BehavoirTree</tag>
+        <tag>Blackboard</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>AbilityTask</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilityTask/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
       <categories>
         <category>SystemDesigns</category>
         <category>GAS</category>
       </categories>
       <tags>
-        <tag>GAS</tag>
-        <tag>GE</tag>
+        <tag>AbilityTask</tag>
       </tags>
   </entry>
   <entry>
-    <title>GameplayCue (GC)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayCue/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>GAS</tag>
-        <tag>GC</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>GameplayAbility (GA)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayAbility/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>GAS</tag>
-        <tag>GA</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>游戏开发中的锁：以FScopedAbilityListLock为例</title>
-    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Lock/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>锁的作用是保护<strong>临界资源</strong>避免并发读写冲突，<code>FScopedAbilityListLock</code>是针对GAS中ActivatableAbilities的轻量级封装锁，只要遍历<code>GetActivatableAbilities()</code>,就需要申请锁进行保护。</p>
+    <title>单例 (Singleton)</title>
+    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Singleton/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>单例的核心是确保类&#x2F;结构体在程序运行期间仅有<strong>一个全局实例</strong>，并提供统一的静态访问入口。<br>实际应用中，最常见的场景式采用原生C++单例实现GameplayTag的集中管理，避免多实例导致Tag重复注册、数值不一致，保证各个模块共享一套Tag。</p>
 <span id="more"></span>
 
-<h1 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h1><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAbilitySystemComponent::ClearAbilityOfSlot</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; Slot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="function">FScopedAbilityListLock <span class="title">ActiveScopLock</span><span class="params">(*<span class="keyword">this</span>)</span></span>;</span><br><span class="line">	<span class="keyword">for</span> (FGameplayAbilitySpec&amp; Spec : <span class="built_in">GetActivatableAbilities</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="built_in">AbilityHasSlot</span>(&amp;Spec , Slot))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">ClearSlot</span>(&amp;Spec);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h1><p><code>GetActivatableAbilities()</code> 返回的技能列表在游戏运行中会被高频修改（如技能锁定、添加、冷却禁用等），若读取列表时被其他代码路径修改，会导致迭代器失效、程序崩溃，因此需通过锁保护该临界资源。</p>
-<p>这一设计与操作系统中的互斥锁思想一致，但存在两点关键差异：</p>
+<h1 id="单例的使用场景"><a href="#单例的使用场景" class="headerlink" title="单例的使用场景"></a>单例的使用场景</h1><p>单例适用于“需全局统一访问、仅初始化一次”的场景：</p>
 <ol>
-<li>此处使用的是“作用域锁”，会随作用域结束（如函数执行完毕）自动析构解锁，无需手动调用<code>Unlock()</code>；</li>
-<li>列表遍历操作耗时极短，无“线程等待资源”场景，因此锁的底层采用自旋锁实现——让线程短暂自旋等待锁释放，而非执行休眠&#x2F;唤醒操作，兼顾效率与安全性。</li>
+<li><strong>全局常量&#x2F;配置管理</strong>：GameplayTag是游戏内通用标记（属性、技能、状态等），需全局唯一注册、跨模块共享，单例可确保所有模块使用同一套Tag，避免重复定义；</li>
+<li><strong>全局状态管理</strong>：如游戏全局开关（音效、无敌模式）、跨场景共享的核心参数，单例保证状态唯一且修改可全局感知；</li>
+<li><strong>全局服务类</strong>：如日志管理、网络请求封装，单例避免多实例导致的资源冲突（如重复创建网络连接）。</li>
 </ol>
-]]></content>
+<h1 id="单例的构建和引用"><a href="#单例的构建和引用" class="headerlink" title="单例的构建和引用"></a>单例的构建和引用</h1><h2 id="1-单例的核心构建规则"><a href="#1-单例的核心构建规则" class="headerlink" title="1. 单例的核心构建规则"></a>1. 单例的核心构建规则</h2><h3 id="头文件（-h）设计：封闭实例-开放访问"><a href="#头文件（-h）设计：封闭实例-开放访问" class="headerlink" title="头文件（.h）设计：封闭实例+开放访问"></a>头文件（.h）设计：封闭实例+开放访问</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 核心：私有静态实例 + 公有静态Get方法，确保唯一实例 + 全局访问</span></span><br><span class="line"><span class="keyword">struct</span>  <span class="title class_">FCustomGameplayTags</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 全局访问入口：返回const引用，避免外部修改实例</span></span><br><span class="line">	<span class="function"><span class="type">static</span> <span class="type">const</span> FCustomGameplayTags&amp; <span class="title">Get</span><span class="params">()</span></span>&#123;<span class="keyword">return</span> GameplayTags;&#125;</span><br><span class="line">    <span class="comment">// 初始化方法：单独封装Tag注册逻辑，在游戏启动时执行</span></span><br><span class="line">	<span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">InitializeNativeGameplayTags</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 需全局共享的GameplayTag变量</span></span><br><span class="line">    FGameplayTag Attributes_Primary_Strength;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 私有静态实例：仅类内可访问，避免外部创建多实例</span></span><br><span class="line">	<span class="type">static</span> FCustomGameplayTags GameplayTags;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="源文件（-cpp）实现：初始化实例-注册逻辑"><a href="#源文件（-cpp）实现：初始化实例-注册逻辑" class="headerlink" title="源文件（.cpp）实现：初始化实例+注册逻辑"></a>源文件（.cpp）实现：初始化实例+注册逻辑</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 初始化静态实例（程序启动时创建，全局唯一）</span></span><br><span class="line">FCustomGameplayTags FCustomGameplayTags::GameplayTags;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 封装GameplayTag的注册逻辑，仅需执行一次</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">FCustomGameplayTags::InitializeNativeGameplayTags</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 向UE引擎注册自定义Native GameplayTag，绑定标记名和说明</span></span><br><span class="line">	GameplayTags.Attributes_Primary_Strength = UGameplayTagsManager::<span class="built_in">Get</span>().<span class="built_in">AddNativeGameplayTag</span>(</span><br><span class="line">		<span class="built_in">FName</span>(<span class="string">&quot;Attributes.Primary.Strength&quot;</span>) ,</span><br><span class="line">		<span class="built_in">FString</span>(<span class="string">&quot;Increases physical damage&quot;</span>)</span><br><span class="line">	);</span><br><span class="line">	<span class="comment">// 可扩展：注册更多Tag</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-单例的全局引用方式"><a href="#2-单例的全局引用方式" class="headerlink" title="2. 单例的全局引用方式"></a>2. 单例的全局引用方式</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 任意模块/类中，通过Get()获取唯一实例，访问已注册的Tag</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AEnemy::CalculateDamage</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 全局访问单例中的Tag，无需创建FCustomGameplayTags实例</span></span><br><span class="line">    <span class="type">const</span> FGameplayTag StrengthTag = FCustomGameplayTags::<span class="built_in">Get</span>().Attributes_Primary_Strength;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
       <categories>
         <category>ProgrammingSkills</category>
       </categories>
       <tags>
-        <tag>Lock</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>AbilitySystemComponent (ASC)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilitySystemComponent/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesgins</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>GAS</tag>
-        <tag>ASC</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Save</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>SaveAndLoad</category>
-      </categories>
-      <tags>
-        <tag>Save</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Highlight</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>Input</category>
-      </categories>
-      <tags>
-        <tag>Highlight</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>GameplayTag</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayTag/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>GAS</tag>
-        <tag>GameplayTag</tag>
+        <tag>Singleton</tag>
       </tags>
   </entry>
   <entry>
@@ -543,82 +441,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Model View ViewModel (MVVM)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/MVVM/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>UI</category>
-      </categories>
-      <tags>
-        <tag>MVVM</tag>
-        <tag>FieldNotify</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Load</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Load/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>SaveAndLoad</category>
-      </categories>
-      <tags>
-        <tag>Load</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Model View Controller (MVC)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/MVC/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>UI</category>
-      </categories>
-      <tags>
-        <tag>MVC</tag>
-        <tag>Widget</tag>
-        <tag>WidgetController</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>GameInstace (GI)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/GameInstance/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>SaveAndLoad</category>
-      </categories>
-      <tags>
-        <tag>GI</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>行为树 (BehaviorTree)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/AI/BehaviorTree/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>AI</category>
-      </categories>
-      <tags>
-        <tag>BehavoirTree</tag>
-        <tag>Blackboard</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>GameMode</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/GameMode/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>SaveAndLoad</category>
-      </categories>
-      <tags>
-        <tag>GameMode</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>ExecCalc</title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/ExecCalc/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
@@ -630,6 +452,108 @@
         <tag>GAS</tag>
         <tag>ExecCalc</tag>
         <tag>Damage</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameplayCue (GC)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayCue/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>GC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameplayAbility (GA)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayAbility/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>GA</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameplayEffect (GE)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayEffect/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>GE</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameplayTag</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayTag/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>GameplayTag</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>AbilitySystemComponent (ASC)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilitySystemComponent/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesgins</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>ASC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>AttributeSet (AS)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/AttributeSet/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>AS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameplayAbilitySystem (GAS)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GAS/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Highlight</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>Input</category>
+      </categories>
+      <tags>
+        <tag>Highlight</tag>
       </tags>
   </entry>
   <entry>
@@ -657,6 +581,83 @@
       </tags>
   </entry>
   <entry>
+    <title>ModMagCalc (MMC)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/ModMagCalc/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>MMC</tag>
+        <tag>Modifier</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>数据驱动系统 (DataDriven)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/DataDriven/Data/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>DataDriven</category>
+      </categories>
+      <tags>
+        <tag>DataAsset</tag>
+        <tag>DataTable</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Model View Controller (MVC)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/MVC/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>UI</category>
+      </categories>
+      <tags>
+        <tag>MVC</tag>
+        <tag>Widget</tag>
+        <tag>WidgetController</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Load</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Load/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>SaveAndLoad</category>
+      </categories>
+      <tags>
+        <tag>Load</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameInstace (GI)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/GameInstance/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>SaveAndLoad</category>
+      </categories>
+      <tags>
+        <tag>GI</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameMode</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/GameMode/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>SaveAndLoad</category>
+      </categories>
+      <tags>
+        <tag>GameMode</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>SpawnVolume and SpawnPoint</title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/Levels/SpawnVolume/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
@@ -667,6 +668,18 @@
       <tags>
         <tag>SpawnVolume</tag>
         <tag>SpawnPoint</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Save</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>SaveAndLoad</category>
+      </categories>
+      <tags>
+        <tag>Save</tag>
       </tags>
   </entry>
   <entry>
@@ -682,29 +695,16 @@
       </tags>
   </entry>
   <entry>
-    <title>AbilityTask</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilityTask/</url>
+    <title>Model View ViewModel (MVVM)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/MVVM/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
       <categories>
         <category>SystemDesigns</category>
-        <category>GAS</category>
+        <category>UI</category>
       </categories>
       <tags>
-        <tag>AbilityTask</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>ModMagCalc (MMC)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/ModMagCalc/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>GAS</tag>
-        <tag>MMC</tag>
-        <tag>Modifier</tag>
+        <tag>MVVM</tag>
+        <tag>FieldNotify</tag>
       </tags>
   </entry>
 </search>
