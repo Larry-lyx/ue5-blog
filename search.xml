@@ -1,6 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>函数库 (Library)</title>
+    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Library/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>自定义函数库是UE开发中解耦跨类通用逻辑、提升代码复用性的核心手段，通过封装静态通用函数，可避免重复编码、减少性能损耗（如频繁Cast），同时让跨模块&#x2F;无继承关系的类高效共享算法与工具逻辑。</p>
+<span id="more"></span>
+
+<h1 id="自定义函数库的优势"><a href="#自定义函数库的优势" class="headerlink" title="自定义函数库的优势"></a>自定义函数库的优势</h1><ol>
+<li><strong>解耦跨类复用逻辑</strong>：许多通用算法（如位置计算、数据校验）的使用方无明显继承关系（如敌人召唤逻辑、战利品生成、弹道计算），函数库可作为“公共逻辑容器”，脱离类的继承层级限制；</li>
+<li><strong>提升开发效率</strong>：将可复用逻辑（如角色周围随机位置生成）提前封装为通用函数，后续开发无需重复编写&#x2F;调试，直接调用即可；</li>
+<li><strong>全局高效访问</strong>：函数库中的函数需声明为<code>static</code>（静态），无需创建类实例即可调用，兼顾全局访问性与性能；</li>
+<li><strong>统一维护入口</strong>：通用逻辑集中管理，后续修改（如调整位置算法的精度）只需改函数库，所有调用方自动生效，降低维护成本。</li>
+</ol>
+<h1 id="自定义函数库的核心内容"><a href="#自定义函数库的核心内容" class="headerlink" title="自定义函数库的核心内容"></a>自定义函数库的核心内容</h1><h2 id="1-通用算法（通用化参数设计）"><a href="#1-通用算法（通用化参数设计）" class="headerlink" title="1. 通用算法（通用化参数设计）"></a>1. 通用算法（通用化参数设计）</h2><p>封装无业务耦合的纯算法逻辑，参数设计需足够通用，避免硬编码，适配多场景调用。</p>
+<h3 id="2-轻量化类型转换（封装static-cast的Setter-Getter）"><a href="#2-轻量化类型转换（封装static-cast的Setter-Getter）" class="headerlink" title="2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）"></a>2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）</h3><p>UE中<code>Cast</code>操作（动态类型转换）性能开销大，需尽量避免；对于自定义扩展的框架类型（如GAS的<code>GameplayEffectContext</code>），可将<code>static_cast</code>封装到函数库，减少重复转换逻辑，提升调用效率。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemLibrary::SetIsBlockedHit</span><span class="params">(FGameplayEffectContextHandle&amp; EffectContextHandle, <span class="type">bool</span> bInIsBlockedHit)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (FCustomGameplayEffectContext* CustomContext = <span class="built_in">static_cast</span>&lt;FCustomGameplayEffectContext*&gt;(EffectContextHandle.<span class="built_in">Get</span>()))</span><br><span class="line">	&#123;</span><br><span class="line">		CustomContext-&gt;<span class="built_in">SetBlockedHit</span>(bInIsBlockedHit);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="自定义函数库的关键规范"><a href="#自定义函数库的关键规范" class="headerlink" title="自定义函数库的关键规范"></a>自定义函数库的关键规范</h3><ol>
+<li><strong>类继承要求</strong>：必须继承<code>UBlueprintFunctionLibrary</code>，否则无法作为全局函数库使用；</li>
+<li><strong>函数声明规则</strong>：<ul>
+<li>函数需为<code>static</code> + <code>UFUNCTION(BlueprintCallable)</code>，支持C++&#x2F;蓝图双端调用；</li>
+<li>加<code>Category</code>分类，便于蓝图中搜索和管理；</li>
+</ul>
+</li>
+<li><strong>参数设计原则</strong>：<ul>
+<li>通用算法参数“按需开放”（如角度范围设默认值），适配多场景；</li>
+<li>避免传入冗余参数，核心参数前置，可选参数后置并设默认值；</li>
+</ul>
+</li>
+<li><strong>性能注意</strong>：<ul>
+<li>函数库仅封装轻量逻辑（算法、类型转换），不存放状态变量；</li>
+<li>避免在函数库中执行耗时操作（如加载资源、遍历大量数据）；</li>
+</ul>
+</li>
+<li><strong>头文件循环引用提醒</strong>：<br>函数库中若直接引用其他类的头文件，这些被引用的类将无法反向包含函数库头文件（触发循环引用报错）。建议通过“前向声明”替代直接包含：仅在函数库头文件中对所需类做前向声明（如<code>class FCustomGameplayEffectContext;</code>），函数具体实现放在cpp文件中，且仅在cpp里包含对应类的头文件，避免循环引用问题。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Library</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>反射系统 (Reflection)</title>
+    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Reflection/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>UE的反射系统是突破C++静态编译限制的核心机制，通过一系列宏为C++代码注入“运行时类型信息”，实现蓝图交互、序列化、编辑器可视化、属性自动同步等关键功能；<br>在实际应用中最需要的，就是熟悉一些常用的反射宏。</p>
+<span id="more"></span>
+
+<h1 id="为什么需要反射-Reflection"><a href="#为什么需要反射-Reflection" class="headerlink" title="为什么需要反射(Reflection)"></a>为什么需要反射(Reflection)</h1><p>原生C++是静态编译型语言，编译后丢失类、属性、函数的元信息，无法在运行时动态获取&#x2F;修改类的成员（比如无法通过字符串“Health”直接找到角色的血量变量）。</p>
+<p>而游戏开发中，大量场景需要“运行时动态操作类成员”：</p>
+<ul>
+<li>蓝图要访问C++定义的血量、技能函数；</li>
+<li>存档系统要自动序列化&#x2F;反序列化角色属性；</li>
+<li>编辑器要可视化显示C++变量（如Mesh、数值参数）并支持实时修改；</li>
+<li>GAS要动态遍历角色的Attribute属性，实现技能效果计算。</li>
+</ul>
+<p>UE的反射系统正是为解决这些问题而生：通过反射宏标记C++元素，让UE在编译时生成额外的“元信息表”，运行时可通过该表动态访问、修改类的成员，无需硬编码关联。</p>
+<h1 id="UE中的反射宏"><a href="#UE中的反射宏" class="headerlink" title="UE中的反射宏"></a>UE中的反射宏</h1><h2 id="UCLASS"><a href="#UCLASS" class="headerlink" title="UCLASS"></a>UCLASS</h2><p>创建类时自动生成核心宏（<code>GENERATED_BODY()</code>），无需手动修改；</p>
+<h2 id="UPROPERTY"><a href="#UPROPERTY" class="headerlink" title="UPROPERTY"></a>UPROPERTY</h2><ol>
+<li><strong>编辑器权限</strong><ul>
+<li><code>EditDefaultsOnly</code>：仅蓝图&#x2F;类的默认值面板可修改，场景实例不可改；</li>
+<li><code>EditAnywhere</code>：蓝图默认值+场景实例面板均可修改。</li>
+</ul>
+</li>
+<li><strong>蓝图权限</strong><ul>
+<li><code>BlueprintReadOnly</code>：蓝图仅可读，不可修改；</li>
+<li><code>BlueprintReadWrite</code>：蓝图可读写，仅在蓝图需操作该变量时使用。</li>
+</ul>
+</li>
+<li><strong>分类管理</strong><ul>
+<li><code>Category = &quot;父类 | 子类&quot;</code>：用<code>|</code>分割层级（如<code>Category = &quot;Enemy | Combat&quot;</code>），让编辑器面板属性归类更清晰。</li>
+</ul>
+</li>
+<li><strong>委托专属</strong><ul>
+<li><code>BlueprintAssignable</code>：蓝图可绑定委托回调；</li>
+<li><code>BlueprintCallable</code>：蓝图可主动触发委托广播；</li>
+<li>注：仅<code>DECLARE_DYNAMIC_*</code>系列动态委托支持上述关键字，原生委托（无DYNAMIC）无效。</li>
+</ul>
+</li>
+<li><strong>存档序列化</strong><ul>
+<li><code>SaveGame</code>：标记变量需纳入存档系统，读档时自动恢复值。</li>
+</ul>
+</li>
+<li><strong>私有变量暴露</strong><ul>
+<li><code>meta = (AllowPrivateAccess = &quot;true&quot;)</code>：private中的变量需加此元数据，才能被反射系统识别（蓝图&#x2F;编辑器可见）。</li>
+</ul>
+</li>
+<li><strong>网络同步</strong></li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 基础同步：服务器修改后自动同步到客户端</span></span><br><span class="line"><span class="built_in">UPROPERTY</span>(Replicated)</span><br><span class="line"><span class="type">float</span> CurrentHealth = <span class="number">100.0f</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 同步+回调：变量同步后触发指定函数（更新UI/逻辑）</span></span><br><span class="line"><span class="built_in">UPROPERTY</span>(ReplicatedUsing=OnRep_HealthChanged)</span><br><span class="line"><span class="type">float</span> SyncHealth = <span class="number">100.0f</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 同步回调函数（必须加UFUNCTION()）</span></span><br><span class="line"><span class="built_in">UFUNCTION</span>()</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">OnRep_HealthChanged</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 必须重写该函数完成同步注册</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAttributeSet::GetLifetimeReplicatedProps</span><span class="params">(TArray&lt;FLifetimeProperty&gt;&amp; OutLifetimeProps)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Super::<span class="built_in">GetLifetimeReplicatedProps</span>(OutLifetimeProps);</span><br><span class="line">    <span class="comment">// 注册同步变量（COND_None=无条件同步，REPNOTIFY_Always=始终触发回调）</span></span><br><span class="line">    <span class="built_in">DOREPLIFETIME_CONDITION_NOTIFY</span>(UAttributeSet, Health, COND_None, REPNOTIFY_Always);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// GAS属性同步回调</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAttributeSet::OnRep_Health</span><span class="params">(<span class="type">const</span> FGameplayAttributeData&amp; OldHealth)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">GAMEPLAYATTRIBUTE_REPNOTIFY</span>(UAttributeSet, Health, OldHealth);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键注意点:</strong><br>空<code>UPROPERTY()</code>并非无意义：所有<code>UObject</code>子类指针（如<code>UComponent*</code>&#x2F;<code>AActor*</code>）必须添加，否则 UE 的 GC（垃圾回收）无法追踪指针，可能导致内存泄漏（无引用时不回收）或野指针（被误回收）。</p>
+<h2 id="UFUNCTION"><a href="#UFUNCTION" class="headerlink" title="UFUNCTION"></a>UFUNCTION</h2><ol>
+<li><strong>蓝图执行</strong></li>
+</ol>
+<ul>
+<li><code>BlueprintCallable</code>：蓝图可调用，有执行引脚，可修改对象状态；</li>
+<li><code>BlueprintPure</code>：蓝图可调用，无执行引脚，仅用于状态获取 &#x2F; 纯计算（不修改变量）。</li>
+</ul>
+<ol start="2">
+<li><strong>蓝图实现 &#x2F; 扩展</strong></li>
+</ol>
+<ul>
+<li><code>BlueprintImplementableEvent</code>：C++ 声明函数，蓝图中实现逻辑（无 C++ 实现体）；</li>
+<li><code>BlueprintNativeEvent</code>：C++ 提供基础实现（函数名加<code>_Implementation</code>后缀），蓝图可重写扩展；调用时用<code>Execute_XXX()</code>。</li>
+</ul>
+<ol start="3">
+<li><strong>网络同步</strong></li>
+</ol>
+<ul>
+<li><code>NetMulticast</code>：服务器调用，所有客户端（含服务器）执行；需搭配<code>Reliable</code>（可靠传输）&#x2F;<code>Unreliable</code>（高频低优先级）；</li>
+<li><code>Server</code>（客户端调、服务器执行）、<code>Client</code>（服务器调、客户端执行），需搭配<code>WithValidation</code>（参数验证）。</li>
+</ul>
+<ol start="4">
+<li><strong>元数据扩展</strong></li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// DefaultToSelf：参数默认值为自身；DisplayName：自定义蓝图节点名称</span></span><br><span class="line"><span class="built_in">UFUNCTION</span>(BlueprintCallable, meta=(DefaultToSelf=<span class="string">&quot;WorldContextObject&quot;</span>, DisplayName=<span class="string">&quot;自定义函数名&quot;</span>))</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">CustomFunction</span><span class="params">(UObject* WorldContextObject)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="USTRUCT"><a href="#USTRUCT" class="headerlink" title="USTRUCT"></a>USTRUCT</h2><ul>
+<li>BlueprintType ，标记自定义结构体，允许蓝图中声明该结构体变量、作为函数参数 &#x2F; 返回值；</li>
+</ul>
+]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Reflection</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>类的继承 (Inheritance)</title>
     <url>/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>类的继承是游戏开发中实现代码复用、逻辑扩展的核心手段，其核心价值在于：</p>
@@ -50,6 +180,28 @@
       </categories>
       <tags>
         <tag>Inheritance</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>游戏开发中的锁：以FScopedAbilityListLock为例</title>
+    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Lock/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>锁的作用是保护<strong>临界资源</strong>避免并发读写冲突，<code>FScopedAbilityListLock</code>是针对GAS中ActivatableAbilities的轻量级封装锁，只要遍历<code>GetActivatableAbilities()</code>,就需要申请锁进行保护。</p>
+<span id="more"></span>
+
+<h1 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h1><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAbilitySystemComponent::ClearAbilityOfSlot</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; Slot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="function">FScopedAbilityListLock <span class="title">ActiveScopLock</span><span class="params">(*<span class="keyword">this</span>)</span></span>;</span><br><span class="line">	<span class="keyword">for</span> (FGameplayAbilitySpec&amp; Spec : <span class="built_in">GetActivatableAbilities</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="built_in">AbilityHasSlot</span>(&amp;Spec , Slot))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">ClearSlot</span>(&amp;Spec);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h1><p><code>GetActivatableAbilities()</code> 返回的技能列表在游戏运行中会被高频修改（如技能锁定、添加、冷却禁用等），若读取列表时被其他代码路径修改，会导致迭代器失效、程序崩溃，因此需通过锁保护该临界资源。</p>
+<p>这一设计与操作系统中的互斥锁思想一致，但存在两点关键差异：</p>
+<ol>
+<li>此处使用的是“作用域锁”，会随作用域结束（如函数执行完毕）自动析构解锁，无需手动调用<code>Unlock()</code>；</li>
+<li>列表遍历操作耗时极短，无“线程等待资源”场景，因此锁的底层采用自旋锁实现——让线程短暂自旋等待锁释放，而非执行休眠&#x2F;唤醒操作，兼顾效率与安全性。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Lock</tag>
       </tags>
   </entry>
   <entry>
@@ -141,147 +293,13 @@
       </tags>
   </entry>
   <entry>
-    <title>游戏开发中的锁：以FScopedAbilityListLock为例</title>
-    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Lock/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>锁的作用是保护<strong>临界资源</strong>避免并发读写冲突，<code>FScopedAbilityListLock</code>是针对GAS中ActivatableAbilities的轻量级封装锁，只要遍历<code>GetActivatableAbilities()</code>,就需要申请锁进行保护。</p>
-<span id="more"></span>
-
-<h1 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h1><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAbilitySystemComponent::ClearAbilityOfSlot</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; Slot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="function">FScopedAbilityListLock <span class="title">ActiveScopLock</span><span class="params">(*<span class="keyword">this</span>)</span></span>;</span><br><span class="line">	<span class="keyword">for</span> (FGameplayAbilitySpec&amp; Spec : <span class="built_in">GetActivatableAbilities</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="built_in">AbilityHasSlot</span>(&amp;Spec , Slot))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">ClearSlot</span>(&amp;Spec);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h1><p><code>GetActivatableAbilities()</code> 返回的技能列表在游戏运行中会被高频修改（如技能锁定、添加、冷却禁用等），若读取列表时被其他代码路径修改，会导致迭代器失效、程序崩溃，因此需通过锁保护该临界资源。</p>
-<p>这一设计与操作系统中的互斥锁思想一致，但存在两点关键差异：</p>
-<ol>
-<li>此处使用的是“作用域锁”，会随作用域结束（如函数执行完毕）自动析构解锁，无需手动调用<code>Unlock()</code>；</li>
-<li>列表遍历操作耗时极短，无“线程等待资源”场景，因此锁的底层采用自旋锁实现——让线程短暂自旋等待锁释放，而非执行休眠&#x2F;唤醒操作，兼顾效率与安全性。</li>
-</ol>
-]]></content>
-      <categories>
-        <category>ProgrammingSkills</category>
-      </categories>
-      <tags>
-        <tag>Lock</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>反射系统 (Reflection)</title>
-    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Reflection/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>UE的反射系统是突破C++静态编译限制的核心机制，通过一系列宏为C++代码注入“运行时类型信息”，实现蓝图交互、序列化、编辑器可视化、属性自动同步等关键功能；<br>在实际应用中最需要的，就是熟悉一些常用的反射宏。</p>
-<span id="more"></span>
-
-<h1 id="为什么需要反射-Reflection"><a href="#为什么需要反射-Reflection" class="headerlink" title="为什么需要反射(Reflection)"></a>为什么需要反射(Reflection)</h1><p>原生C++是静态编译型语言，编译后丢失类、属性、函数的元信息，无法在运行时动态获取&#x2F;修改类的成员（比如无法通过字符串“Health”直接找到角色的血量变量）。</p>
-<p>而游戏开发中，大量场景需要“运行时动态操作类成员”：</p>
-<ul>
-<li>蓝图要访问C++定义的血量、技能函数；</li>
-<li>存档系统要自动序列化&#x2F;反序列化角色属性；</li>
-<li>编辑器要可视化显示C++变量（如Mesh、数值参数）并支持实时修改；</li>
-<li>GAS要动态遍历角色的Attribute属性，实现技能效果计算。</li>
-</ul>
-<p>UE的反射系统正是为解决这些问题而生：通过反射宏标记C++元素，让UE在编译时生成额外的“元信息表”，运行时可通过该表动态访问、修改类的成员，无需硬编码关联。</p>
-<h1 id="UE中的反射宏"><a href="#UE中的反射宏" class="headerlink" title="UE中的反射宏"></a>UE中的反射宏</h1><h2 id="UCLASS"><a href="#UCLASS" class="headerlink" title="UCLASS"></a>UCLASS</h2><p>创建类时自动生成核心宏（<code>GENERATED_BODY()</code>），无需手动修改；</p>
-<h2 id="UPROPERTY"><a href="#UPROPERTY" class="headerlink" title="UPROPERTY"></a>UPROPERTY</h2><ol>
-<li><strong>编辑器权限</strong><ul>
-<li><code>EditDefaultsOnly</code>：仅蓝图&#x2F;类的默认值面板可修改，场景实例不可改；</li>
-<li><code>EditAnywhere</code>：蓝图默认值+场景实例面板均可修改。</li>
-</ul>
-</li>
-<li><strong>蓝图权限</strong><ul>
-<li><code>BlueprintReadOnly</code>：蓝图仅可读，不可修改；</li>
-<li><code>BlueprintReadWrite</code>：蓝图可读写，仅在蓝图需操作该变量时使用。</li>
-</ul>
-</li>
-<li><strong>分类管理</strong><ul>
-<li><code>Category = &quot;父类 | 子类&quot;</code>：用<code>|</code>分割层级（如<code>Category = &quot;Enemy | Combat&quot;</code>），让编辑器面板属性归类更清晰。</li>
-</ul>
-</li>
-<li><strong>委托专属</strong><ul>
-<li><code>BlueprintAssignable</code>：蓝图可绑定委托回调；</li>
-<li><code>BlueprintCallable</code>：蓝图可主动触发委托广播；</li>
-<li>注：仅<code>DECLARE_DYNAMIC_*</code>系列动态委托支持上述关键字，原生委托（无DYNAMIC）无效。</li>
-</ul>
-</li>
-<li><strong>存档序列化</strong><ul>
-<li><code>SaveGame</code>：标记变量需纳入存档系统，读档时自动恢复值。</li>
-</ul>
-</li>
-<li><strong>私有变量暴露</strong><ul>
-<li><code>meta = (AllowPrivateAccess = &quot;true&quot;)</code>：private中的变量需加此元数据，才能被反射系统识别（蓝图&#x2F;编辑器可见）。</li>
-</ul>
-</li>
-<li><strong>网络同步</strong></li>
-</ol>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 基础同步：服务器修改后自动同步到客户端</span></span><br><span class="line"><span class="built_in">UPROPERTY</span>(Replicated)</span><br><span class="line"><span class="type">float</span> CurrentHealth = <span class="number">100.0f</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 同步+回调：变量同步后触发指定函数（更新UI/逻辑）</span></span><br><span class="line"><span class="built_in">UPROPERTY</span>(ReplicatedUsing=OnRep_HealthChanged)</span><br><span class="line"><span class="type">float</span> SyncHealth = <span class="number">100.0f</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 同步回调函数（必须加UFUNCTION()）</span></span><br><span class="line"><span class="built_in">UFUNCTION</span>()</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">OnRep_HealthChanged</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 必须重写该函数完成同步注册</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAttributeSet::GetLifetimeReplicatedProps</span><span class="params">(TArray&lt;FLifetimeProperty&gt;&amp; OutLifetimeProps)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Super::<span class="built_in">GetLifetimeReplicatedProps</span>(OutLifetimeProps);</span><br><span class="line">    <span class="comment">// 注册同步变量（COND_None=无条件同步，REPNOTIFY_Always=始终触发回调）</span></span><br><span class="line">    <span class="built_in">DOREPLIFETIME_CONDITION_NOTIFY</span>(UAttributeSet, Health, COND_None, REPNOTIFY_Always);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// GAS属性同步回调</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAttributeSet::OnRep_Health</span><span class="params">(<span class="type">const</span> FGameplayAttributeData&amp; OldHealth)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">GAMEPLAYATTRIBUTE_REPNOTIFY</span>(UAttributeSet, Health, OldHealth);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>关键注意点:</strong><br>空<code>UPROPERTY()</code>并非无意义：所有<code>UObject</code>子类指针（如<code>UComponent*</code>&#x2F;<code>AActor*</code>）必须添加，否则 UE 的 GC（垃圾回收）无法追踪指针，可能导致内存泄漏（无引用时不回收）或野指针（被误回收）。</p>
-<h2 id="UFUNCTION"><a href="#UFUNCTION" class="headerlink" title="UFUNCTION"></a>UFUNCTION</h2><ol>
-<li><strong>蓝图执行</strong></li>
-</ol>
-<ul>
-<li><code>BlueprintCallable</code>：蓝图可调用，有执行引脚，可修改对象状态；</li>
-<li><code>BlueprintPure</code>：蓝图可调用，无执行引脚，仅用于状态获取 &#x2F; 纯计算（不修改变量）。</li>
-</ul>
-<ol start="2">
-<li><strong>蓝图实现 &#x2F; 扩展</strong></li>
-</ol>
-<ul>
-<li><code>BlueprintImplementableEvent</code>：C++ 声明函数，蓝图中实现逻辑（无 C++ 实现体）；</li>
-<li><code>BlueprintNativeEvent</code>：C++ 提供基础实现（函数名加<code>_Implementation</code>后缀），蓝图可重写扩展；调用时用<code>Execute_XXX()</code>。</li>
-</ul>
-<ol start="3">
-<li><strong>网络同步</strong></li>
-</ol>
-<ul>
-<li><code>NetMulticast</code>：服务器调用，所有客户端（含服务器）执行；需搭配<code>Reliable</code>（可靠传输）&#x2F;<code>Unreliable</code>（高频低优先级）；</li>
-<li><code>Server</code>（客户端调、服务器执行）、<code>Client</code>（服务器调、客户端执行），需搭配<code>WithValidation</code>（参数验证）。</li>
-</ul>
-<ol start="4">
-<li><strong>元数据扩展</strong></li>
-</ol>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// DefaultToSelf：参数默认值为自身；DisplayName：自定义蓝图节点名称</span></span><br><span class="line"><span class="built_in">UFUNCTION</span>(BlueprintCallable, meta=(DefaultToSelf=<span class="string">&quot;WorldContextObject&quot;</span>, DisplayName=<span class="string">&quot;自定义函数名&quot;</span>))</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">CustomFunction</span><span class="params">(UObject* WorldContextObject)</span></span>;</span><br></pre></td></tr></table></figure>
-
-<h2 id="USTRUCT"><a href="#USTRUCT" class="headerlink" title="USTRUCT"></a>USTRUCT</h2><ul>
-<li>BlueprintType ，标记自定义结构体，允许蓝图中声明该结构体变量、作为函数参数 &#x2F; 返回值；</li>
-</ul>
-]]></content>
-      <categories>
-        <category>ProgrammingSkills</category>
-      </categories>
-      <tags>
-        <tag>Reflection</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Singleton/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
     <title></title>
     <url>/ue5-blog/2025/12/07/ProgrammingSkills/Serialize/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Library/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/DataDriven/Data/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVC/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/</url>
-    <content><![CDATA[]]></content>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVVM/</url>
+    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Pointer/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -298,12 +316,12 @@
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Load/</url>
+    <url>/ue5-blog/2025/12/06/SystemDesigns/GAS/GAS/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/</url>
+    <url>/ue5-blog/2025/12/06/ProgrammingSkills/Singleton/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -313,17 +331,37 @@
   </entry>
   <entry>
     <title></title>
+    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayCue/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayEffect/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/DataDriven/Data/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
     <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayAbility/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/06/SystemDesigns/GAS/GAS/</url>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayCue/</url>
+    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVC/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Load/</url>
     <content><![CDATA[]]></content>
   </entry>
   <entry>
@@ -333,7 +371,12 @@
   </entry>
   <entry>
     <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayEffect/</url>
+    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVVM/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/</url>
     <content><![CDATA[]]></content>
   </entry>
 </search>
