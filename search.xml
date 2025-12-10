@@ -304,19 +304,42 @@
       </tags>
   </entry>
   <entry>
-    <title></title>
+    <title>数据驱动系统 (DataDriven)</title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/DataDriven/Data/</url>
-    <content><![CDATA[]]></content>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>DataDriven</category>
+      </categories>
+      <tags>
+        <tag>DataAsset</tag>
+        <tag>DataTable</tag>
+      </tags>
   </entry>
   <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/06/SystemDesigns/GAS/GAS/</url>
-    <content><![CDATA[]]></content>
+    <title>GameplayAbilitySystem (GAS)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GAS/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+      </tags>
   </entry>
   <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/AttributeSet/</url>
-    <content><![CDATA[]]></content>
+    <title>AttributeSet (AS)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/AttributeSet/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>AS</tag>
+      </tags>
   </entry>
   <entry>
     <title>接口 (Interface)</title>
@@ -355,19 +378,43 @@
       </tags>
   </entry>
   <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayEffect/</url>
-    <content><![CDATA[]]></content>
+    <title>GameplayEffect (GE)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayEffect/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>GE</tag>
+      </tags>
   </entry>
   <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayCue/</url>
-    <content><![CDATA[]]></content>
+    <title>GameplayCue (GC)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayCue/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>GC</tag>
+      </tags>
   </entry>
   <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/07/SystemDesigns/GAS/GameplayAbility/</url>
-    <content><![CDATA[]]></content>
+    <title>GameplayAbility (GA)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayAbility/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>GA</tag>
+      </tags>
   </entry>
   <entry>
     <title>游戏开发中的锁：以FScopedAbilityListLock为例</title>
@@ -392,31 +439,54 @@
       </tags>
   </entry>
   <entry>
-    <title>AbilitySystemComponent</title>
+    <title>AbilitySystemComponent (ASC)</title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilitySystemComponent/</url>
-    <content><![CDATA[<h1 id="ASC-Ability-System-Component-的作用"><a href="#ASC-Ability-System-Component-的作用" class="headerlink" title="ASC(Ability System Component)的作用"></a>ASC(Ability System Component)的作用</h1>]]></content>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
       <categories>
         <category>SystemDesgins</category>
         <category>GAS</category>
       </categories>
       <tags>
         <tag>GAS</tag>
+        <tag>ASC</tag>
       </tags>
   </entry>
   <entry>
-    <title></title>
+    <title>Save</title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/</url>
-    <content><![CDATA[]]></content>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>SaveAndLoad</category>
+      </categories>
+      <tags>
+        <tag>Save</tag>
+      </tags>
   </entry>
   <entry>
-    <title></title>
+    <title>Highlight</title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/</url>
-    <content><![CDATA[]]></content>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>Input</category>
+      </categories>
+      <tags>
+        <tag>Highlight</tag>
+      </tags>
   </entry>
   <entry>
-    <title></title>
+    <title>GameplayTag</title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayTag/</url>
-    <content><![CDATA[]]></content>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>GameplayTag</tag>
+      </tags>
   </entry>
   <entry>
     <title>序列化 (Serialize)</title>
@@ -473,18 +543,168 @@
       </tags>
   </entry>
   <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVVM/</url>
-    <content><![CDATA[]]></content>
+    <title>Model View ViewModel (MVVM)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/MVVM/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>UI</category>
+      </categories>
+      <tags>
+        <tag>MVVM</tag>
+        <tag>FieldNotify</tag>
+      </tags>
   </entry>
   <entry>
-    <title></title>
+    <title>Load</title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Load/</url>
-    <content><![CDATA[]]></content>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>SaveAndLoad</category>
+      </categories>
+      <tags>
+        <tag>Load</tag>
+      </tags>
   </entry>
   <entry>
-    <title></title>
-    <url>/ue5-blog/2025/12/06/SystemDesigns/UI/MVC/</url>
-    <content><![CDATA[]]></content>
+    <title>Model View Controller (MVC)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/MVC/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>UI</category>
+      </categories>
+      <tags>
+        <tag>MVC</tag>
+        <tag>Widget</tag>
+        <tag>WidgetController</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameInstace (GI)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/GameInstance/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>SaveAndLoad</category>
+      </categories>
+      <tags>
+        <tag>GI</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>行为树 (BehaviorTree)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/AI/BehaviorTree/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>AI</category>
+      </categories>
+      <tags>
+        <tag>BehavoirTree</tag>
+        <tag>Blackboard</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameMode</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/GameMode/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>SaveAndLoad</category>
+      </categories>
+      <tags>
+        <tag>GameMode</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ExecCalc</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/ExecCalc/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>ExecCalc</tag>
+        <tag>Damage</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>EnhancedInput</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/EnhancedInput/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>Input</category>
+      </categories>
+      <tags>
+        <tag>EnhancedInput</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Head Up Display (HUD)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/HUD/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>UI</category>
+      </categories>
+      <tags>
+        <tag>HUD</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SpawnVolume and SpawnPoint</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Levels/SpawnVolume/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>Levels</category>
+      </categories>
+      <tags>
+        <tag>SpawnVolume</tag>
+        <tag>SpawnPoint</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>WorldTransition</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Levels/WorldTransition/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>Levels</category>
+      </categories>
+      <tags>
+        <tag>WorldTransition</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>AbilityTask</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilityTask/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>AbilityTask</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ModMagCalc (MMC)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/ModMagCalc/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>MMC</tag>
+        <tag>Modifier</tag>
+      </tags>
   </entry>
 </search>
