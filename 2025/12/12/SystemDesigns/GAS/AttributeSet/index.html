@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/ue5-blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/ue5-blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/ue5-blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/ue5-blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/ue5-blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
+
+    <meta name="description" content="核心总结AttributeSet（AS）是GAS框架中统一管理角色属性的核心类，承担“属性存储+属性变化处理”两大核心职责：按属性特性划分存储策略（通用属性存AS、玩家特有属性存PlayerState），通过“普通属性+元属性”分层处理简单&#x2F;复杂属性修改逻辑，最终依托重写核心函数完成属性变化的标准化处理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AttributeSet (AS)">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/12/SystemDesigns/GAS/AttributeSet/index.html">
+<meta property="og:site_name" content="UE5学习笔记博客">
+<meta property="og:description" content="核心总结AttributeSet（AS）是GAS框架中统一管理角色属性的核心类，承担“属性存储+属性变化处理”两大核心职责：按属性特性划分存储策略（通用属性存AS、玩家特有属性存PlayerState），通过“普通属性+元属性”分层处理简单&#x2F;复杂属性修改逻辑，最终依托重写核心函数完成属性变化的标准化处理。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-12-11T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-12T07:55:52.705Z">
+<meta property="article:author" content="Larry-lyx">
+<meta property="article:tag" content="AS">
+<meta property="article:tag" content="GAS">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/12/SystemDesigns/GAS/AttributeSet/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/12/SystemDesigns/GAS/AttributeSet/","path":"2025/12/12/SystemDesigns/GAS/AttributeSet/","title":"AttributeSet (AS)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>AttributeSet (AS) | UE5学习笔记博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/utils.js" defer></script><script src="/ue5-blog/js/motion.js" defer></script><script src="/ue5-blog/js/sidebar.js" defer></script><script src="/ue5-blog/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/ue5-blog/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/ue5-blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">UE5学习笔记博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">从入门到精通，持续更新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/ue5-blog/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/ue5-blog/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/ue5-blog/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/ue5-blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%B1%9E%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text">定义属性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E8%AF%B4%E6%98%8E"><span class="nav-number">2.1.</span> <span class="nav-text">核心说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%99%AE%E9%80%9A%E5%B1%9E%E6%80%A7"><span class="nav-number">2.2.</span> <span class="nav-text">普通属性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%B0%81%E8%A3%85%E5%B1%9E%E6%80%A7%E8%AE%BF%E9%97%AE%E5%99%A8"><span class="nav-number">2.2.1.</span> <span class="nav-text">1. 封装属性访问器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%AE%9A%E4%B9%89Tag-%E5%B1%9E%E6%80%A7%E6%98%A0%E5%B0%84%E6%A8%A1%E6%9D%BF"><span class="nav-number">2.2.2.</span> <span class="nav-text">2. 定义Tag-属性映射模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-AS%E7%B1%BB%E6%A0%B8%E5%BF%83%E5%AE%9A%E4%B9%89%EF%BC%88%E5%90%AB%E7%BD%91%E7%BB%9C%E5%A4%8D%E5%88%B6%EF%BC%89"><span class="nav-number">2.2.3.</span> <span class="nav-text">3. AS类核心定义（含网络复制）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%83%E5%B1%9E%E6%80%A7%EF%BC%88Meta-Attribute%EF%BC%89"><span class="nav-number">2.3.</span> <span class="nav-text">元属性（Meta Attribute）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%85%83%E5%B1%9E%E6%80%A7%E7%9A%84%E5%BF%85%E8%A6%81%E6%80%A7"><span class="nav-number">2.3.1.</span> <span class="nav-text">1. 元属性的必要性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%85%83%E5%B1%9E%E6%80%A7%E5%AE%9A%E4%B9%89%E6%96%B9%E5%BC%8F"><span class="nav-number">2.3.2.</span> <span class="nav-text">2. 元属性定义方式</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E5%B1%9E%E6%80%A7%E5%8F%98%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">处理属性变化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%96%B9%E6%B3%95"><span class="nav-number">3.1.</span> <span class="nav-text">基本方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%9E%E6%80%A7%E5%8F%98%E5%8C%96%E5%90%8E%E5%A4%84%E7%90%86"><span class="nav-number">3.1.1.</span> <span class="nav-text">属性变化后处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">3.2.</span> <span class="nav-text">自定义数据结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E8%80%A6%E6%93%8D%E4%BD%9C"><span class="nav-number">3.3.</span> <span class="nav-text">解耦操作</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Larry-lyx</p>
+  <div class="site-description" itemprop="description">分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/ue5-blog/archives/">
+          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/ue5-blog/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/ue5-blog/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/12/SystemDesigns/GAS/AttributeSet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="AttributeSet (AS) | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AttributeSet (AS)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-12 00:00:00 / 修改时间：15:55:52" itemprop="dateCreated datePublished" datetime="2025-12-12T00:00:00+08:00">2025-12-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/GAS/" itemprop="url" rel="index"><span itemprop="name">GAS</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>AttributeSet（AS）是GAS框架中统一管理角色属性的核心类，承担“属性存储+属性变化处理”两大核心职责：按属性特性划分存储策略（通用属性存AS、玩家特有属性存PlayerState），通过“普通属性+元属性”分层处理简单&#x2F;复杂属性修改逻辑，最终依托重写核心函数完成属性变化的标准化处理。</p>
+<span id="more"></span>
+
+<h1 id="定义属性"><a href="#定义属性" class="headerlink" title="定义属性"></a>定义属性</h1><h2 id="核心说明"><a href="#核心说明" class="headerlink" title="核心说明"></a>核心说明</h2><p>AS的属性存储与生命周期按角色类型和属性用途区分：</p>
+<ol>
+<li><strong>通用属性</strong>（血量、蓝量、力量等）：存放于AS中，适配所有角色（玩家&#x2F;敌人）；</li>
+<li><strong>玩家特有属性</strong>（XP、属性点、技能点等）：存放于PlayerState（PS）中（敌人无此类属性）；</li>
+<li><strong>AS挂载策略</strong>：<ul>
+<li>玩家AS：挂载在PS中，死亡后可继承属性（满足存档&#x2F;持久化需求）；</li>
+<li>敌人AS：挂载在角色类中，随角色创建实例化、销毁后自动释放。</li>
+</ul>
+</li>
+</ol>
+<h2 id="普通属性"><a href="#普通属性" class="headerlink" title="普通属性"></a>普通属性</h2><p>普通属性是角色长期持有的核心属性（如血量、力量），需网络复制保证多端数据一致，定义流程如下：</p>
+<h3 id="1-封装属性访问器"><a href="#1-封装属性访问器" class="headerlink" title="1. 封装属性访问器"></a>1. 封装属性访问器</h3><p>通过自定义宏快速生成属性的Getter&#x2F;Setter&#x2F;Initter，避免重复编写访问逻辑：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \</span></span><br><span class="line"><span class="meta">	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \</span></span><br><span class="line"><span class="meta">	GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \</span></span><br><span class="line"><span class="meta">	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \</span></span><br><span class="line"><span class="meta">	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-定义Tag-属性映射模板"><a href="#2-定义Tag-属性映射模板" class="headerlink" title="2. 定义Tag-属性映射模板"></a>2. 定义Tag-属性映射模板</h3><p>模板用于构建GameplayTag与属性的映射表，每个AS实例持有该映射，支持通过Tag快速定位属性：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">template&lt;class T&gt;</span><br><span class="line">using TStaticFuncPtr = TBaseStaticDelegateInstance&lt;T , FDefaultDelegateUserPolicy&gt;::FFuncPtr;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-AS类核心定义（含网络复制）"><a href="#3-AS类核心定义（含网络复制）" class="headerlink" title="3. AS类核心定义（含网络复制）"></a>3. AS类核心定义（含网络复制）</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAS_Custom_API</span> UCustomAttributeSet : <span class="keyword">public</span> UAttributeSet</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line">	</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="comment">// 构造函数：初始化Tag与属性的映射关系</span></span><br><span class="line">	<span class="built_in">UCustomAttributeSet</span>();</span><br><span class="line">	<span class="comment">// Tag-属性映射表：通过Tag快速获取属性，避免硬编码</span></span><br><span class="line">	TMap&lt;FGameplayTag , TStaticFuncPtr&lt;<span class="built_in">FGameplayAttribute</span>()&gt;&gt; TagToAttribute;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 重写：注册需网络复制的属性</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">GetLifetimeReplicatedProps</span><span class="params">(TArray&lt;<span class="keyword">class</span> FLifetimeProperty&gt;&amp; OutLifetimeProps)</span> <span class="type">const</span> <span class="keyword">override</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 生命值属性：GAS标准数据类型，指定同步回调</span></span><br><span class="line">    <span class="built_in">UPROPERTY</span>(BlueprintReadOnly , ReplicatedUsing = OnRep_Health , Category = <span class="string">&quot;Vital Attributes&quot;</span>)</span><br><span class="line">	FGameplayAttributeData Health;</span><br><span class="line">	<span class="comment">// 生命值同步回调：Server属性变化后触发Client逻辑</span></span><br><span class="line">	<span class="built_in">UFUNCTION</span>()</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">OnRep_Health</span><span class="params">(<span class="type">const</span> FGameplayAttributeData&amp; OldHealth)</span> <span class="type">const</span></span>;</span><br><span class="line">	<span class="comment">// 生成生命值访问器（复用自定义宏）</span></span><br><span class="line">	<span class="built_in">ATTRIBUTE_ACCESSORS</span>(UCustomAttributeSet , Health);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 构造函数：绑定Tag与属性的映射</span></span><br><span class="line">UCustomAttributeSet::<span class="built_in">UCustomAttributeSet</span>()</span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">const</span> FCustomGameplayTags&amp; GameplayTags = FCustomGameplayTags::<span class="built_in">Get</span>();</span><br><span class="line">	TagToAttribute.<span class="built_in">Add</span>(GameplayTags.Attributes_Primary_Health , GetHealthAttribute);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 注册网络复制规则</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::GetLifetimeReplicatedProps</span><span class="params">(TArray&lt;<span class="keyword">class</span> FLifetimeProperty&gt;&amp; OutLifetimeProps)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">GetLifetimeReplicatedProps</span>(OutLifetimeProps);</span><br><span class="line">	<span class="comment">// COND_None：属性变化即同步；REPNOTIFY_Always：同步必触发回调</span></span><br><span class="line">	<span class="built_in">DOREPLIFETIME_CONDITION_NOTIFY</span>(UCustomAttributeSet , Health , COND_None , REPNOTIFY_Always);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 属性同步回调：处理Client端属性变化逻辑</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::OnRep_Health</span><span class="params">(<span class="type">const</span> FGameplayAttributeData&amp; OldHealth)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// GAS内置宏：触发属性变化全局回调（如UI更新、死亡判定）</span></span><br><span class="line">	<span class="built_in">GAMEPLAYATTRIBUTE_REPNOTIFY</span>(UCustomAttributeSet , Health , OldHealth);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="元属性（Meta-Attribute）"><a href="#元属性（Meta-Attribute）" class="headerlink" title="元属性（Meta Attribute）"></a>元属性（Meta Attribute）</h2><p>元属性是临时属性，仅用于复杂属性变化的过渡计算，无需网络复制（仅Server端处理）：</p>
+<h3 id="1-元属性的必要性"><a href="#1-元属性的必要性" class="headerlink" title="1. 元属性的必要性"></a>1. 元属性的必要性</h3><p>GE对属性的作用常包含复杂逻辑（如伤害附带击退、Debuff），无法直接修改普通属性完成。通过元属性（如IncomingDamage）作为“过渡载体”：</p>
+<ul>
+<li>GE先计算最终效果值，修改元属性；</li>
+<li>AS监听元属性变化，完成最终属性修改+附加效果（击退、Debuff）。</li>
+</ul>
+<h3 id="2-元属性定义方式"><a href="#2-元属性定义方式" class="headerlink" title="2. 元属性定义方式"></a>2. 元属性定义方式</h3><p>仅需声明属性（无网络复制），复用访问器宏即可：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UPROPERTY</span>(BlueprintReadOnly , Category = <span class="string">&quot;Meta Attributes&quot;</span>)</span><br><span class="line">FGameplayAttributeData IncomingDamage;</span><br><span class="line"><span class="built_in">ATTRIBUTE_ACCESSORS</span>(UCustomAttributeSet , IncomingDamage);</span><br></pre></td></tr></table></figure>
+
+<h1 id="处理属性变化"><a href="#处理属性变化" class="headerlink" title="处理属性变化"></a>处理属性变化</h1><h2 id="基本方法"><a href="#基本方法" class="headerlink" title="基本方法"></a>基本方法</h2><p>核心是重写<code>PostGameplayEffectExecute</code>函数，按属性类型处理修改逻辑：简单属性仅做合法性校验，复杂属性调用自定义处理函数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::PostGameplayEffectExecute</span><span class="params">(<span class="type">const</span> FGameplayEffectModCallbackData&amp; Data)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">PostGameplayEffectExecute</span>(Data);</span><br><span class="line"></span><br><span class="line">	FEffectProperties Props;</span><br><span class="line">	<span class="built_in">SetEffectProperties</span>(Data , Props);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 角色已死亡则跳过属性处理</span></span><br><span class="line">	<span class="keyword">if</span> (Props.TargetCharacter-&gt;<span class="built_in">Implements</span>&lt;UCombatInterface&gt;() &amp;&amp; ICombatInterface::<span class="built_in">Execute_IsDead</span>(Props.TargetCharacter)) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 简单属性：法力值范围校验</span></span><br><span class="line">	<span class="keyword">if</span> (Data.EvaluatedData.Attribute == <span class="built_in">GetManaAttribute</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">SetMana</span>(FMath::<span class="built_in">Clamp</span>(<span class="built_in">GetMana</span>() , <span class="number">0.f</span> , <span class="built_in">GetMaxMana</span>()));</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 复杂属性：调用自定义伤害处理逻辑</span></span><br><span class="line">	<span class="keyword">if</span> (Data.EvaluatedData.Attribute == <span class="built_in">GetIncomingDamageAttribute</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">HandleIncomingDamage</span>(Props);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="属性变化后处理"><a href="#属性变化后处理" class="headerlink" title="属性变化后处理"></a>属性变化后处理</h3><p>重写<code>PostAttributeChange</code>可在属性最终修改后执行附加逻辑，例：满血状态下最大血量提升时自动补满当前血量（否则UI上看起来血量反而下降）：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::PostAttributeChange</span><span class="params">(<span class="type">const</span> FGameplayAttribute&amp; Attribute, <span class="type">float</span> OldValue, <span class="type">float</span> NewValue)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">PostAttributeChange</span>(Attribute, OldValue, NewValue);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (Attribute == <span class="built_in">GetMaxHealthAttribute</span>() &amp;&amp; bTopOffHealth)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">SetHealth</span>(<span class="built_in">GetMaxHealth</span>());</span><br><span class="line">		bTopOffHealth = <span class="literal">false</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="自定义数据结构"><a href="#自定义数据结构" class="headerlink" title="自定义数据结构"></a>自定义数据结构</h2><p>从GE回调数据中提取核心信息封装为结构体，便于复用和代码整洁：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">USTRUCT</span>()</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">FEffectProperties</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line">	<span class="built_in">FEffectProperties</span>()&#123;&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// GE上下文句柄：存储施法者、目标、伤害类型等信息</span></span><br><span class="line">	FGameplayEffectContextHandle EffectContextHandle;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 源端（施法者）数据</span></span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	UAbilitySystemComponent* SourceASC = <span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	AActor* SourceAvatarActor = <span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	AController* SourceController =	<span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	ACharacter* SourceCharacter = <span class="literal">nullptr</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 目标端（受击者）数据</span></span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	UAbilitySystemComponent* TargetASC = <span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	AActor* TargetAvatarActor = <span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	AController* TargetController =	<span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	ACharacter* TargetCharacter = <span class="literal">nullptr</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 填充结构体数据：从GE回调中提取源/目标信息</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::SetEffectProperties</span><span class="params">(<span class="type">const</span> FGameplayEffectModCallbackData&amp; Data, FEffectProperties&amp; Props)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Props.EffectContextHandle = Data.EffectSpec.<span class="built_in">GetContext</span>();</span><br><span class="line">	Props.SourceASC = Props.EffectContextHandle.<span class="built_in">GetOriginalInstigatorAbilitySystemComponent</span>();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 填充源端数据</span></span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">IsValid</span>(Props.SourceASC) &amp;&amp; Props.SourceASC-&gt;AbilityActorInfo.<span class="built_in">IsValid</span>() &amp;&amp; Props.SourceASC-&gt;AbilityActorInfo-&gt;AvatarActor.<span class="built_in">IsValid</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		Props.SourceAvatarActor = Props.SourceASC-&gt;AbilityActorInfo-&gt;AvatarActor.<span class="built_in">Get</span>();</span><br><span class="line">		Props.SourceController = Props.SourceASC-&gt;AbilityActorInfo-&gt;PlayerController.<span class="built_in">Get</span>();</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (Props.SourceController == <span class="literal">nullptr</span> &amp;&amp; Props.SourceAvatarActor != <span class="literal">nullptr</span>)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (APawn* Pawn = <span class="built_in">Cast</span>&lt;APawn&gt;(Props.SourceAvatarActor))</span><br><span class="line">			&#123;</span><br><span class="line">				Props.SourceController = Pawn-&gt;<span class="built_in">GetController</span>();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (Props.SourceController)</span><br><span class="line">		&#123;</span><br><span class="line">			Props.SourceCharacter = <span class="built_in">Cast</span>&lt;ACharacter&gt;(Props.SourceController-&gt;<span class="built_in">GetPawn</span>());</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 填充目标端数据</span></span><br><span class="line">	<span class="keyword">if</span> (Data.Target.AbilityActorInfo.<span class="built_in">IsValid</span>() &amp;&amp; Data.Target.AbilityActorInfo-&gt;AvatarActor.<span class="built_in">IsValid</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		Props.TargetAvatarActor = Data.Target.AbilityActorInfo-&gt;AvatarActor.<span class="built_in">Get</span>();</span><br><span class="line">		Props.TargetController = Data.Target.AbilityActorInfo-&gt;PlayerController.<span class="built_in">Get</span>();</span><br><span class="line">		Props.TargetCharacter = <span class="built_in">Cast</span>&lt;ACharacter&gt;(Props.TargetAvatarActor);</span><br><span class="line">		Props.TargetASC = UAbilitySystemBlueprintLibrary::<span class="built_in">GetAbilitySystemComponent</span>(Props.TargetAvatarActor);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="解耦操作"><a href="#解耦操作" class="headerlink" title="解耦操作"></a>解耦操作</h2><p>AS仅负责属性变化的分发，具体业务逻辑（如伤害、击退）解耦到FunctionLibrary中，保证AS职责单一：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::HandleIncomingDamage</span><span class="params">(<span class="type">const</span> FEffectProperties&amp; Props)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">const</span> <span class="type">float</span> LocalIncomingDamage = <span class="built_in">GetIncomingDamage</span>();</span><br><span class="line">	<span class="built_in">SetIncomingDamage</span>(<span class="number">0.f</span>); <span class="comment">// 重置元属性</span></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span> (LocalIncomingDamage &gt; <span class="number">0.f</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// 1. 计算最终血量并校验范围</span></span><br><span class="line">		<span class="type">const</span> <span class="type">float</span> NewHealth = <span class="built_in">GetHealth</span>() - LocalIncomingDamage;</span><br><span class="line">		<span class="built_in">SetHealth</span>(FMath::<span class="built_in">Clamp</span>(NewHealth , <span class="number">0.f</span> , <span class="built_in">GetMaxHealth</span>()));</span><br><span class="line"></span><br><span class="line">		<span class="type">const</span> <span class="type">bool</span> bFatal = (NewHealth &lt;= <span class="number">0.f</span>);</span><br><span class="line">		<span class="keyword">if</span> (!bFatal)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="comment">// 2. 非致命伤害：触发受击反应（GA）</span></span><br><span class="line">			<span class="keyword">if</span> (Props.TargetCharacter-&gt;<span class="built_in">Implements</span>&lt;UCombatInterface&gt;() &amp;&amp; !ICombatInterface::<span class="built_in">Execute_IsBeingShocked</span>(Props.TargetCharacter))</span><br><span class="line">			&#123;</span><br><span class="line">				FGameplayTagContainer TagContainer;</span><br><span class="line">				TagContainer.<span class="built_in">AddTag</span>(FCustomGameplayTags::<span class="built_in">Get</span>().Effects_HitReact);</span><br><span class="line">				Props.TargetASC-&gt;<span class="built_in">TryActivateAbilitiesByTag</span>(TagContainer);</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 3. 触发击退效果</span></span><br><span class="line">			<span class="type">const</span> FVector KnockbackForce = UCustomAbilitySystemLibrary::<span class="built_in">GetKnockbackForce</span>(Props.EffectContextHandle);</span><br><span class="line">			<span class="keyword">if</span> (!KnockbackForce.<span class="built_in">IsNearlyZero</span>(<span class="number">1.f</span>))</span><br><span class="line">			&#123;</span><br><span class="line">				Props.TargetCharacter-&gt;<span class="built_in">LaunchCharacter</span>(KnockbackForce , <span class="literal">true</span> , <span class="literal">true</span>);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">		&#123;</span><br><span class="line">			<span class="comment">// 4. 致命伤害：触发死亡逻辑</span></span><br><span class="line">			ICombatInterface* CombatInterface = <span class="built_in">Cast</span>&lt;ICombatInterface&gt;(Props.TargetAvatarActor);</span><br><span class="line">			<span class="keyword">if</span> (CombatInterface)</span><br><span class="line">			&#123;</span><br><span class="line">				CombatInterface-&gt;<span class="built_in">Die</span>(UCustomAbilitySystemLibrary::<span class="built_in">GetDeathImpulse</span>(Props.EffectContextHandle));</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 5. 击杀奖励：发放经验</span></span><br><span class="line">			<span class="built_in">SendXPEvent</span>(Props);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 6. 显示伤害飘字（区分格挡/暴击）</span></span><br><span class="line">		<span class="type">const</span> <span class="type">bool</span> bBlockedHit = UCustomAbilitySystemLibrary::<span class="built_in">IsBlockedHit</span>(Props.EffectContextHandle);</span><br><span class="line">		<span class="type">const</span> <span class="type">bool</span> bCriticalHit = UCustomAbilitySystemLibrary::<span class="built_in">IsCriticalHit</span>(Props.EffectContextHandle);</span><br><span class="line">		<span class="built_in">ShowFloatingText</span>(Props , LocalIncomingDamage , bBlockedHit , bCriticalHit);</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 7. 触发Debuff效果</span></span><br><span class="line">		<span class="keyword">if</span> (UCustomAbilitySystemLibrary::<span class="built_in">IsSuccessfulDebuff</span>(Props.EffectContextHandle))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">HandleDebuff</span>(Props);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注：HandleDebuff需结合自定义GE实现，详情见<a href="/ue5-blog/2025/12/12/GAS-GE">此处</a>。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/ue5-blog/tags/GAS/" rel="tag"># GAS</a>
+              <a href="/ue5-blog/tags/AS/" rel="tag"># AS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/" rel="prev" title="AbilitySystemComponent (ASC)">
+                  <i class="fa fa-angle-left"></i> AbilitySystemComponent (ASC)
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Larry-lyx</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
