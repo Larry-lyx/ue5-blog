@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/ue5-blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/ue5-blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/ue5-blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/ue5-blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/ue5-blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
+
+    <meta name="description" content="核心总结AbilitySystemComponent（ASC）是GAS框架的核心中枢，作为挂载在Actor&#x2F;Character上的“逻辑容器”，承接对象所有GAS相关能力与交互。GAS的核心逻辑（属性变更、效果施加、技能执行）均围绕ASC展开，所有交互遵循“ASC发起→ASC接收”的模式，是连接GE、GA、AttributeSet的核心桥梁。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AbilitySystemComponent (ASC)">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/index.html">
+<meta property="og:site_name" content="UE5学习笔记博客">
+<meta property="og:description" content="核心总结AbilitySystemComponent（ASC）是GAS框架的核心中枢，作为挂载在Actor&#x2F;Character上的“逻辑容器”，承接对象所有GAS相关能力与交互。GAS的核心逻辑（属性变更、效果施加、技能执行）均围绕ASC展开，所有交互遵循“ASC发起→ASC接收”的模式，是连接GE、GA、AttributeSet的核心桥梁。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-12-11T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-12T02:30:51.134Z">
+<meta property="article:author" content="Larry-lyx">
+<meta property="article:tag" content="ASC">
+<meta property="article:tag" content="GAS">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/","path":"2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/","title":"AbilitySystemComponent (ASC)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>AbilitySystemComponent (ASC) | UE5学习笔记博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/utils.js" defer></script><script src="/ue5-blog/js/motion.js" defer></script><script src="/ue5-blog/js/sidebar.js" defer></script><script src="/ue5-blog/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/ue5-blog/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/ue5-blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">UE5学习笔记博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">从入门到精通，持续更新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/ue5-blog/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/ue5-blog/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/ue5-blog/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/ue5-blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ASC-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">2.</span> <span class="nav-text">ASC 是什么</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%B8%B8%E6%88%8F%E6%95%88%E6%9E%9C%EF%BC%88GameplayEffect%EF%BC%8CGE%EF%BC%89%EF%BC%9A%E4%B8%96%E7%95%8C%E5%AF%B9ASC%E7%9A%84%E4%BD%9C%E7%94%A8%E8%BD%BD%E4%BD%93"><span class="nav-number">2.1.</span> <span class="nav-text">1. 游戏效果（GameplayEffect，GE）：世界对ASC的作用载体</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%B8%B8%E6%88%8F%E6%8A%80%E8%83%BD%EF%BC%88GameplayAbility%EF%BC%8CGA%EF%BC%89%EF%BC%9AASC%E5%AF%B9%E4%B8%96%E7%95%8C%E7%9A%84%E4%BD%9C%E7%94%A8%E8%BD%BD%E4%BD%93"><span class="nav-number">2.2.</span> <span class="nav-text">2. 游戏技能（GameplayAbility，GA）：ASC对世界的作用载体</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E8%A1%A5%E5%85%85%EF%BC%9A%E5%B1%9E%E6%80%A7%EF%BC%88Attribute%EF%BC%89%E7%9A%84%E7%AE%A1%E7%90%86"><span class="nav-number">2.3.</span> <span class="nav-text">3. 补充：属性（Attribute）的管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ASC%E7%9A%84%E6%A0%B8%E5%BF%83%E4%BA%A4%E4%BA%92%E9%80%BB%E8%BE%91"><span class="nav-number">2.4.</span> <span class="nav-text">ASC的核心交互逻辑</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ASC%E7%B1%BB%E6%8F%90%E4%BE%9B%E7%9A%84%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD"><span class="nav-number">3.</span> <span class="nav-text">ASC类提供的核心功能</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%93%8D%E5%BA%94GE%E6%8C%82%E8%BD%BD%EF%BC%9A%E5%A4%84%E7%90%86%E8%87%AA%E8%BA%AB%E8%A2%AB%E6%96%BD%E5%8A%A0GE%E5%90%8E%E7%9A%84%E9%80%BB%E8%BE%91"><span class="nav-number">3.1.</span> <span class="nav-text">1. 响应GE挂载：处理自身被施加GE后的逻辑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E7%AE%A1%E7%90%86GA%EF%BC%9A%E6%A0%B8%E5%BF%83%E6%98%AF%E7%AE%A1%E7%90%86Gameplay-Ability-Spec"><span class="nav-number">3.2.</span> <span class="nav-text">2. 管理GA：核心是管理Gameplay Ability Spec</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%EF%BC%881%EF%BC%89Tag%E4%B8%8ESpec%E7%9A%84%E5%85%B3%E8%81%94%E7%AE%A1%E7%90%86"><span class="nav-number">3.2.1.</span> <span class="nav-text">（1）Tag与Spec的关联管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%EF%BC%882%EF%BC%89%E6%8E%88%E4%BA%88%E6%96%B0%E6%8A%80%E8%83%BD%EF%BC%88Spec%EF%BC%89"><span class="nav-number">3.2.2.</span> <span class="nav-text">（2）授予新技能（Spec）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%EF%BC%883%EF%BC%89%E5%A4%84%E7%90%86%E6%8A%80%E8%83%BD%E8%BE%93%E5%85%A5%E5%93%8D%E5%BA%94"><span class="nav-number">3.2.3.</span> <span class="nav-text">（3）处理技能输入响应</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%A4%84%E7%90%86%E5%B1%9E%E6%80%A7%E5%8F%98%E5%8C%96"><span class="nav-number">3.3.</span> <span class="nav-text">3. 处理属性变化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E5%A4%8D%E5%88%B6"><span class="nav-number">4.</span> <span class="nav-text">网络复制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Server%E4%B8%8EClient%E7%9A%84%E8%81%8C%E8%B4%A3"><span class="nav-number">4.1.</span> <span class="nav-text">Server与Client的职责</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90"><span class="nav-number">4.2.</span> <span class="nav-text">代码解析</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Larry-lyx</p>
+  <div class="site-description" itemprop="description">分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/ue5-blog/archives/">
+          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/ue5-blog/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/ue5-blog/tags/">
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="AbilitySystemComponent (ASC) | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AbilitySystemComponent (ASC)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-12 00:00:00 / 修改时间：10:30:51" itemprop="dateCreated datePublished" datetime="2025-12-12T00:00:00+08:00">2025-12-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/GAS/" itemprop="url" rel="index"><span itemprop="name">GAS</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>AbilitySystemComponent（ASC）是GAS框架的核心中枢，作为挂载在Actor&#x2F;Character上的“逻辑容器”，承接对象所有GAS相关能力与交互。GAS的核心逻辑（属性变更、效果施加、技能执行）均围绕ASC展开，所有交互遵循“ASC发起→ASC接收”的模式，是连接GE、GA、AttributeSet的核心桥梁。</p>
+<span id="more"></span>
+
+<h1 id="ASC-是什么"><a href="#ASC-是什么" class="headerlink" title="ASC 是什么"></a>ASC 是什么</h1><p>从GAS的核心逻辑视角，ASC是承载对象GAS能力的“逻辑核心”（Actor&#x2F;Character仅作为宿主，GAS层面无需关注其原生逻辑）——可将GAS需处理的所有对象，抽象为一个个独立的ASC实例。</p>
+<p>每个ASC独立管理如下核心内容，构成GAS交互的基础：</p>
+<h2 id="1-游戏效果（GameplayEffect，GE）：世界对ASC的作用载体"><a href="#1-游戏效果（GameplayEffect，GE）：世界对ASC的作用载体" class="headerlink" title="1. 游戏效果（GameplayEffect，GE）：世界对ASC的作用载体"></a>1. 游戏效果（GameplayEffect，GE）：世界对ASC的作用载体</h2><p>游戏世界中所有事件对当前ASC产生的影响，均通过挂载在该ASC上的GE实现；处理ASC对外部作用的反馈，核心是围绕GE的挂载、移除与响应展开。</p>
+<h2 id="2-游戏技能（GameplayAbility，GA）：ASC对世界的作用载体"><a href="#2-游戏技能（GameplayAbility，GA）：ASC对世界的作用载体" class="headerlink" title="2. 游戏技能（GameplayAbility，GA）：ASC对世界的作用载体"></a>2. 游戏技能（GameplayAbility，GA）：ASC对世界的作用载体</h2><p>ASC对游戏世界产生的所有影响（如播放角色动画、生成带伤害GE的子弹），均依赖其拥有的GA实现。需注意：ASC管理的并非GA实例，而是Gameplay Ability Spec（技能规格）；关于Spec与Instance的区别可点击此处跳转。</p>
+<h2 id="3-补充：属性（Attribute）的管理"><a href="#3-补充：属性（Attribute）的管理" class="headerlink" title="3. 补充：属性（Attribute）的管理"></a>3. 补充：属性（Attribute）的管理</h2><p>属性用于描述对象的核心状态（如血量、蓝量、力量），虽可直接由ASC管理，但为逻辑解耦，通常单独通过AttributeSet封装；特殊属性（如玩家XP、技能点、属性点）可存储在PlayerState中，由ASC关联访问。</p>
+<h2 id="ASC的核心交互逻辑"><a href="#ASC的核心交互逻辑" class="headerlink" title="ASC的核心交互逻辑"></a>ASC的核心交互逻辑</h2><p>GAS框架下所有交互均遵循“ASC发起→ASC接收”：</p>
+<ol>
+<li>发起方ASC通过自身拥有的GA触发对外作用；</li>
+<li>GA执行过程中产生的各类影响（如伤害、视觉效果等），最终以GE的形式施加到目标ASC；</li>
+<li>目标ASC接收GE后，修改自身Attribute，并触发配套的世界交互（如血量降低同步更新UI、触发死亡特效）。</li>
+</ol>
+<h1 id="ASC类提供的核心功能"><a href="#ASC类提供的核心功能" class="headerlink" title="ASC类提供的核心功能"></a>ASC类提供的核心功能</h1><h2 id="1-响应GE挂载：处理自身被施加GE后的逻辑"><a href="#1-响应GE挂载：处理自身被施加GE后的逻辑" class="headerlink" title="1. 响应GE挂载：处理自身被施加GE后的逻辑"></a>1. 响应GE挂载：处理自身被施加GE后的逻辑</h2><p>通过绑定ASC内置的<code>OnGameplayEffectAppliedDelegateToSelf</code>委托回调，可监听并处理GE施加到自身的逻辑。需注意：该委托仅在Server端生效（GE的核心生效逻辑均在Server执行），Client端需通过Server广播同步UI等视觉&#x2F;交互变化。</p>
+<p>该委托回调会传入两个核心参数：<code>FGameplayEffectSpec</code>（GE的配置规格）、<code>FActiveGameplayEffectHandle</code>（GE实例的句柄），用于精准识别并处理对应的GE。</p>
+<h2 id="2-管理GA：核心是管理Gameplay-Ability-Spec"><a href="#2-管理GA：核心是管理Gameplay-Ability-Spec" class="headerlink" title="2. 管理GA：核心是管理Gameplay Ability Spec"></a>2. 管理GA：核心是管理Gameplay Ability Spec</h2><p>ASC不直接与GA实例交互，所有GA相关操作均围绕Spec展开，核心能力包括：</p>
+<h3 id="（1）Tag与Spec的关联管理"><a href="#（1）Tag与Spec的关联管理" class="headerlink" title="（1）Tag与Spec的关联管理"></a>（1）Tag与Spec的关联管理</h3><p>提供一系列工具函数，实现GameplayTag（Ability&#x2F;Status&#x2F;Input类标签）与Spec的绑定、查询与校验，例如：</p>
+<ul>
+<li><code>GetInputTagFromSpec</code>：从Spec中提取绑定的输入Tag；</li>
+<li><code>AbilityHasSlot</code>：校验Spec是否绑定了指定技能槽位；</li>
+<li><code>AssignSlotToAbility</code>：为Spec分配技能槽位。</li>
+</ul>
+<p>关键注意点：</p>
+<ul>
+<li>Spec的动态标签（如Status、Input Tag）：通过<code>Spec.GetDynamicSourceTags()</code>获取&#x2F;管理；</li>
+<li>Spec的固定标签（如AbilityTag）：通过<code>Spec.Ability.Get()-&gt;GetAssetTags()</code>获取&#x2F;管理；</li>
+<li>遍历已授予（granted）的技能Spec：调用<code>GetActivatableAbilities()</code>，返回值为Spec列表；<strong>遍历激活技能时必须加锁</strong>（如<code>FScopedAbilityListLock</code>），避免多线程冲突。</li>
+</ul>
+<h3 id="（2）授予新技能（Spec）"><a href="#（2）授予新技能（Spec）" class="headerlink" title="（2）授予新技能（Spec）"></a>（2）授予新技能（Spec）</h3><p>ASC的“技能槽”不仅包含UI可见技能，还涵盖所有已授予的技能；授予逻辑仅针对Spec，而非GA实例，核心步骤：</p>
+<ol>
+<li>创建新的Gameplay Ability Spec；</li>
+<li>为Spec填充配置（如绑定Tag、设置等级、配置冷却）；</li>
+<li>调用<code>GiveAbility(Spec)</code>完成授予（按需激活：<code>GiveAbilityAndActivateOnce(Spec)</code>会直接实例化并执行GA）；</li>
+<li>向UI广播技能授予事件，同步界面展示，按需进行。</li>
+</ol>
+<h3 id="（3）处理技能输入响应"><a href="#（3）处理技能输入响应" class="headerlink" title="（3）处理技能输入响应"></a>（3）处理技能输入响应</h3><p>这是GA实例化（激活）的核心逻辑，ASC通过<code>AbilityInputTagPressed/Held/Released</code>等函数响应输入：</p>
+<ul>
+<li>职责边界：ASC仅负责触发GA的实例化&#x2F;激活，GA的结束逻辑由其自身控制；</li>
+<li>输入习惯适配：通常在<code>AbilityInputTagHeld</code>中处理激活逻辑（绑定<code>ETriggerEvent::Triggered</code>，按下期间每帧触发），支持长按连续释放技能（需结合冷却&#x2F;激活状态判断）；</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::AbilityInputTagHeld</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; InputTag)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (!InputTag.<span class="built_in">IsValid</span>()) <span class="keyword">return</span>;</span><br><span class="line">	<span class="function">FScopedAbilityListLock <span class="title">ActiveScopeLock</span><span class="params">(*<span class="keyword">this</span>)</span></span>;</span><br><span class="line">	<span class="keyword">for</span> (FGameplayAbilitySpec&amp; AbilitySpec : <span class="built_in">GetActivatableAbilities</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (AbilitySpec.<span class="built_in">GetDynamicSpecSourceTags</span>().<span class="built_in">HasTagExact</span>(InputTag))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">AbilitySpecInputPressed</span>(AbilitySpec);</span><br><span class="line">			<span class="keyword">if</span> (!AbilitySpec.<span class="built_in">IsActive</span>())</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="built_in">TryActivateAbility</span>(AbilitySpec.Handle);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>网络同步：输入事件发生在Client端，需同步到Server端以保证效果一致：</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (AbilitySpec.<span class="built_in">IsActive</span>())</span><br><span class="line">&#123;</span><br><span class="line">    TArray&lt;UGameplayAbility*&gt; Instances = AbilitySpec.<span class="built_in">GetAbilityInstances</span>();</span><br><span class="line">    <span class="type">const</span> FGameplayAbilityActivationInfo&amp; ActivationInfo = Instances.<span class="built_in">Last</span>()-&gt;<span class="built_in">GetCurrentActivationInfoRef</span>();</span><br><span class="line">    FPredictionKey OriginalPredictionKey = ActivationInfo.<span class="built_in">GetActivationPredictionKey</span>();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">InvokeReplicatedEvent</span>(EAbilityGenericReplicatedEvent::InputPressed , AbilitySpec.Handle , OriginalPredictionKey);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-处理属性变化"><a href="#3-处理属性变化" class="headerlink" title="3. 处理属性变化"></a>3. 处理属性变化</h2><p>属性变化的核心逻辑通常封装在AttributeSet中，ASC仅处理与技能强关联的属性变更场景：</p>
+<ul>
+<li>典型场景：角色等级提升解锁&#x2F;升级技能（需ASC执行技能授予&#x2F;更新Spec配置）；</li>
+<li>实现方式：ASC通过<code>GetAvatarActor()</code>获取宿主对象，关联AttributeSet或PlayerState读取&#x2F;修改属性；</li>
+<li>扩展方案：可通过GameplayEvent转发属性变化事件（详情可点击此处查看）。</li>
+</ul>
+<h1 id="网络复制"><a href="#网络复制" class="headerlink" title="网络复制"></a>网络复制</h1><h2 id="Server与Client的职责"><a href="#Server与Client的职责" class="headerlink" title="Server与Client的职责"></a>Server与Client的职责</h2><p>为适配多人游戏，需明确ASC相关逻辑在Server&#x2F;Client的分工：</p>
+<ul>
+<li>Server端：执行核心逻辑（属性修改、技能授予、GE施加），保证数据权威；</li>
+<li>Client端：仅处理UI同步、视觉反馈等非核心逻辑。</li>
+</ul>
+<p>设计范式：拆分“Server执行+Client广播”两套函数：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::ServerEquipAbility_Implementation</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; AbilityTag,</span></span></span><br><span class="line"><span class="params"><span class="function">                                                                    <span class="type">const</span> FGameplayTag&amp; Slot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (FGameplayAbilitySpec* AbilitySpec = <span class="built_in">GetSpecFromAbilityTag</span>(AbilityTag))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// Server端修改Spec的核心逻辑</span></span><br><span class="line"></span><br><span class="line">		<span class="built_in">ClientEquipAbility</span>(AbilityTag , GameplayTags.Abilities_Status_Equipped , Slot , PrevSlot);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::ClientEquipAbility_Implementation</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; AbilityTag, <span class="type">const</span> FGameplayTag&amp; Status,</span></span></span><br><span class="line"><span class="params"><span class="function">                                                                    <span class="type">const</span> FGameplayTag&amp; Slot, <span class="type">const</span> FGameplayTag&amp; PreviousSlot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	AbilityEquipped.<span class="built_in">Broadcast</span>(AbilityTag , Status , Slot , PreviousSlot);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="代码解析"><a href="#代码解析" class="headerlink" title="代码解析"></a>代码解析</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">AbilitySpec.<span class="built_in">GetDynamicSpecSourceTags</span>().<span class="built_in">AddTag</span>(GameplayTags.Abilities_Status_Eligible);</span><br><span class="line"><span class="built_in">MarkAbilitySpecDirty</span>(AbilitySpec);</span><br><span class="line"><span class="comment">// 同步 “Spec 配置数据”，传递 Spec 的完整状态，用于保证配置一致。</span></span><br></pre></td></tr></table></figure>
+<p>当手动修改了 AbilitySpec 的成员变量后（如设置目标、调整冷却），调用 MarkAbilitySpecDirty 可以立即生效这些更改，避免延迟或不同步状况。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/ue5-blog/tags/GAS/" rel="tag"># GAS</a>
+              <a href="/ue5-blog/tags/ASC/" rel="tag"># ASC</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/11/SystemDesigns/GAS/GameplayEvent/" rel="prev" title="">
+                  <i class="fa fa-angle-left"></i> 
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Larry-lyx</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

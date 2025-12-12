@@ -1,6 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>类的继承 (Inheritance)</title>
+    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>类的继承是游戏开发中实现代码复用、逻辑扩展的核心手段，其核心价值在于：</p>
+<ul>
+<li>通过基类统一抽象通用逻辑，子类定制差异化行为；</li>
+<li>保证代码可维护性，尤其在C++&#x2F;蓝图混合开发中，需兼顾封装性与灵活扩展。</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="基类"><a href="#基类" class="headerlink" title="基类"></a>基类</h1><p>游戏开发中，为同类对象构建基类是提升开发效率的核心习惯，核心原因有二：</p>
+<ol>
+<li><strong>通用逻辑复用</strong>：大量游戏对象（如敌人、道具、技能）存在共性属性&#x2F;行为（如血量、受击逻辑、销毁逻辑），基类可集中封装这些通用逻辑，避免重复编码；</li>
+<li><strong>批量扩展便捷</strong>：后续需为某类对象新增功能（如所有敌人添加“被击硬直”）时，只需修改基类，所有子类自动继承，无需逐个调整。</li>
+</ol>
+<p>在UE开发中，几乎所有自定义C++类都会配套创建<strong>蓝图基类</strong>，核心优势在于：</p>
+<ul>
+<li>配置灵活：无需硬编码&#x2F;重新编译，即可调整Mesh、数值参数（如敌人血量、技能冷却时间），快速验证效果；</li>
+<li>轻量逻辑快速迭代：简单逻辑（如UI提示、音效触发）可直接在蓝图中实现，开发效率高，且非密集计算类逻辑几乎无性能损耗。</li>
+</ul>
+<p>但蓝图也有明确的使用边界：</p>
+<ul>
+<li>复杂逻辑易因节点布线混乱导致维护成本高；</li>
+<li>版本控制中难以追踪蓝图的具体修改内容。<br>因此最佳实践是：蓝图仅处理“配置+极简逻辑”，复杂逻辑仍放在C++中实现。</li>
+</ul>
+<h1 id="继承关系"><a href="#继承关系" class="headerlink" title="继承关系"></a>继承关系</h1><p>丰富的功能实现依赖灵活的继承体系：子类可继承父类的变量&#x2F;函数，也可重写函数逻辑，极大提升代码扩展性。</p>
+<h2 id="核心问题：为何要区分-public-protected-private-访问权限？"><a href="#核心问题：为何要区分-public-protected-private-访问权限？" class="headerlink" title="核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？"></a>核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？</h2><p>个人开发中，若类的规模小、仅自己维护，权限区分的影响不明显；但在团队协作或源码复用场景下，权限划分是“降低理解成本、避免逻辑混乱”的关键：</p>
+<ul>
+<li><strong>public</strong>：对外暴露的核心接口（如<code>GetHealth()</code>），使用者无需关注内部实现，直接调用即可；</li>
+<li><strong>protected</strong>：仅子类可访问&#x2F;重写的逻辑（如<code>OnTakeDamage()</code>），保证子类可定制，又避免外部随意调用；</li>
+<li><strong>private</strong>：父类纯内部逻辑（如辅助计算的临时变量），完全隐藏实现细节，防止意外篡改。</li>
+</ul>
+<p>因此，当类的逻辑逐渐复杂时，需梳理头文件：明确权限划分、添加注释说明接口用途，让使用者快速知晓“哪些可调用、哪些可重写、哪些不可触碰”，无需深挖实现细节。</p>
+<h1 id="类与实例"><a href="#类与实例" class="headerlink" title="类与实例"></a>类与实例</h1><p>类是“模板”，实例是基于模板创建的“具体对象”：类中定义的非静态变量&#x2F;函数，会在每个实例中独立存在（如两个Enemy实例的血量、位置相互独立）。</p>
+<h2 id="静态成员的适用场景"><a href="#静态成员的适用场景" class="headerlink" title="静态成员的适用场景"></a>静态成员的适用场景</h2><p>对无需区分实例的通用逻辑&#x2F;数据（如全局配置、工具函数），可添加<code>static</code>关键字绑定到类上，核心优势：</p>
+<ol>
+<li>性能优化：无需创建实例即可调用，减少内存占用；</li>
+<li>逻辑统一：所有实例共享同一数据&#x2F;逻辑。</li>
+</ol>
+<h2 id="关键注意点"><a href="#关键注意点" class="headerlink" title="关键注意点"></a>关键注意点</h2><p>UE开发中需牢记：继承后的属性&#x2F;函数始终归属于“具体实例”，而非类本身。例如：</p>
+<ul>
+<li>为<code>Enemy1</code>实例绑定的受击回调，仅会响应该实例的受击事件；</li>
+<li>修改<code>Enemy2</code>实例的血量，不会影响其他Enemy实例的状态。<br>即使IDE的自动提示已经十分完善，也需时刻明确“操作的是类模板还是实例对象”，避免因边界混淆导致逻辑错误。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Inheritance</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>委托 (Delegate)</title>
+    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>委托的核心价值可概括为两点：</p>
+<ol>
+<li><p><strong>解耦：</strong><br>发送方仅负责在合适时机广播事件，无需知晓接收方逻辑；接收方专注实现回调，无需关联发送方细节，双方独立扩展逻辑。</p>
+</li>
+<li><p><strong>异步：</strong><br>接收方无需预判事件触发时间，只需提前绑定回调函数，事件广播时自动执行，降低时机同步成本。</p>
+</li>
+</ol>
+<span id="more"></span>
+
+<h1 id="什么是委托-Delegate"><a href="#什么是委托-Delegate" class="headerlink" title="什么是委托(Delegate)"></a>什么是委托(Delegate)</h1><p>游戏系统中存在大量跨对象的交互事件——事件发起者执行某个行为后，其他对象需要对该行为做出响应。</p>
+<p>以“子弹击中敌人”为例：子弹触发Overlap事件是行为发起端，若直接在子弹代码中修改敌人血量、硬直等属性，会导致代码扩展性极差（比如不同敌人有不同的减伤、免硬直等差异化逻辑）。核心问题在于：子弹无需知晓被击中对象的具体类型和响应逻辑，所有“受击后的处理”都应归属于被击中对象自身。</p>
+<p>委托（Delegate）正是解决这类问题的核心机制，其本质是一套“事件通信管道”：</p>
+<ul>
+<li>事件发起者只需负责向“管道”发送消息，无需关心谁会接收、如何处理；</li>
+<li>事件接收者提前将处理逻辑（回调函数）绑定到“管道”，当收到消息时自动执行逻辑。</li>
+</ul>
+<p>需明确委托机制的三个核心要素：</p>
+<ol>
+<li>委托事件（即“通信管道”）：需要定义在某个通用类中；</li>
+<li>消息发送：事件发起方在合适的时机触发委托、广播消息；</li>
+<li>回调绑定：事件接收方需在事件发生前，将处理函数绑定到委托上。</li>
+</ol>
+<p>这里的核心易错点是<strong>绑定时机</strong>：回调函数的绑定必须早于委托广播，否则接收方无法响应。即便在“自身向自身发消息”的场景中，代码层面仍需先定义回调逻辑、完成绑定，再执行委托广播——回调函数的代码书写顺序在前，实际执行却在收到消息后，这也是委托使用中易混淆的点。</p>
+<h1 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h1><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// DelegateSender.h</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 1. 动态多播委托（支持蓝图绑定）：需声明参数类型+参数名</span></span><br><span class="line"><span class="built_in">DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam</span>(FOnSingleParamEvent, int32, DamageValue); </span><br><span class="line"><span class="comment">// 2. 普通多播委托（仅C++可用）：只需参数类型，参数名用注释说明（提升可读性）</span></span><br><span class="line"><span class="built_in">DECLARE_MULTICAST_DELEGATE_TwoParams</span>(FOnTwoParamEvent, FVector, <span class="comment">/* HitLocation */</span>, AActor*, <span class="comment">/* HitActor */</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// MULTICAST表示有多个接受方，多个接收方都会自动执行回调</span></span><br><span class="line"><span class="comment">// 如果是单播委托，使用Execute进行触发</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 委托发送方类（示例：子弹类）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAME_API</span> UDelegateSender : <span class="keyword">public</span> UObject</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 声明委托实例（供外部绑定回调）</span></span><br><span class="line">    FOnSingleParamEvent OnDamageEvent;       <span class="comment">// 单参数委托实例（如传递伤害值）</span></span><br><span class="line">    FOnTwoParamEvent OnHitEvent;             <span class="comment">// 双参数委托实例（如传递击中位置+击中对象）</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// DelegateSender.cpp</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 委托发送方：在事件触发时机广播委托（示例：子弹检测到击中时）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UDelegateSender::TriggerHitEvent</span><span class="params">(int32 Damage, FVector HitLoc, AActor* HitActor)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 广播委托：所有绑定的回调函数会自动执行</span></span><br><span class="line">    OnDamageEvent.<span class="built_in">Broadcast</span>(Damage);</span><br><span class="line">    OnHitEvent.<span class="built_in">Broadcast</span>(HitLoc, HitActor);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// DelegateReceiver.cpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;DelegateReceiver.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;DelegateSender.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 委托接收方：绑定回调函数到发送方的委托（需在事件触发前完成绑定）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UDelegateReceiver::BindToDelegate</span><span class="params">(UDelegateSender* Sender)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!Sender) <span class="keyword">return</span>; <span class="comment">// 空指针校验</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 方式1：绑定成员函数（最常用）</span></span><br><span class="line">    <span class="comment">// AddUObject：接收方为UObject子类时使用，自动处理生命周期（对象销毁时解绑）</span></span><br><span class="line">    Sender-&gt;OnDamageEvent.<span class="built_in">AddUObject</span>(<span class="keyword">this</span>, &amp;UDelegateReceiver::OnReceiveDamage);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 方式2：绑定Lambda表达式（适合简单逻辑，无需单独写成员函数）</span></span><br><span class="line">    Sender-&gt;OnHitEvent.<span class="built_in">AddLambda</span>(</span><br><span class="line">        [<span class="keyword">this</span>](FVector HitLocation, AActor* HitActor) <span class="comment">// 捕获this以访问接收方成员</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// 击中事件的回调逻辑</span></span><br><span class="line">            <span class="built_in">UE_LOG</span>(LogTemp, Log, <span class="built_in">TEXT</span>(<span class="string">&quot;击中位置：%s&quot;</span>), *HitLocation.<span class="built_in">ToString</span>());</span><br><span class="line">        &#125;</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 委托回调函数（对应OnDamageEvent）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UDelegateReceiver::OnReceiveDamage</span><span class="params">(int32 DamageValue)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 接收方的处理逻辑</span></span><br><span class="line">    <span class="built_in">UE_LOG</span>(LogTemp, Log, <span class="built_in">TEXT</span>(<span class="string">&quot;收到伤害值：%d&quot;</span>), DamageValue);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="疑难解释"><a href="#疑难解释" class="headerlink" title="疑难解释"></a>疑难解释</h1><h2 id="1-委托的定义位置：并非必须绑定发送方"><a href="#1-委托的定义位置：并非必须绑定发送方" class="headerlink" title="1. 委托的定义位置：并非必须绑定发送方"></a>1. 委托的定义位置：并非必须绑定发送方</h2><p>委托的声明位置可灵活调整——既可以定义在事件发送方，也可以定义在接收方，但核心前提是：<strong>委托的广播方（实际触发者）必须能获取到委托所属类的实例</strong>。</p>
+<p>这一点容易引发“解耦不彻底”的疑问：绑定回调时，接收方需要包含委托定义类的头文件，看似仍存在耦合。以子弹击中敌人的场景为例：若委托定义在子弹类（发送方），敌人需持有子弹指针才能绑定回调，这意味着“敌人必须知道触发伤害的具体类型”；即便委托定义在敌人类（接收方），子弹需知道敌人的类型才能广播委托——两种方式都违背“敌人无需知晓攻击来源、子弹无需知晓被击目标”的解耦原则（尤其当子弹&#x2F;敌人类型扩展后，代码修改成本会急剧增加）。</p>
+<h2 id="2-解耦方案：委托归属于“通用基类”"><a href="#2-解耦方案：委托归属于“通用基类”" class="headerlink" title="2. 解耦方案：委托归属于“通用基类”"></a>2. 解耦方案：委托归属于“通用基类”</h2><p>为进一步解耦，实战中会将委托定义在<strong>通用基类</strong>中：</p>
+<ul>
+<li>发送方（如子弹）仅需依赖该通用基类，无需知晓具体接收方类型，只需在事件触发时调用基类的委托广播接口；</li>
+<li>接收方（如不同类型的敌人、道具）继承该通用基类，重写&#x2F;绑定自定义回调函数，实现差异化的事件处理；</li>
+<li>核心优势：发送方和接收方仅依赖“通用基类”，彼此完全隔离，新增子弹&#x2F;敌人类型时无需修改原有逻辑。</li>
+</ul>
+<p>需要注意的是，委托代表的通信管道是和<strong>实例</strong>同级的，一个实例代表一个单独的通信管道。</p>
+<h2 id="3-场景适配：委托-vs-GAS的GE（GameplayEffect）"><a href="#3-场景适配：委托-vs-GAS的GE（GameplayEffect）" class="headerlink" title="3. 场景适配：委托 vs GAS的GE（GameplayEffect）"></a>3. 场景适配：委托 vs GAS的GE（GameplayEffect）</h2><p>子弹击中造成伤害、附加Debuff、击飞（Knockback）等战斗事件，看似可用委托实现，但这类事件的上下文（伤害数值、Debuff类型、击飞力度等）复杂且需支持扩展，纯委托方案会因参数膨胀、逻辑分散变得难以维护。</p>
+<p>在GAS框架中，这类战斗事件更适合用 <strong>GE</strong> 处理：GE天然封装了属性修改、效果叠加、持续时间等战斗逻辑，且通过GameplayTag实现灵活的触发&#x2F;取消规则，比委托更贴合“技能-属性-状态”的联动需求。</p>
+<p>而简单的多播委托更适配<strong>UI交互场景</strong>：比如角色属性（血量、蓝量）变化时更新UI、技能冷却完成时刷新按钮状态——此时可将委托定义在ASC中，所有UI组件绑定该委托，当属性&#x2F;状态变更时广播委托，UI组件自动更新显示，无需业务逻辑层关心具体UI实现。这也是GAS框架中ASC、AS的核心作用之一：作为“通用事件枢纽”，统一管理属性变更、技能状态等事件的广播与回调，兼顾解耦与扩展性。</p>
+]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Delegate</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>实例化 (Instance)</title>
+    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Instance/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Instance</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>接口 (Interface)</title>
     <url>/ue5-blog/2025/12/09/ProgrammingSkills/Interface/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>接口是游戏开发中“按功能归类”的核心手段，可突破类继承的层级限制，让不同类型的对象实现同一套功能逻辑；<br>在UE中结合<code>BlueprintNativeEvent</code>使用，既能保证功能统一，又能避免频繁类型转换(Cast)，提升代码效率与扩展性。</p>
@@ -34,58 +149,6 @@
       </categories>
       <tags>
         <tag>Interface</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>委托 (Delegate)</title>
-    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>委托的核心价值可概括为两点：</p>
-<ol>
-<li><p><strong>解耦：</strong><br>发送方仅负责在合适时机广播事件，无需知晓接收方逻辑；接收方专注实现回调，无需关联发送方细节，双方独立扩展逻辑。</p>
-</li>
-<li><p><strong>异步：</strong><br>接收方无需预判事件触发时间，只需提前绑定回调函数，事件广播时自动执行，降低时机同步成本。</p>
-</li>
-</ol>
-<span id="more"></span>
-
-<h1 id="什么是委托-Delegate"><a href="#什么是委托-Delegate" class="headerlink" title="什么是委托(Delegate)"></a>什么是委托(Delegate)</h1><p>游戏系统中存在大量跨对象的交互事件——事件发起者执行某个行为后，其他对象需要对该行为做出响应。</p>
-<p>以“子弹击中敌人”为例：子弹触发Overlap事件是行为发起端，若直接在子弹代码中修改敌人血量、硬直等属性，会导致代码扩展性极差（比如不同敌人有不同的减伤、免硬直等差异化逻辑）。核心问题在于：子弹无需知晓被击中对象的具体类型和响应逻辑，所有“受击后的处理”都应归属于被击中对象自身。</p>
-<p>委托（Delegate）正是解决这类问题的核心机制，其本质是一套“事件通信管道”：</p>
-<ul>
-<li>事件发起者只需负责向“管道”发送消息，无需关心谁会接收、如何处理；</li>
-<li>事件接收者提前将处理逻辑（回调函数）绑定到“管道”，当收到消息时自动执行逻辑。</li>
-</ul>
-<p>需明确委托机制的三个核心要素：</p>
-<ol>
-<li>委托事件（即“通信管道”）：需要定义在某个通用类中；</li>
-<li>消息发送：事件发起方在合适的时机触发委托、广播消息；</li>
-<li>回调绑定：事件接收方需在事件发生前，将处理函数绑定到委托上。</li>
-</ol>
-<p>这里的核心易错点是<strong>绑定时机</strong>：回调函数的绑定必须早于委托广播，否则接收方无法响应。即便在“自身向自身发消息”的场景中，代码层面仍需先定义回调逻辑、完成绑定，再执行委托广播——回调函数的代码书写顺序在前，实际执行却在收到消息后，这也是委托使用中易混淆的点。</p>
-<h1 id="代码实例"><a href="#代码实例" class="headerlink" title="代码实例"></a>代码实例</h1><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// DelegateSender.h</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 1. 动态多播委托（支持蓝图绑定）：需声明参数类型+参数名</span></span><br><span class="line"><span class="built_in">DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam</span>(FOnSingleParamEvent, int32, DamageValue); </span><br><span class="line"><span class="comment">// 2. 普通多播委托（仅C++可用）：只需参数类型，参数名用注释说明（提升可读性）</span></span><br><span class="line"><span class="built_in">DECLARE_MULTICAST_DELEGATE_TwoParams</span>(FOnTwoParamEvent, FVector, <span class="comment">/* HitLocation */</span>, AActor*, <span class="comment">/* HitActor */</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// MULTICAST表示有多个接受方，多个接收方都会自动执行回调</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 委托发送方类（示例：子弹类）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAME_API</span> UDelegateSender : <span class="keyword">public</span> UObject</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 声明委托实例（供外部绑定回调）</span></span><br><span class="line">    FOnSingleParamEvent OnDamageEvent;       <span class="comment">// 单参数委托实例（如传递伤害值）</span></span><br><span class="line">    FOnTwoParamEvent OnHitEvent;             <span class="comment">// 双参数委托实例（如传递击中位置+击中对象）</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// DelegateSender.cpp</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 委托发送方：在事件触发时机广播委托（示例：子弹检测到击中时）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UDelegateSender::TriggerHitEvent</span><span class="params">(int32 Damage, FVector HitLoc, AActor* HitActor)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 广播委托：所有绑定的回调函数会自动执行</span></span><br><span class="line">    OnDamageEvent.<span class="built_in">Broadcast</span>(Damage);</span><br><span class="line">    OnHitEvent.<span class="built_in">Broadcast</span>(HitLoc, HitActor);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// DelegateReceiver.cpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;DelegateReceiver.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;DelegateSender.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 委托接收方：绑定回调函数到发送方的委托（需在事件触发前完成绑定）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UDelegateReceiver::BindToDelegate</span><span class="params">(UDelegateSender* Sender)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!Sender) <span class="keyword">return</span>; <span class="comment">// 空指针校验</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 方式1：绑定成员函数（最常用）</span></span><br><span class="line">    <span class="comment">// AddUObject：接收方为UObject子类时使用，自动处理生命周期（对象销毁时解绑）</span></span><br><span class="line">    Sender-&gt;OnDamageEvent.<span class="built_in">AddUObject</span>(<span class="keyword">this</span>, &amp;UDelegateReceiver::OnReceiveDamage);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 方式2：绑定Lambda表达式（适合简单逻辑，无需单独写成员函数）</span></span><br><span class="line">    Sender-&gt;OnHitEvent.<span class="built_in">AddLambda</span>(</span><br><span class="line">        [<span class="keyword">this</span>](FVector HitLocation, AActor* HitActor) <span class="comment">// 捕获this以访问接收方成员</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// 击中事件的回调逻辑</span></span><br><span class="line">            <span class="built_in">UE_LOG</span>(LogTemp, Log, <span class="built_in">TEXT</span>(<span class="string">&quot;击中位置：%s&quot;</span>), *HitLocation.<span class="built_in">ToString</span>());</span><br><span class="line">        &#125;</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 委托回调函数（对应OnDamageEvent）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UDelegateReceiver::OnReceiveDamage</span><span class="params">(int32 DamageValue)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 接收方的处理逻辑</span></span><br><span class="line">    <span class="built_in">UE_LOG</span>(LogTemp, Log, <span class="built_in">TEXT</span>(<span class="string">&quot;收到伤害值：%d&quot;</span>), DamageValue);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="疑难解释"><a href="#疑难解释" class="headerlink" title="疑难解释"></a>疑难解释</h1><h2 id="1-委托的定义位置：并非必须绑定发送方"><a href="#1-委托的定义位置：并非必须绑定发送方" class="headerlink" title="1. 委托的定义位置：并非必须绑定发送方"></a>1. 委托的定义位置：并非必须绑定发送方</h2><p>委托的声明位置可灵活调整——既可以定义在事件发送方，也可以定义在接收方，但核心前提是：<strong>委托的广播方（实际触发者）必须能获取到委托所属类的实例</strong>。</p>
-<p>这一点容易引发“解耦不彻底”的疑问：绑定回调时，接收方需要包含委托定义类的头文件，看似仍存在耦合。以子弹击中敌人的场景为例：若委托定义在子弹类（发送方），敌人需持有子弹指针才能绑定回调，这意味着“敌人必须知道触发伤害的具体类型”；即便委托定义在敌人类（接收方），子弹需知道敌人的类型才能广播委托——两种方式都违背“敌人无需知晓攻击来源、子弹无需知晓被击目标”的解耦原则（尤其当子弹&#x2F;敌人类型扩展后，代码修改成本会急剧增加）。</p>
-<h2 id="2-解耦方案：委托归属于“通用基类”"><a href="#2-解耦方案：委托归属于“通用基类”" class="headerlink" title="2. 解耦方案：委托归属于“通用基类”"></a>2. 解耦方案：委托归属于“通用基类”</h2><p>为进一步解耦，实战中会将委托定义在<strong>通用基类</strong>中：</p>
-<ul>
-<li>发送方（如子弹）仅需依赖该通用基类，无需知晓具体接收方类型，只需在事件触发时调用基类的委托广播接口；</li>
-<li>接收方（如不同类型的敌人、道具）继承该通用基类，重写&#x2F;绑定自定义回调函数，实现差异化的事件处理；</li>
-<li>核心优势：发送方和接收方仅依赖“通用基类”，彼此完全隔离，新增子弹&#x2F;敌人类型时无需修改原有逻辑。</li>
-</ul>
-<p>需要注意的是，委托代表的通信管道是和<strong>实例</strong>同级的，一个实例代表一个单独的通信管道。</p>
-<h2 id="3-场景适配：委托-vs-GAS的GE（GameplayEffect）"><a href="#3-场景适配：委托-vs-GAS的GE（GameplayEffect）" class="headerlink" title="3. 场景适配：委托 vs GAS的GE（GameplayEffect）"></a>3. 场景适配：委托 vs GAS的GE（GameplayEffect）</h2><p>子弹击中造成伤害、附加Debuff、击飞（Knockback）等战斗事件，看似可用委托实现，但这类事件的上下文（伤害数值、Debuff类型、击飞力度等）复杂且需支持扩展，纯委托方案会因参数膨胀、逻辑分散变得难以维护。</p>
-<p>在GAS框架中，这类战斗事件更适合用 <strong>GE</strong> 处理：GE天然封装了属性修改、效果叠加、持续时间等战斗逻辑，且通过GameplayTag实现灵活的触发&#x2F;取消规则，比委托更贴合“技能-属性-状态”的联动需求。</p>
-<p>而简单的多播委托更适配<strong>UI交互场景</strong>：比如角色属性（血量、蓝量）变化时更新UI、技能冷却完成时刷新按钮状态——此时可将委托定义在ASC中，所有UI组件绑定该委托，当属性&#x2F;状态变更时广播委托，UI组件自动更新显示，无需业务逻辑层关心具体UI实现。这也是GAS框架中ASC、AS的核心作用之一：作为“通用事件枢纽”，统一管理属性变更、技能状态等事件的广播与回调，兼顾解耦与扩展性。</p>
-]]></content>
-      <categories>
-        <category>ProgrammingSkills</category>
-      </categories>
-      <tags>
-        <tag>Delegate</tag>
       </tags>
   </entry>
   <entry>
@@ -198,6 +261,73 @@
       </tags>
   </entry>
   <entry>
+    <title>单例 (Singleton)</title>
+    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Singleton/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>单例的核心是确保类&#x2F;结构体在程序运行期间仅有<strong>一个全局实例</strong>，并提供统一的静态访问入口。<br>实际应用中，最常见的场景式采用原生C++单例实现GameplayTag的集中管理，避免多实例导致Tag重复注册、数值不一致，保证各个模块共享一套Tag。</p>
+<span id="more"></span>
+
+<h1 id="单例的使用场景"><a href="#单例的使用场景" class="headerlink" title="单例的使用场景"></a>单例的使用场景</h1><p>单例适用于“需全局统一访问、仅初始化一次”的场景：</p>
+<ol>
+<li><strong>全局常量&#x2F;配置管理</strong>：GameplayTag是游戏内通用标记（属性、技能、状态等），需全局唯一注册、跨模块共享，单例可确保所有模块使用同一套Tag，避免重复定义；</li>
+<li><strong>全局状态管理</strong>：如游戏全局开关（音效、无敌模式）、跨场景共享的核心参数，单例保证状态唯一且修改可全局感知；</li>
+<li><strong>全局服务类</strong>：如日志管理、网络请求封装，单例避免多实例导致的资源冲突（如重复创建网络连接）。</li>
+</ol>
+<h1 id="单例的构建和引用"><a href="#单例的构建和引用" class="headerlink" title="单例的构建和引用"></a>单例的构建和引用</h1><h2 id="1-单例的核心构建规则"><a href="#1-单例的核心构建规则" class="headerlink" title="1. 单例的核心构建规则"></a>1. 单例的核心构建规则</h2><h3 id="头文件（-h）设计：封闭实例-开放访问"><a href="#头文件（-h）设计：封闭实例-开放访问" class="headerlink" title="头文件（.h）设计：封闭实例+开放访问"></a>头文件（.h）设计：封闭实例+开放访问</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 核心：私有静态实例 + 公有静态Get方法，确保唯一实例 + 全局访问</span></span><br><span class="line"><span class="keyword">struct</span>  <span class="title class_">FCustomGameplayTags</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 全局访问入口：返回const引用，避免外部修改实例</span></span><br><span class="line">	<span class="function"><span class="type">static</span> <span class="type">const</span> FCustomGameplayTags&amp; <span class="title">Get</span><span class="params">()</span></span>&#123;<span class="keyword">return</span> GameplayTags;&#125;</span><br><span class="line">    <span class="comment">// 初始化方法：单独封装Tag注册逻辑，在游戏启动时执行</span></span><br><span class="line">	<span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">InitializeNativeGameplayTags</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 需全局共享的GameplayTag变量</span></span><br><span class="line">    FGameplayTag Attributes_Primary_Strength;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 私有静态实例：仅类内可访问，避免外部创建多实例</span></span><br><span class="line">	<span class="type">static</span> FCustomGameplayTags GameplayTags;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="源文件（-cpp）实现：初始化实例-注册逻辑"><a href="#源文件（-cpp）实现：初始化实例-注册逻辑" class="headerlink" title="源文件（.cpp）实现：初始化实例+注册逻辑"></a>源文件（.cpp）实现：初始化实例+注册逻辑</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 初始化静态实例（程序启动时创建，全局唯一）</span></span><br><span class="line">FCustomGameplayTags FCustomGameplayTags::GameplayTags;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 封装GameplayTag的注册逻辑，仅需执行一次</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">FCustomGameplayTags::InitializeNativeGameplayTags</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 向UE引擎注册自定义Native GameplayTag，绑定标记名和说明</span></span><br><span class="line">	GameplayTags.Attributes_Primary_Strength = UGameplayTagsManager::<span class="built_in">Get</span>().<span class="built_in">AddNativeGameplayTag</span>(</span><br><span class="line">		<span class="built_in">FName</span>(<span class="string">&quot;Attributes.Primary.Strength&quot;</span>) ,</span><br><span class="line">		<span class="built_in">FString</span>(<span class="string">&quot;Increases physical damage&quot;</span>)</span><br><span class="line">	);</span><br><span class="line">	<span class="comment">// 可扩展：注册更多Tag</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-单例的全局引用方式"><a href="#2-单例的全局引用方式" class="headerlink" title="2. 单例的全局引用方式"></a>2. 单例的全局引用方式</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 任意模块/类中，通过Get()获取唯一实例，访问已注册的Tag</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AEnemy::CalculateDamage</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 全局访问单例中的Tag，无需创建FCustomGameplayTags实例</span></span><br><span class="line">    <span class="type">const</span> FGameplayTag StrengthTag = FCustomGameplayTags::<span class="built_in">Get</span>().Attributes_Primary_Strength;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Singleton</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>函数库 (Library)</title>
+    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Library/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>自定义函数库是UE开发中解耦跨类通用逻辑、提升代码复用性的核心手段，通过封装静态通用函数，可避免重复编码、减少性能损耗（如频繁Cast），同时让跨模块&#x2F;无继承关系的类高效共享算法与工具逻辑。</p>
+<span id="more"></span>
+
+<h1 id="自定义函数库的优势"><a href="#自定义函数库的优势" class="headerlink" title="自定义函数库的优势"></a>自定义函数库的优势</h1><ol>
+<li><strong>解耦跨类复用逻辑</strong>：许多通用算法（如位置计算、数据校验）的使用方无明显继承关系（如敌人召唤逻辑、战利品生成、弹道计算），函数库可作为“公共逻辑容器”，脱离类的继承层级限制；</li>
+<li><strong>提升开发效率</strong>：将可复用逻辑（如角色周围随机位置生成）提前封装为通用函数，后续开发无需重复编写&#x2F;调试，直接调用即可；</li>
+<li><strong>全局高效访问</strong>：函数库中的函数需声明为<code>static</code>（静态），无需创建类实例即可调用，兼顾全局访问性与性能；</li>
+<li><strong>统一维护入口</strong>：通用逻辑集中管理，后续修改（如调整位置算法的精度）只需改函数库，所有调用方自动生效，降低维护成本。</li>
+</ol>
+<h1 id="自定义函数库的核心内容"><a href="#自定义函数库的核心内容" class="headerlink" title="自定义函数库的核心内容"></a>自定义函数库的核心内容</h1><h2 id="1-通用算法（通用化参数设计）"><a href="#1-通用算法（通用化参数设计）" class="headerlink" title="1. 通用算法（通用化参数设计）"></a>1. 通用算法（通用化参数设计）</h2><p>封装无业务耦合的纯算法逻辑，参数设计需足够通用，避免硬编码，适配多场景调用。</p>
+<h3 id="2-轻量化类型转换（封装static-cast的Setter-Getter）"><a href="#2-轻量化类型转换（封装static-cast的Setter-Getter）" class="headerlink" title="2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）"></a>2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）</h3><p>UE中<code>Cast</code>操作（动态类型转换）性能开销大，需尽量避免；对于自定义扩展的框架类型（如GAS的<code>GameplayEffectContext</code>），可将<code>static_cast</code>封装到函数库，减少重复转换逻辑，提升调用效率。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemLibrary::SetIsBlockedHit</span><span class="params">(FGameplayEffectContextHandle&amp; EffectContextHandle, <span class="type">bool</span> bInIsBlockedHit)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (FCustomGameplayEffectContext* CustomContext = <span class="built_in">static_cast</span>&lt;FCustomGameplayEffectContext*&gt;(EffectContextHandle.<span class="built_in">Get</span>()))</span><br><span class="line">	&#123;</span><br><span class="line">		CustomContext-&gt;<span class="built_in">SetBlockedHit</span>(bInIsBlockedHit);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="自定义函数库的关键规范"><a href="#自定义函数库的关键规范" class="headerlink" title="自定义函数库的关键规范"></a>自定义函数库的关键规范</h3><ol>
+<li><strong>类继承要求</strong>：必须继承<code>UBlueprintFunctionLibrary</code>，否则无法作为全局函数库使用；</li>
+<li><strong>函数声明规则</strong>：<ul>
+<li>函数需为<code>static</code> + <code>UFUNCTION(BlueprintCallable)</code>，支持C++&#x2F;蓝图双端调用；</li>
+<li>加<code>Category</code>分类，便于蓝图中搜索和管理；</li>
+</ul>
+</li>
+<li><strong>参数设计原则</strong>：<ul>
+<li>通用算法参数“按需开放”（如角度范围设默认值），适配多场景；</li>
+<li>避免传入冗余参数，核心参数前置，可选参数后置并设默认值；</li>
+</ul>
+</li>
+<li><strong>性能注意</strong>：<ul>
+<li>函数库仅封装轻量逻辑（算法、类型转换），不存放状态变量；</li>
+<li>避免在函数库中执行耗时操作（如加载资源、遍历大量数据）；</li>
+</ul>
+</li>
+<li><strong>头文件循环引用提醒</strong>：<br>函数库中若直接引用其他类的头文件，这些被引用的类将无法反向包含函数库头文件（触发循环引用报错）。建议通过“前向声明”替代直接包含：仅在函数库头文件中对所需类做前向声明（如<code>class FCustomGameplayEffectContext;</code>），函数具体实现放在cpp文件中，且仅在cpp里包含对应类的头文件，避免循环引用问题。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Library</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>智能指针 (Pointer)</title>
     <url>/ue5-blog/2025/12/10/ProgrammingSkills/Pointer/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>UE中的智能指针是管理对象生命周期、避免裸指针风险的核心工具，分为适配引擎GC的UObject专属指针（TObjectPtr&#x2F;TWeakObjectPtr等）和管理非UObject的通用共享指针（TSharedPtr）；</p>
@@ -243,55 +373,15 @@
       </tags>
   </entry>
   <entry>
-    <title>类的继承 (Inheritance)</title>
-    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>类的继承是游戏开发中实现代码复用、逻辑扩展的核心手段，其核心价值在于：</p>
-<ul>
-<li>通过基类统一抽象通用逻辑，子类定制差异化行为；</li>
-<li>保证代码可维护性，尤其在C++&#x2F;蓝图混合开发中，需兼顾封装性与灵活扩展。</li>
-</ul>
-<span id="more"></span>
-
-<h1 id="基类"><a href="#基类" class="headerlink" title="基类"></a>基类</h1><p>游戏开发中，为同类对象构建基类是提升开发效率的核心习惯，核心原因有二：</p>
-<ol>
-<li><strong>通用逻辑复用</strong>：大量游戏对象（如敌人、道具、技能）存在共性属性&#x2F;行为（如血量、受击逻辑、销毁逻辑），基类可集中封装这些通用逻辑，避免重复编码；</li>
-<li><strong>批量扩展便捷</strong>：后续需为某类对象新增功能（如所有敌人添加“被击硬直”）时，只需修改基类，所有子类自动继承，无需逐个调整。</li>
-</ol>
-<p>在UE开发中，几乎所有自定义C++类都会配套创建<strong>蓝图基类</strong>，核心优势在于：</p>
-<ul>
-<li>配置灵活：无需硬编码&#x2F;重新编译，即可调整Mesh、数值参数（如敌人血量、技能冷却时间），快速验证效果；</li>
-<li>轻量逻辑快速迭代：简单逻辑（如UI提示、音效触发）可直接在蓝图中实现，开发效率高，且非密集计算类逻辑几乎无性能损耗。</li>
-</ul>
-<p>但蓝图也有明确的使用边界：</p>
-<ul>
-<li>复杂逻辑易因节点布线混乱导致维护成本高；</li>
-<li>版本控制中难以追踪蓝图的具体修改内容。<br>因此最佳实践是：蓝图仅处理“配置+极简逻辑”，复杂逻辑仍放在C++中实现。</li>
-</ul>
-<h1 id="继承关系"><a href="#继承关系" class="headerlink" title="继承关系"></a>继承关系</h1><p>丰富的功能实现依赖灵活的继承体系：子类可继承父类的变量&#x2F;函数，也可重写函数逻辑，极大提升代码扩展性。</p>
-<h2 id="核心问题：为何要区分-public-protected-private-访问权限？"><a href="#核心问题：为何要区分-public-protected-private-访问权限？" class="headerlink" title="核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？"></a>核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？</h2><p>个人开发中，若类的规模小、仅自己维护，权限区分的影响不明显；但在团队协作或源码复用场景下，权限划分是“降低理解成本、避免逻辑混乱”的关键：</p>
-<ul>
-<li><strong>public</strong>：对外暴露的核心接口（如<code>GetHealth()</code>），使用者无需关注内部实现，直接调用即可；</li>
-<li><strong>protected</strong>：仅子类可访问&#x2F;重写的逻辑（如<code>OnTakeDamage()</code>），保证子类可定制，又避免外部随意调用；</li>
-<li><strong>private</strong>：父类纯内部逻辑（如辅助计算的临时变量），完全隐藏实现细节，防止意外篡改。</li>
-</ul>
-<p>因此，当类的逻辑逐渐复杂时，需梳理头文件：明确权限划分、添加注释说明接口用途，让使用者快速知晓“哪些可调用、哪些可重写、哪些不可触碰”，无需深挖实现细节。</p>
-<h1 id="类与实例"><a href="#类与实例" class="headerlink" title="类与实例"></a>类与实例</h1><p>类是“模板”，实例是基于模板创建的“具体对象”：类中定义的非静态变量&#x2F;函数，会在每个实例中独立存在（如两个Enemy实例的血量、位置相互独立）。</p>
-<h2 id="静态成员的适用场景"><a href="#静态成员的适用场景" class="headerlink" title="静态成员的适用场景"></a>静态成员的适用场景</h2><p>对无需区分实例的通用逻辑&#x2F;数据（如全局配置、工具函数），可添加<code>static</code>关键字绑定到类上，核心优势：</p>
-<ol>
-<li>性能优化：无需创建实例即可调用，减少内存占用；</li>
-<li>逻辑统一：所有实例共享同一数据&#x2F;逻辑。</li>
-</ol>
-<h2 id="关键注意点"><a href="#关键注意点" class="headerlink" title="关键注意点"></a>关键注意点</h2><p>UE开发中需牢记：继承后的属性&#x2F;函数始终归属于“具体实例”，而非类本身。例如：</p>
-<ul>
-<li>为<code>Enemy1</code>实例绑定的受击回调，仅会响应该实例的受击事件；</li>
-<li>修改<code>Enemy2</code>实例的血量，不会影响其他Enemy实例的状态。<br>即使IDE的自动提示已经十分完善，也需时刻明确“操作的是类模板还是实例对象”，避免因边界混淆导致逻辑错误。</li>
-</ul>
-]]></content>
+    <title>EnhancedInput</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/EnhancedInput/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
       <categories>
-        <category>ProgrammingSkills</category>
+        <category>SystemDesigns</category>
+        <category>Input</category>
       </categories>
       <tags>
-        <tag>Inheritance</tag>
+        <tag>EnhancedInput</tag>
       </tags>
   </entry>
   <entry>
@@ -349,68 +439,6 @@
       </tags>
   </entry>
   <entry>
-    <title>单例 (Singleton)</title>
-    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Singleton/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>单例的核心是确保类&#x2F;结构体在程序运行期间仅有<strong>一个全局实例</strong>，并提供统一的静态访问入口。<br>实际应用中，最常见的场景式采用原生C++单例实现GameplayTag的集中管理，避免多实例导致Tag重复注册、数值不一致，保证各个模块共享一套Tag。</p>
-<span id="more"></span>
-
-<h1 id="单例的使用场景"><a href="#单例的使用场景" class="headerlink" title="单例的使用场景"></a>单例的使用场景</h1><p>单例适用于“需全局统一访问、仅初始化一次”的场景：</p>
-<ol>
-<li><strong>全局常量&#x2F;配置管理</strong>：GameplayTag是游戏内通用标记（属性、技能、状态等），需全局唯一注册、跨模块共享，单例可确保所有模块使用同一套Tag，避免重复定义；</li>
-<li><strong>全局状态管理</strong>：如游戏全局开关（音效、无敌模式）、跨场景共享的核心参数，单例保证状态唯一且修改可全局感知；</li>
-<li><strong>全局服务类</strong>：如日志管理、网络请求封装，单例避免多实例导致的资源冲突（如重复创建网络连接）。</li>
-</ol>
-<h1 id="单例的构建和引用"><a href="#单例的构建和引用" class="headerlink" title="单例的构建和引用"></a>单例的构建和引用</h1><h2 id="1-单例的核心构建规则"><a href="#1-单例的核心构建规则" class="headerlink" title="1. 单例的核心构建规则"></a>1. 单例的核心构建规则</h2><h3 id="头文件（-h）设计：封闭实例-开放访问"><a href="#头文件（-h）设计：封闭实例-开放访问" class="headerlink" title="头文件（.h）设计：封闭实例+开放访问"></a>头文件（.h）设计：封闭实例+开放访问</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 核心：私有静态实例 + 公有静态Get方法，确保唯一实例 + 全局访问</span></span><br><span class="line"><span class="keyword">struct</span>  <span class="title class_">FCustomGameplayTags</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 全局访问入口：返回const引用，避免外部修改实例</span></span><br><span class="line">	<span class="function"><span class="type">static</span> <span class="type">const</span> FCustomGameplayTags&amp; <span class="title">Get</span><span class="params">()</span></span>&#123;<span class="keyword">return</span> GameplayTags;&#125;</span><br><span class="line">    <span class="comment">// 初始化方法：单独封装Tag注册逻辑，在游戏启动时执行</span></span><br><span class="line">	<span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">InitializeNativeGameplayTags</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 需全局共享的GameplayTag变量</span></span><br><span class="line">    FGameplayTag Attributes_Primary_Strength;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 私有静态实例：仅类内可访问，避免外部创建多实例</span></span><br><span class="line">	<span class="type">static</span> FCustomGameplayTags GameplayTags;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<h3 id="源文件（-cpp）实现：初始化实例-注册逻辑"><a href="#源文件（-cpp）实现：初始化实例-注册逻辑" class="headerlink" title="源文件（.cpp）实现：初始化实例+注册逻辑"></a>源文件（.cpp）实现：初始化实例+注册逻辑</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 初始化静态实例（程序启动时创建，全局唯一）</span></span><br><span class="line">FCustomGameplayTags FCustomGameplayTags::GameplayTags;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 封装GameplayTag的注册逻辑，仅需执行一次</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">FCustomGameplayTags::InitializeNativeGameplayTags</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 向UE引擎注册自定义Native GameplayTag，绑定标记名和说明</span></span><br><span class="line">	GameplayTags.Attributes_Primary_Strength = UGameplayTagsManager::<span class="built_in">Get</span>().<span class="built_in">AddNativeGameplayTag</span>(</span><br><span class="line">		<span class="built_in">FName</span>(<span class="string">&quot;Attributes.Primary.Strength&quot;</span>) ,</span><br><span class="line">		<span class="built_in">FString</span>(<span class="string">&quot;Increases physical damage&quot;</span>)</span><br><span class="line">	);</span><br><span class="line">	<span class="comment">// 可扩展：注册更多Tag</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="2-单例的全局引用方式"><a href="#2-单例的全局引用方式" class="headerlink" title="2. 单例的全局引用方式"></a>2. 单例的全局引用方式</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 任意模块/类中，通过Get()获取唯一实例，访问已注册的Tag</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AEnemy::CalculateDamage</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 全局访问单例中的Tag，无需创建FCustomGameplayTags实例</span></span><br><span class="line">    <span class="type">const</span> FGameplayTag StrengthTag = FCustomGameplayTags::<span class="built_in">Get</span>().Attributes_Primary_Strength;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>ProgrammingSkills</category>
-      </categories>
-      <tags>
-        <tag>Singleton</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>AbilitySystemComponent (ASC)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilitySystemComponent/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>GAS</tag>
-        <tag>ASC</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>数据驱动系统 (DataDriven)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/DataDriven/Data/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>DataDriven</category>
-      </categories>
-      <tags>
-        <tag>DataAsset</tag>
-        <tag>DataTable</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>AbilityTask</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilityTask/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>AbilityTask</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>行为树 (BehaviorTree)</title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/AI/BehaviorTree/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
@@ -437,6 +465,153 @@
       </tags>
   </entry>
   <entry>
+    <title>AbilitySystemComponent (ASC)</title>
+    <url>/ue5-blog/2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>AbilitySystemComponent（ASC）是GAS框架的核心中枢，作为挂载在Actor&#x2F;Character上的“逻辑容器”，承接对象所有GAS相关能力与交互。GAS的核心逻辑（属性变更、效果施加、技能执行）均围绕ASC展开，所有交互遵循“ASC发起→ASC接收”的模式，是连接GE、GA、AttributeSet的核心桥梁。</p>
+<span id="more"></span>
+
+<h1 id="ASC-是什么"><a href="#ASC-是什么" class="headerlink" title="ASC 是什么"></a>ASC 是什么</h1><p>从GAS的核心逻辑视角，ASC是承载对象GAS能力的“逻辑核心”（Actor&#x2F;Character仅作为宿主，GAS层面无需关注其原生逻辑）——可将GAS需处理的所有对象，抽象为一个个独立的ASC实例。</p>
+<p>每个ASC独立管理如下核心内容，构成GAS交互的基础：</p>
+<h2 id="1-游戏效果（GameplayEffect，GE）：世界对ASC的作用载体"><a href="#1-游戏效果（GameplayEffect，GE）：世界对ASC的作用载体" class="headerlink" title="1. 游戏效果（GameplayEffect，GE）：世界对ASC的作用载体"></a>1. 游戏效果（GameplayEffect，GE）：世界对ASC的作用载体</h2><p>游戏世界中所有事件对当前ASC产生的影响，均通过挂载在该ASC上的GE实现；处理ASC对外部作用的反馈，核心是围绕GE的挂载、移除与响应展开。</p>
+<h2 id="2-游戏技能（GameplayAbility，GA）：ASC对世界的作用载体"><a href="#2-游戏技能（GameplayAbility，GA）：ASC对世界的作用载体" class="headerlink" title="2. 游戏技能（GameplayAbility，GA）：ASC对世界的作用载体"></a>2. 游戏技能（GameplayAbility，GA）：ASC对世界的作用载体</h2><p>ASC对游戏世界产生的所有影响（如播放角色动画、生成带伤害GE的子弹），均依赖其拥有的GA实现。需注意：ASC管理的并非GA实例，而是Gameplay Ability Spec（技能规格）；关于Spec与Instance的区别可点击此处跳转。</p>
+<h2 id="3-补充：属性（Attribute）的管理"><a href="#3-补充：属性（Attribute）的管理" class="headerlink" title="3. 补充：属性（Attribute）的管理"></a>3. 补充：属性（Attribute）的管理</h2><p>属性用于描述对象的核心状态（如血量、蓝量、力量），虽可直接由ASC管理，但为逻辑解耦，通常单独通过AttributeSet封装；特殊属性（如玩家XP、技能点、属性点）可存储在PlayerState中，由ASC关联访问。</p>
+<h2 id="ASC的核心交互逻辑"><a href="#ASC的核心交互逻辑" class="headerlink" title="ASC的核心交互逻辑"></a>ASC的核心交互逻辑</h2><p>GAS框架下所有交互均遵循“ASC发起→ASC接收”：</p>
+<ol>
+<li>发起方ASC通过自身拥有的GA触发对外作用；</li>
+<li>GA执行过程中产生的各类影响（如伤害、视觉效果等），最终以GE的形式施加到目标ASC；</li>
+<li>目标ASC接收GE后，修改自身Attribute，并触发配套的世界交互（如血量降低同步更新UI、触发死亡特效）。</li>
+</ol>
+<h1 id="ASC类提供的核心功能"><a href="#ASC类提供的核心功能" class="headerlink" title="ASC类提供的核心功能"></a>ASC类提供的核心功能</h1><h2 id="1-响应GE挂载：处理自身被施加GE后的逻辑"><a href="#1-响应GE挂载：处理自身被施加GE后的逻辑" class="headerlink" title="1. 响应GE挂载：处理自身被施加GE后的逻辑"></a>1. 响应GE挂载：处理自身被施加GE后的逻辑</h2><p>通过绑定ASC内置的<code>OnGameplayEffectAppliedDelegateToSelf</code>委托回调，可监听并处理GE施加到自身的逻辑。需注意：该委托仅在Server端生效（GE的核心生效逻辑均在Server执行），Client端需通过Server广播同步UI等视觉&#x2F;交互变化。</p>
+<p>该委托回调会传入两个核心参数：<code>FGameplayEffectSpec</code>（GE的配置规格）、<code>FActiveGameplayEffectHandle</code>（GE实例的句柄），用于精准识别并处理对应的GE。</p>
+<h2 id="2-管理GA：核心是管理Gameplay-Ability-Spec"><a href="#2-管理GA：核心是管理Gameplay-Ability-Spec" class="headerlink" title="2. 管理GA：核心是管理Gameplay Ability Spec"></a>2. 管理GA：核心是管理Gameplay Ability Spec</h2><p>ASC不直接与GA实例交互，所有GA相关操作均围绕Spec展开，核心能力包括：</p>
+<h3 id="（1）Tag与Spec的关联管理"><a href="#（1）Tag与Spec的关联管理" class="headerlink" title="（1）Tag与Spec的关联管理"></a>（1）Tag与Spec的关联管理</h3><p>提供一系列工具函数，实现GameplayTag（Ability&#x2F;Status&#x2F;Input类标签）与Spec的绑定、查询与校验，例如：</p>
+<ul>
+<li><code>GetInputTagFromSpec</code>：从Spec中提取绑定的输入Tag；</li>
+<li><code>AbilityHasSlot</code>：校验Spec是否绑定了指定技能槽位；</li>
+<li><code>AssignSlotToAbility</code>：为Spec分配技能槽位。</li>
+</ul>
+<p>关键注意点：</p>
+<ul>
+<li>Spec的动态标签（如Status、Input Tag）：通过<code>Spec.GetDynamicSourceTags()</code>获取&#x2F;管理；</li>
+<li>Spec的固定标签（如AbilityTag）：通过<code>Spec.Ability.Get()-&gt;GetAssetTags()</code>获取&#x2F;管理；</li>
+<li>遍历已授予（granted）的技能Spec：调用<code>GetActivatableAbilities()</code>，返回值为Spec列表；<strong>遍历激活技能时必须加锁</strong>（如<code>FScopedAbilityListLock</code>），避免多线程冲突。</li>
+</ul>
+<h3 id="（2）授予新技能（Spec）"><a href="#（2）授予新技能（Spec）" class="headerlink" title="（2）授予新技能（Spec）"></a>（2）授予新技能（Spec）</h3><p>ASC的“技能槽”不仅包含UI可见技能，还涵盖所有已授予的技能；授予逻辑仅针对Spec，而非GA实例，核心步骤：</p>
+<ol>
+<li>创建新的Gameplay Ability Spec；</li>
+<li>为Spec填充配置（如绑定Tag、设置等级、配置冷却）；</li>
+<li>调用<code>GiveAbility(Spec)</code>完成授予（按需激活：<code>GiveAbilityAndActivateOnce(Spec)</code>会直接实例化并执行GA）；</li>
+<li>向UI广播技能授予事件，同步界面展示，按需进行。</li>
+</ol>
+<h3 id="（3）处理技能输入响应"><a href="#（3）处理技能输入响应" class="headerlink" title="（3）处理技能输入响应"></a>（3）处理技能输入响应</h3><p>这是GA实例化（激活）的核心逻辑，ASC通过<code>AbilityInputTagPressed/Held/Released</code>等函数响应输入：</p>
+<ul>
+<li>职责边界：ASC仅负责触发GA的实例化&#x2F;激活，GA的结束逻辑由其自身控制；</li>
+<li>输入习惯适配：通常在<code>AbilityInputTagHeld</code>中处理激活逻辑（绑定<code>ETriggerEvent::Triggered</code>，按下期间每帧触发），支持长按连续释放技能（需结合冷却&#x2F;激活状态判断）；</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::AbilityInputTagHeld</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; InputTag)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (!InputTag.<span class="built_in">IsValid</span>()) <span class="keyword">return</span>;</span><br><span class="line">	<span class="function">FScopedAbilityListLock <span class="title">ActiveScopeLock</span><span class="params">(*<span class="keyword">this</span>)</span></span>;</span><br><span class="line">	<span class="keyword">for</span> (FGameplayAbilitySpec&amp; AbilitySpec : <span class="built_in">GetActivatableAbilities</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (AbilitySpec.<span class="built_in">GetDynamicSpecSourceTags</span>().<span class="built_in">HasTagExact</span>(InputTag))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">AbilitySpecInputPressed</span>(AbilitySpec);</span><br><span class="line">			<span class="keyword">if</span> (!AbilitySpec.<span class="built_in">IsActive</span>())</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="built_in">TryActivateAbility</span>(AbilitySpec.Handle);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>网络同步：输入事件发生在Client端，需同步到Server端以保证效果一致：</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (AbilitySpec.<span class="built_in">IsActive</span>())</span><br><span class="line">&#123;</span><br><span class="line">    TArray&lt;UGameplayAbility*&gt; Instances = AbilitySpec.<span class="built_in">GetAbilityInstances</span>();</span><br><span class="line">    <span class="type">const</span> FGameplayAbilityActivationInfo&amp; ActivationInfo = Instances.<span class="built_in">Last</span>()-&gt;<span class="built_in">GetCurrentActivationInfoRef</span>();</span><br><span class="line">    FPredictionKey OriginalPredictionKey = ActivationInfo.<span class="built_in">GetActivationPredictionKey</span>();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">InvokeReplicatedEvent</span>(EAbilityGenericReplicatedEvent::InputPressed , AbilitySpec.Handle , OriginalPredictionKey);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-处理属性变化"><a href="#3-处理属性变化" class="headerlink" title="3. 处理属性变化"></a>3. 处理属性变化</h2><p>属性变化的核心逻辑通常封装在AttributeSet中，ASC仅处理与技能强关联的属性变更场景：</p>
+<ul>
+<li>典型场景：角色等级提升解锁&#x2F;升级技能（需ASC执行技能授予&#x2F;更新Spec配置）；</li>
+<li>实现方式：ASC通过<code>GetAvatarActor()</code>获取宿主对象，关联AttributeSet或PlayerState读取&#x2F;修改属性；</li>
+<li>扩展方案：可通过GameplayEvent转发属性变化事件（详情可点击此处查看）。</li>
+</ul>
+<h1 id="网络复制"><a href="#网络复制" class="headerlink" title="网络复制"></a>网络复制</h1><h2 id="Server与Client的职责"><a href="#Server与Client的职责" class="headerlink" title="Server与Client的职责"></a>Server与Client的职责</h2><p>为适配多人游戏，需明确ASC相关逻辑在Server&#x2F;Client的分工：</p>
+<ul>
+<li>Server端：执行核心逻辑（属性修改、技能授予、GE施加），保证数据权威；</li>
+<li>Client端：仅处理UI同步、视觉反馈等非核心逻辑。</li>
+</ul>
+<p>设计范式：拆分“Server执行+Client广播”两套函数：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::ServerEquipAbility_Implementation</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; AbilityTag,</span></span></span><br><span class="line"><span class="params"><span class="function">                                                                    <span class="type">const</span> FGameplayTag&amp; Slot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (FGameplayAbilitySpec* AbilitySpec = <span class="built_in">GetSpecFromAbilityTag</span>(AbilityTag))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// Server端修改Spec的核心逻辑</span></span><br><span class="line"></span><br><span class="line">		<span class="built_in">ClientEquipAbility</span>(AbilityTag , GameplayTags.Abilities_Status_Equipped , Slot , PrevSlot);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::ClientEquipAbility_Implementation</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; AbilityTag, <span class="type">const</span> FGameplayTag&amp; Status,</span></span></span><br><span class="line"><span class="params"><span class="function">                                                                    <span class="type">const</span> FGameplayTag&amp; Slot, <span class="type">const</span> FGameplayTag&amp; PreviousSlot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	AbilityEquipped.<span class="built_in">Broadcast</span>(AbilityTag , Status , Slot , PreviousSlot);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="代码解析"><a href="#代码解析" class="headerlink" title="代码解析"></a>代码解析</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">AbilitySpec.<span class="built_in">GetDynamicSpecSourceTags</span>().<span class="built_in">AddTag</span>(GameplayTags.Abilities_Status_Eligible);</span><br><span class="line"><span class="built_in">MarkAbilitySpecDirty</span>(AbilitySpec);</span><br><span class="line"><span class="comment">// 同步 “Spec 配置数据”，传递 Spec 的完整状态，用于保证配置一致。</span></span><br></pre></td></tr></table></figure>
+<p>当手动修改了 AbilitySpec 的成员变量后（如设置目标、调整冷却），调用 MarkAbilitySpecDirty 可以立即生效这些更改，避免延迟或不同步状况。</p>
+]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>ASC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Highlight</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>Input</category>
+      </categories>
+      <tags>
+        <tag>Highlight</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>AbilityTask</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilityTask/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>AbilityTask</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameplayAbilitySystem (GAS)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GAS/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameplayAbility (GA)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayAbility/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>
+
+<h1 id="Gameplay-Ability-Spec-与-Gameplay-Ability-Instance"><a href="#Gameplay-Ability-Spec-与-Gameplay-Ability-Instance" class="headerlink" title="Gameplay Ability Spec 与 Gameplay Ability Instance"></a>Gameplay Ability Spec 与 Gameplay Ability Instance</h1><p>在GAS框架中，Gameplay Ability Spec（简称Spec，技能规格）与Gameplay Ability Instance（简称Instance，技能实例）是GA（Gameplay Ability）的两个核心要素，二者分工明确：Spec负责技能的“管理与配置”，Instance负责技能的“实际执行”。</p>
+<h2 id="核心概念区分"><a href="#核心概念区分" class="headerlink" title="核心概念区分"></a>核心概念区分</h2><h3 id="1-Gameplay-Ability-Spec：技能的“管理槽位”"><a href="#1-Gameplay-Ability-Spec：技能的“管理槽位”" class="headerlink" title="1. Gameplay Ability Spec：技能的“管理槽位”"></a>1. Gameplay Ability Spec：技能的“管理槽位”</h3><p>Spec是ASC（AbilitySystemComponent）对技能的管理与配置对象，可类比为角色的“技能槽”：</p>
+<ul>
+<li>核心职责：存储并管控该技能的核心配置（等级、冷却时间、资源消耗、释放条件如所需GameplayTag），以及技能的可用状态（是否可释放、是否处于冷却）；</li>
+<li>生命周期：与“技能授予”绑定——ASC授予技能时创建Spec，移除技能时销毁Spec，长期存在于ASC的技能管理列表中。</li>
+</ul>
+<h3 id="2-Gameplay-Ability-Instance：技能的“执行行为”"><a href="#2-Gameplay-Ability-Instance：技能的“执行行为”" class="headerlink" title="2. Gameplay Ability Instance：技能的“执行行为”"></a>2. Gameplay Ability Instance：技能的“执行行为”</h3><p>Instance是GA的实际运行实例，可类比为“角色放出一个火球的具体行为”：</p>
+<ul>
+<li>核心职责：执行技能的具体逻辑（如施法动画、生成火球等），仅在技能激活时创建，技能结束（施法完成&#x2F;被打断）后销毁；</li>
+<li>生命周期：与“技能激活”绑定——每次激活技能（如点击释放火球术），ASC会基于Spec创建一个Instance，技能执行完毕后Instance随之销毁。</li>
+</ul>
+<h2 id="关键关系与特性"><a href="#关键关系与特性" class="headerlink" title="关键关系与特性"></a>关键关系与特性</h2><ol>
+<li>一对多关联：一个Spec（技能槽）可对应多个Instance（多次释放技能）——比如角色的火球术技能槽（Spec），可反复激活生成多个火球术执行实例（Instance），也可对同一Instance进行激活、禁用等操作；</li>
+<li>分工明确的交互逻辑：<ul>
+<li>Spec直接与ASC交互：所有对技能的“管理操作”（如修改等级、重置冷却、判断释放权限）均通过ASC作用于Spec；</li>
+<li>Instance与游戏世界交互：Instance专注完成技能的世界交互逻辑（如生成特效、检测碰撞、施加伤害），无需感知所属ASC，仅需完成自身的执行任务。</li>
+</ul>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>GA</tag>
+        <tag>GameplayAbilitySpec</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>ExecCalc</title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/ExecCalc/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
@@ -451,47 +626,22 @@
       </tags>
   </entry>
   <entry>
-    <title>函数库 (Library)</title>
-    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Library/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>自定义函数库是UE开发中解耦跨类通用逻辑、提升代码复用性的核心手段，通过封装静态通用函数，可避免重复编码、减少性能损耗（如频繁Cast），同时让跨模块&#x2F;无继承关系的类高效共享算法与工具逻辑。</p>
-<span id="more"></span>
-
-<h1 id="自定义函数库的优势"><a href="#自定义函数库的优势" class="headerlink" title="自定义函数库的优势"></a>自定义函数库的优势</h1><ol>
-<li><strong>解耦跨类复用逻辑</strong>：许多通用算法（如位置计算、数据校验）的使用方无明显继承关系（如敌人召唤逻辑、战利品生成、弹道计算），函数库可作为“公共逻辑容器”，脱离类的继承层级限制；</li>
-<li><strong>提升开发效率</strong>：将可复用逻辑（如角色周围随机位置生成）提前封装为通用函数，后续开发无需重复编写&#x2F;调试，直接调用即可；</li>
-<li><strong>全局高效访问</strong>：函数库中的函数需声明为<code>static</code>（静态），无需创建类实例即可调用，兼顾全局访问性与性能；</li>
-<li><strong>统一维护入口</strong>：通用逻辑集中管理，后续修改（如调整位置算法的精度）只需改函数库，所有调用方自动生效，降低维护成本。</li>
-</ol>
-<h1 id="自定义函数库的核心内容"><a href="#自定义函数库的核心内容" class="headerlink" title="自定义函数库的核心内容"></a>自定义函数库的核心内容</h1><h2 id="1-通用算法（通用化参数设计）"><a href="#1-通用算法（通用化参数设计）" class="headerlink" title="1. 通用算法（通用化参数设计）"></a>1. 通用算法（通用化参数设计）</h2><p>封装无业务耦合的纯算法逻辑，参数设计需足够通用，避免硬编码，适配多场景调用。</p>
-<h3 id="2-轻量化类型转换（封装static-cast的Setter-Getter）"><a href="#2-轻量化类型转换（封装static-cast的Setter-Getter）" class="headerlink" title="2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）"></a>2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）</h3><p>UE中<code>Cast</code>操作（动态类型转换）性能开销大，需尽量避免；对于自定义扩展的框架类型（如GAS的<code>GameplayEffectContext</code>），可将<code>static_cast</code>封装到函数库，减少重复转换逻辑，提升调用效率。</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemLibrary::SetIsBlockedHit</span><span class="params">(FGameplayEffectContextHandle&amp; EffectContextHandle, <span class="type">bool</span> bInIsBlockedHit)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (FCustomGameplayEffectContext* CustomContext = <span class="built_in">static_cast</span>&lt;FCustomGameplayEffectContext*&gt;(EffectContextHandle.<span class="built_in">Get</span>()))</span><br><span class="line">	&#123;</span><br><span class="line">		CustomContext-&gt;<span class="built_in">SetBlockedHit</span>(bInIsBlockedHit);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="自定义函数库的关键规范"><a href="#自定义函数库的关键规范" class="headerlink" title="自定义函数库的关键规范"></a>自定义函数库的关键规范</h3><ol>
-<li><strong>类继承要求</strong>：必须继承<code>UBlueprintFunctionLibrary</code>，否则无法作为全局函数库使用；</li>
-<li><strong>函数声明规则</strong>：<ul>
-<li>函数需为<code>static</code> + <code>UFUNCTION(BlueprintCallable)</code>，支持C++&#x2F;蓝图双端调用；</li>
-<li>加<code>Category</code>分类，便于蓝图中搜索和管理；</li>
-</ul>
-</li>
-<li><strong>参数设计原则</strong>：<ul>
-<li>通用算法参数“按需开放”（如角度范围设默认值），适配多场景；</li>
-<li>避免传入冗余参数，核心参数前置，可选参数后置并设默认值；</li>
-</ul>
-</li>
-<li><strong>性能注意</strong>：<ul>
-<li>函数库仅封装轻量逻辑（算法、类型转换），不存放状态变量；</li>
-<li>避免在函数库中执行耗时操作（如加载资源、遍历大量数据）；</li>
-</ul>
-</li>
-<li><strong>头文件循环引用提醒</strong>：<br>函数库中若直接引用其他类的头文件，这些被引用的类将无法反向包含函数库头文件（触发循环引用报错）。建议通过“前向声明”替代直接包含：仅在函数库头文件中对所需类做前向声明（如<code>class FCustomGameplayEffectContext;</code>），函数具体实现放在cpp文件中，且仅在cpp里包含对应类的头文件，避免循环引用问题。</li>
-</ol>
-]]></content>
+    <title>GameplayCue (GC)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayCue/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
       <categories>
-        <category>ProgrammingSkills</category>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
       </categories>
       <tags>
-        <tag>Library</tag>
+        <tag>GAS</tag>
+        <tag>GC</tag>
       </tags>
+  </entry>
+  <entry>
+    <title></title>
+    <url>/ue5-blog/2025/12/11/SystemDesigns/GAS/GameplayEvent/</url>
+    <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title>GameplayEffect (GE)</title>
@@ -504,32 +654,6 @@
       <tags>
         <tag>GAS</tag>
         <tag>GE</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>GameplayTag</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayTag/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>GAS</tag>
-        <tag>GameplayTag</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>GameplayAbility (GA)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayAbility/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>GAS</tag>
-        <tag>GA</tag>
       </tags>
   </entry>
   <entry>
@@ -547,15 +671,28 @@
       </tags>
   </entry>
   <entry>
-    <title>GameplayAbilitySystem (GAS)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GAS/</url>
+    <title>数据驱动系统 (DataDriven)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/DataDriven/Data/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
       <categories>
         <category>SystemDesigns</category>
-        <category>GAS</category>
+        <category>DataDriven</category>
       </categories>
       <tags>
-        <tag>GAS</tag>
+        <tag>DataAsset</tag>
+        <tag>DataTable</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>WorldTransition</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Levels/WorldTransition/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>Levels</category>
+      </categories>
+      <tags>
+        <tag>WorldTransition</tag>
       </tags>
   </entry>
   <entry>
@@ -571,21 +708,8 @@
       </tags>
   </entry>
   <entry>
-    <title>Model View ViewModel (MVVM)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/MVVM/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>UI</category>
-      </categories>
-      <tags>
-        <tag>MVVM</tag>
-        <tag>FieldNotify</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>GameplayCue (GC)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayCue/</url>
+    <title>GameplayTag</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayTag/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
       <categories>
         <category>SystemDesigns</category>
@@ -593,92 +717,7 @@
       </categories>
       <tags>
         <tag>GAS</tag>
-        <tag>GC</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>EnhancedInput</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/EnhancedInput/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>Input</category>
-      </categories>
-      <tags>
-        <tag>EnhancedInput</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>GameInstace (GI)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/GameInstance/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>SaveAndLoad</category>
-      </categories>
-      <tags>
-        <tag>GI</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>GameMode</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/GameMode/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>SaveAndLoad</category>
-      </categories>
-      <tags>
-        <tag>GameMode</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Highlight</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>Input</category>
-      </categories>
-      <tags>
-        <tag>Highlight</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Save</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>SaveAndLoad</category>
-      </categories>
-      <tags>
-        <tag>Save</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SpawnVolume and SpawnPoint</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/Levels/SpawnVolume/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>Levels</category>
-      </categories>
-      <tags>
-        <tag>SpawnVolume</tag>
-        <tag>SpawnPoint</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>WorldTransition</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/Levels/WorldTransition/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>Levels</category>
-      </categories>
-      <tags>
-        <tag>WorldTransition</tag>
+        <tag>GameplayTag</tag>
       </tags>
   </entry>
   <entry>
@@ -696,6 +735,19 @@
       </tags>
   </entry>
   <entry>
+    <title>SpawnVolume and SpawnPoint</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Levels/SpawnVolume/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>Levels</category>
+      </categories>
+      <tags>
+        <tag>SpawnVolume</tag>
+        <tag>SpawnPoint</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Load</title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Load/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
@@ -705,6 +757,55 @@
       </categories>
       <tags>
         <tag>Load</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Model View ViewModel (MVVM)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/MVVM/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>UI</category>
+      </categories>
+      <tags>
+        <tag>MVVM</tag>
+        <tag>FieldNotify</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameMode</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/GameMode/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>SaveAndLoad</category>
+      </categories>
+      <tags>
+        <tag>GameMode</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameInstace (GI)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/GameInstance/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>SaveAndLoad</category>
+      </categories>
+      <tags>
+        <tag>GI</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Save</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Save/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>SaveAndLoad</category>
+      </categories>
+      <tags>
+        <tag>Save</tag>
       </tags>
   </entry>
 </search>

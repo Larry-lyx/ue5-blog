@@ -167,7 +167,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/ue5-blog/archives/">
-          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-count">34</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -178,7 +178,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/ue5-blog/tags/">
-        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-count">42</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -204,7 +204,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/10/ProgrammingSkills/Pointer/">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
@@ -222,7 +222,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/10/ProgrammingSkills/Pointer/" class="post-title-link" itemprop="url">智能指针 (Pointer)</a>
+          <a href="/ue5-blog/2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/" class="post-title-link" itemprop="url">AbilitySystemComponent (ASC)</a>
         </h2>
 
         <div class="post-meta-container">
@@ -234,7 +234,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2025-12-10 00:00:00 / 修改时间：09:44:53" itemprop="dateCreated datePublished" datetime="2025-12-10T00:00:00+08:00">2025-12-10</time>
+      <time title="创建时间：2025-12-12 00:00:00 / 修改时间：10:30:51" itemprop="dateCreated datePublished" datetime="2025-12-12T00:00:00+08:00">2025-12-12</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -242,7 +242,11 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/ue5-blog/categories/ProgrammingSkills/" itemprop="url" rel="index"><span itemprop="name">ProgrammingSkills</span></a>
+          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/GAS/" itemprop="url" rel="index"><span itemprop="name">GAS</span></a>
         </span>
     </span>
 
@@ -256,11 +260,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>UE中的智能指针是管理对象生命周期、避免裸指针风险的核心工具，分为适配引擎GC的UObject专属指针（TObjectPtr&#x2F;TWeakObjectPtr等）和管理非UObject的通用共享指针（TSharedPtr）；</p>
-<p>在实际使用中，最常见的是TObjectPtr，但有时调用引擎内置的函数时可能需使用 &#x2F; 返回特定指针类型，需了解相关转换规则和其中异同。</p>
+          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>AbilitySystemComponent（ASC）是GAS框架的核心中枢，作为挂载在Actor&#x2F;Character上的“逻辑容器”，承接对象所有GAS相关能力与交互。GAS的核心逻辑（属性变更、效果施加、技能执行）均围绕ASC展开，所有交互遵循“ASC发起→ASC接收”的模式，是连接GE、GA、AttributeSet的核心桥梁。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/ue5-blog/2025/12/10/ProgrammingSkills/Pointer/#more" rel="contents">
+              <a class="btn" href="/ue5-blog/2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -291,7 +294,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/10/ProgrammingSkills/Serialize/">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/11/SystemDesigns/GAS/GameplayEvent/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
@@ -309,7 +312,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/10/ProgrammingSkills/Serialize/" class="post-title-link" itemprop="url">序列化 (Serialize)</a>
+          <a href="/ue5-blog/2025/12/11/SystemDesigns/GAS/GameplayEvent/" class="post-title-link" itemprop="url">未命名</a>
         </h2>
 
         <div class="post-meta-container">
@@ -319,18 +322,8 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2025-12-10 00:00:00 / 修改时间：12:36:12" itemprop="dateCreated datePublished" datetime="2025-12-10T00:00:00+08:00">2025-12-10</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/ue5-blog/categories/ProgrammingSkills/" itemprop="url" rel="index"><span itemprop="name">ProgrammingSkills</span></a>
-        </span>
+      <time title="创建时间：2025-12-11 15:29:01" itemprop="dateCreated datePublished" datetime="2025-12-11T15:29:01+08:00">2025-12-11</time>
     </span>
 
   
@@ -343,15 +336,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>序列化本质是将内存中的数据（变量、对象、结构体）转换为二进制&#x2F;字节流格式，便于持久化存储（存档）、网络传输（同步）；反序列化则是将字节流还原为内存中的原始数据。<br>在实际使用中，最常见的是存档读档、网络同步两大场景。对于如何进行相应的序列化操作，应当充分了解。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/ue5-blog/2025/12/10/ProgrammingSkills/Serialize/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
+          
       
     </div>
 
@@ -549,7 +534,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Interface/">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/10/ProgrammingSkills/Pointer/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
@@ -567,7 +552,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Interface/" class="post-title-link" itemprop="url">接口 (Interface)</a>
+          <a href="/ue5-blog/2025/12/10/ProgrammingSkills/Pointer/" class="post-title-link" itemprop="url">智能指针 (Pointer)</a>
         </h2>
 
         <div class="post-meta-container">
@@ -579,7 +564,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2025-12-09 00:00:00 / 修改时间：15:53:04" itemprop="dateCreated datePublished" datetime="2025-12-09T00:00:00+08:00">2025-12-09</time>
+      <time title="创建时间：2025-12-10 00:00:00 / 修改时间：09:44:53" itemprop="dateCreated datePublished" datetime="2025-12-10T00:00:00+08:00">2025-12-10</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -601,10 +586,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>接口是游戏开发中“按功能归类”的核心手段，可突破类继承的层级限制，让不同类型的对象实现同一套功能逻辑；<br>在UE中结合<code>BlueprintNativeEvent</code>使用，既能保证功能统一，又能避免频繁类型转换(Cast)，提升代码效率与扩展性。</p>
+          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>UE中的智能指针是管理对象生命周期、避免裸指针风险的核心工具，分为适配引擎GC的UObject专属指针（TObjectPtr&#x2F;TWeakObjectPtr等）和管理非UObject的通用共享指针（TSharedPtr）；</p>
+<p>在实际使用中，最常见的是TObjectPtr，但有时调用引擎内置的函数时可能需使用 &#x2F; 返回特定指针类型，需了解相关转换规则和其中异同。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/ue5-blog/2025/12/09/ProgrammingSkills/Interface/#more" rel="contents">
+              <a class="btn" href="/ue5-blog/2025/12/10/ProgrammingSkills/Pointer/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -635,7 +621,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/10/ProgrammingSkills/Serialize/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
@@ -653,7 +639,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/" class="post-title-link" itemprop="url">委托 (Delegate)</a>
+          <a href="/ue5-blog/2025/12/10/ProgrammingSkills/Serialize/" class="post-title-link" itemprop="url">序列化 (Serialize)</a>
         </h2>
 
         <div class="post-meta-container">
@@ -665,7 +651,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2025-12-09 00:00:00 / 修改时间：13:33:28" itemprop="dateCreated datePublished" datetime="2025-12-09T00:00:00+08:00">2025-12-09</time>
+      <time title="创建时间：2025-12-10 00:00:00 / 修改时间：12:36:12" itemprop="dateCreated datePublished" datetime="2025-12-10T00:00:00+08:00">2025-12-10</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -687,188 +673,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>委托的核心价值可概括为两点：</p>
-<ol>
-<li><p><strong>解耦：</strong><br>发送方仅负责在合适时机广播事件，无需知晓接收方逻辑；接收方专注实现回调，无需关联发送方细节，双方独立扩展逻辑。</p>
-</li>
-<li><p><strong>异步：</strong><br>接收方无需预判事件触发时间，只需提前绑定回调函数，事件广播时自动执行，降低时机同步成本。</p>
-</li>
-</ol>
+          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>序列化本质是将内存中的数据（变量、对象、结构体）转换为二进制&#x2F;字节流格式，便于持久化存储（存档）、网络传输（同步）；反序列化则是将字节流还原为内存中的原始数据。<br>在实际使用中，最常见的是存档读档、网络同步两大场景。对于如何进行相应的序列化操作，应当充分了解。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Lock/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
-      <meta itemprop="name" content="Larry-lyx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="UE5学习笔记博客">
-      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | UE5学习笔记博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Lock/" class="post-title-link" itemprop="url">游戏开发中的锁：以FScopedAbilityListLock为例</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2025-12-09 00:00:00 / 修改时间：16:41:52" itemprop="dateCreated datePublished" datetime="2025-12-09T00:00:00+08:00">2025-12-09</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/ue5-blog/categories/ProgrammingSkills/" itemprop="url" rel="index"><span itemprop="name">ProgrammingSkills</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>锁的作用是保护<strong>临界资源</strong>避免并发读写冲突，<code>FScopedAbilityListLock</code>是针对GAS中ActivatableAbilities的轻量级封装锁，只要遍历<code>GetActivatableAbilities()</code>,就需要申请锁进行保护。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/ue5-blog/2025/12/09/ProgrammingSkills/Lock/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Reflection/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
-      <meta itemprop="name" content="Larry-lyx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="UE5学习笔记博客">
-      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | UE5学习笔记博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Reflection/" class="post-title-link" itemprop="url">反射系统 (Reflection)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2025-12-09 00:00:00 / 修改时间：20:03:28" itemprop="dateCreated datePublished" datetime="2025-12-09T00:00:00+08:00">2025-12-09</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/ue5-blog/categories/ProgrammingSkills/" itemprop="url" rel="index"><span itemprop="name">ProgrammingSkills</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>UE的反射系统是突破C++静态编译限制的核心机制，通过一系列宏为C++代码注入“运行时类型信息”，实现蓝图交互、序列化、编辑器可视化、属性自动同步等关键功能；<br>在实际应用中最需要的，就是熟悉一些常用的反射宏。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/ue5-blog/2025/12/09/ProgrammingSkills/Reflection/#more" rel="contents">
+              <a class="btn" href="/ue5-blog/2025/12/10/ProgrammingSkills/Serialize/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -989,7 +797,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilitySystemComponent/">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
@@ -1007,7 +815,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilitySystemComponent/" class="post-title-link" itemprop="url">AbilitySystemComponent (ASC)</a>
+          <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/" class="post-title-link" itemprop="url">委托 (Delegate)</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1018,14 +826,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2025-12-08 00:00:00" itemprop="dateCreated datePublished" datetime="2025-12-08T00:00:00+08:00">2025-12-08</time>
+      <time title="创建时间：2025-12-09 00:00:00" itemprop="dateCreated datePublished" datetime="2025-12-09T00:00:00+08:00">2025-12-09</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-12-10 14:44:56" itemprop="dateModified" datetime="2025-12-10T14:44:56+08:00">2025-12-10</time>
+      <time title="修改时间：2025-12-10 19:18:55" itemprop="dateModified" datetime="2025-12-10T19:18:55+08:00">2025-12-10</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1033,11 +841,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/ue5-blog/categories/SystemDesigns/GAS/" itemprop="url" rel="index"><span itemprop="name">GAS</span></a>
+          <a href="/ue5-blog/categories/ProgrammingSkills/" itemprop="url" rel="index"><span itemprop="name">ProgrammingSkills</span></a>
         </span>
     </span>
 
@@ -1051,10 +855,188 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1>
+          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>委托的核心价值可概括为两点：</p>
+<ol>
+<li><p><strong>解耦：</strong><br>发送方仅负责在合适时机广播事件，无需知晓接收方逻辑；接收方专注实现回调，无需关联发送方细节，双方独立扩展逻辑。</p>
+</li>
+<li><p><strong>异步：</strong><br>接收方无需预判事件触发时间，只需提前绑定回调函数，事件广播时自动执行，降低时机同步成本。</p>
+</li>
+</ol>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilitySystemComponent/#more" rel="contents">
+              <a class="btn" href="/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Interface/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Interface/" class="post-title-link" itemprop="url">接口 (Interface)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-09 00:00:00 / 修改时间：15:53:04" itemprop="dateCreated datePublished" datetime="2025-12-09T00:00:00+08:00">2025-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/ProgrammingSkills/" itemprop="url" rel="index"><span itemprop="name">ProgrammingSkills</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>接口是游戏开发中“按功能归类”的核心手段，可突破类继承的层级限制，让不同类型的对象实现同一套功能逻辑；<br>在UE中结合<code>BlueprintNativeEvent</code>使用，既能保证功能统一，又能避免频繁类型转换(Cast)，提升代码效率与扩展性。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/ue5-blog/2025/12/09/ProgrammingSkills/Interface/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Lock/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Lock/" class="post-title-link" itemprop="url">游戏开发中的锁：以FScopedAbilityListLock为例</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-09 00:00:00 / 修改时间：16:41:52" itemprop="dateCreated datePublished" datetime="2025-12-09T00:00:00+08:00">2025-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/ProgrammingSkills/" itemprop="url" rel="index"><span itemprop="name">ProgrammingSkills</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>锁的作用是保护<strong>临界资源</strong>避免并发读写冲突，<code>FScopedAbilityListLock</code>是针对GAS中ActivatableAbilities的轻量级封装锁，只要遍历<code>GetActivatableAbilities()</code>,就需要申请锁进行保护。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/ue5-blog/2025/12/09/ProgrammingSkills/Lock/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
