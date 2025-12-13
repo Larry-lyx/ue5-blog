@@ -26,15 +26,15 @@
 <meta property="og:site_name" content="UE5学习笔记博客">
 <meta property="og:description" content="核心总结GameplayEvent 是 GAS 框架中类委托（Delegate）的消息传递机制，核心作用是实现对象间的事件通知与数据传递：通过自定义事件标签发送包含数据的事件，Actor 所拥有的 GameplayAbility（GA）可通过 WaitGameplayEvent 监听并响应事件，相比普通委托，它是定制化的消息管道，专用于 GAS 体系内的事件交互。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://larry-lyx.github.io/ue5-blog/ue5-blog/images/GameplayEvent_1.png">
-<meta property="og:image" content="https://larry-lyx.github.io/ue5-blog/ue5-blog/images/GameplayEvent_2.png">
+<meta property="og:image" content="https://larry-lyx.github.io/ue5-blog/GameplayEvent/GameplayEvent_1.png">
+<meta property="og:image" content="https://larry-lyx.github.io/ue5-blog/GameplayEvent/GameplayEvent_2.png">
 <meta property="article:published_time" content="2025-12-11T16:00:00.000Z">
-<meta property="article:modified_time" content="2025-12-13T09:04:20.088Z">
+<meta property="article:modified_time" content="2025-12-13T09:28:25.592Z">
 <meta property="article:author" content="Larry-lyx">
 <meta property="article:tag" content="GAS">
 <meta property="article:tag" content="GameplayEvent">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://larry-lyx.github.io/ue5-blog/ue5-blog/images/GameplayEvent_1.png">
+<meta name="twitter:image" content="https://larry-lyx.github.io/ue5-blog/GameplayEvent/GameplayEvent_1.png">
 
 
 <link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/12/GAS-GameplayEvent/">
@@ -186,7 +186,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/ue5-blog/tags/">
-        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-count">40</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -249,7 +249,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-12-13 17:04:20" itemprop="dateModified" datetime="2025-12-13T17:04:20+08:00">2025-12-13</time>
+      <time title="修改时间：2025-12-13 17:28:25" itemprop="dateModified" datetime="2025-12-13T17:28:25+08:00">2025-12-13</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -283,8 +283,8 @@
 <h2 id="场景1：来自动画的通知（无数据传递）"><a href="#场景1：来自动画的通知（无数据传递）" class="headerlink" title="场景1：来自动画的通知（无数据传递）"></a>场景1：来自动画的通知（无数据传递）</h2><p>以火球技能（GA_FireBolt）为例，需求是“角色动画播放到指定帧时，生成并释放火球”，核心流程如下：</p>
 <ol>
 <li><strong>插入动画通知</strong>：在火球技能对应的动画蒙太奇（Montage）中，在目标时间点插入 Anim_Notify，绑定事件标签 <code>Event.Montage.FireBolt</code>；</li>
-<li><strong>发送 GameplayEvent</strong>：在该 Anim_Notify 的逻辑中，向角色 Actor 发送带有 <code>Event.Montage.FireBolt</code> 标签的 GameplayEvent（无额外数据）；<br><img src="/ue5-blog/ue5-blog/images/GameplayEvent_1.png" alt="alt text"></li>
-<li><strong>监听并响应事件</strong>：在 GA_FireBolt 中播放动画蒙太奇的同时，启用 <code>WaitGameplayEvent</code> 监听 <code>Event.Montage.FireBolt</code> 标签；一旦捕获到该事件，即判定动画播放至指定时机，执行火球生成与释放逻辑。<br><img src="/ue5-blog/ue5-blog/images/GameplayEvent_2.png" alt="alt text"></li>
+<li><strong>发送 GameplayEvent</strong>：在该 Anim_Notify 的逻辑中，向角色 Actor 发送带有 <code>Event.Montage.FireBolt</code> 标签的 GameplayEvent（无额外数据）；<br><img src="/ue5-blog/GameplayEvent/GameplayEvent_1.png" alt="alt text"></li>
+<li><strong>监听并响应事件</strong>：在 GA_FireBolt 中播放动画蒙太奇的同时，启用 <code>WaitGameplayEvent</code> 监听 <code>Event.Montage.FireBolt</code> 标签；一旦捕获到该事件，即判定动画播放至指定时机，执行火球生成与释放逻辑。<br><img src="/ue5-blog/GameplayEvent/GameplayEvent_2.png" alt="alt text"></li>
 </ol>
 <h2 id="场景2：使用属性点增加属性（带数据传递）"><a href="#场景2：使用属性点增加属性（带数据传递）" class="headerlink" title="场景2：使用属性点增加属性（带数据传递）"></a>场景2：使用属性点增加属性（带数据传递）</h2><p>需求是“消耗1个属性点，提升指定属性数值”，需实现<strong>带数据的事件发送</strong>与<strong>持续监听的事件接收</strong>，核心分为发送、接收两步：</p>
 <h3 id="步骤1：发送-GameplayEvent（带Payload数据）"><a href="#步骤1：发送-GameplayEvent（带Payload数据）" class="headerlink" title="步骤1：发送 GameplayEvent（带Payload数据）"></a>步骤1：发送 GameplayEvent（带Payload数据）</h3><p>与无数据传递的场景不同，需将“提升的属性标签”“提升数值”封装到 <code>FGameplayEventData</code>（Payload）中，再发送事件：</p>
@@ -322,13 +322,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/12/GAS-GE/" rel="prev" title="GameplayEffect (GE)">
-                  <i class="fa fa-angle-left"></i> GameplayEffect (GE)
+                <a href="/ue5-blog/2025/12/11/GAS-GA/" rel="prev" title="GameplayAbility (GA)">
+                  <i class="fa fa-angle-left"></i> GameplayAbility (GA)
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/12/GAS-AS/" rel="next" title="AttributeSet (AS)">
-                  AttributeSet (AS) <i class="fa fa-angle-right"></i>
+                <a href="/ue5-blog/2025/12/12/GAS-GE/" rel="next" title="GameplayEffect (GE)">
+                  GameplayEffect (GE) <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>

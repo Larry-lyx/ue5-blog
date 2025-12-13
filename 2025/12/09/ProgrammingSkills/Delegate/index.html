@@ -27,7 +27,7 @@
 <meta property="og:description" content="核心总结委托的核心价值可概括为两点：  解耦：发送方仅负责在合适时机广播事件，无需知晓接收方逻辑；接收方专注实现回调，无需关联发送方细节，双方独立扩展逻辑。  异步：接收方无需预判事件触发时间，只需提前绑定回调函数，事件广播时自动执行，降低时机同步成本。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-12-08T16:00:00.000Z">
-<meta property="article:modified_time" content="2025-12-10T11:18:55.443Z">
+<meta property="article:modified_time" content="2025-12-13T09:07:13.526Z">
 <meta property="article:author" content="Larry-lyx">
 <meta property="article:tag" content="Delegate">
 <meta name="twitter:card" content="summary">
@@ -158,7 +158,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%A7%94%E6%89%98-Delegate"><span class="nav-number">2.</span> <span class="nav-text">什么是委托(Delegate)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E4%BE%8B"><span class="nav-number">3.</span> <span class="nav-text">代码实例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%96%91%E9%9A%BE%E8%A7%A3%E9%87%8A"><span class="nav-number">4.</span> <span class="nav-text">疑难解释</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%A7%94%E6%89%98%E7%9A%84%E5%AE%9A%E4%B9%89%E4%BD%8D%E7%BD%AE%EF%BC%9A%E5%B9%B6%E9%9D%9E%E5%BF%85%E9%A1%BB%E7%BB%91%E5%AE%9A%E5%8F%91%E9%80%81%E6%96%B9"><span class="nav-number">4.1.</span> <span class="nav-text">1. 委托的定义位置：并非必须绑定发送方</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E8%A7%A3%E8%80%A6%E6%96%B9%E6%A1%88%EF%BC%9A%E5%A7%94%E6%89%98%E5%BD%92%E5%B1%9E%E4%BA%8E%E2%80%9C%E9%80%9A%E7%94%A8%E5%9F%BA%E7%B1%BB%E2%80%9D"><span class="nav-number">4.2.</span> <span class="nav-text">2. 解耦方案：委托归属于“通用基类”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%9C%BA%E6%99%AF%E9%80%82%E9%85%8D%EF%BC%9A%E5%A7%94%E6%89%98-vs-GAS%E7%9A%84GE%EF%BC%88GameplayEffect%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">3. 场景适配：委托 vs GAS的GE（GameplayEffect）</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%A7%94%E6%89%98-Delegate"><span class="nav-number">2.</span> <span class="nav-text">什么是委托(Delegate)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E4%BE%8B"><span class="nav-number">3.</span> <span class="nav-text">代码实例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%96%91%E9%9A%BE%E8%A7%A3%E9%87%8A"><span class="nav-number">4.</span> <span class="nav-text">疑难解释</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%A7%94%E6%89%98%E7%9A%84%E5%AE%9A%E4%B9%89%E4%BD%8D%E7%BD%AE%EF%BC%9A%E5%B9%B6%E9%9D%9E%E5%BF%85%E9%A1%BB%E7%BB%91%E5%AE%9A%E5%8F%91%E9%80%81%E6%96%B9"><span class="nav-number">4.1.</span> <span class="nav-text">1. 委托的定义位置：并非必须绑定发送方</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E8%A7%A3%E8%80%A6%E6%96%B9%E6%A1%88%EF%BC%9A%E5%A7%94%E6%89%98%E5%BD%92%E5%B1%9E%E4%BA%8E%E2%80%9C%E9%80%9A%E7%94%A8%E5%9F%BA%E7%B1%BB%E2%80%9D"><span class="nav-number">4.2.</span> <span class="nav-text">2. 解耦方案：委托归属于“通用基类”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%9C%BA%E6%99%AF%E9%80%82%E9%85%8D%EF%BC%9A%E5%A7%94%E6%89%98-vs-GAS%E7%9A%84GE%EF%BC%88GameplayEffect%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">3. 场景适配：委托 vs GAS的GE（GameplayEffect）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%93%9D%E5%9B%BE%E4%B8%AD%E7%9A%84%E5%B9%BF%E6%92%AD-Event-Dispatcher"><span class="nav-number">5.</span> <span class="nav-text">蓝图中的广播 Event Dispatcher</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -182,7 +182,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/ue5-blog/tags/">
-        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-count">40</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -245,7 +245,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-12-10 19:18:55" itemprop="dateModified" datetime="2025-12-10T19:18:55+08:00">2025-12-10</time>
+      <time title="修改时间：2025-12-13 17:07:13" itemprop="dateModified" datetime="2025-12-13T17:07:13+08:00">2025-12-13</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -307,7 +307,7 @@
 <h2 id="3-场景适配：委托-vs-GAS的GE（GameplayEffect）"><a href="#3-场景适配：委托-vs-GAS的GE（GameplayEffect）" class="headerlink" title="3. 场景适配：委托 vs GAS的GE（GameplayEffect）"></a>3. 场景适配：委托 vs GAS的GE（GameplayEffect）</h2><p>子弹击中造成伤害、附加Debuff、击飞（Knockback）等战斗事件，看似可用委托实现，但这类事件的上下文（伤害数值、Debuff类型、击飞力度等）复杂且需支持扩展，纯委托方案会因参数膨胀、逻辑分散变得难以维护。</p>
 <p>在GAS框架中，这类战斗事件更适合用 <strong>GE</strong> 处理：GE天然封装了属性修改、效果叠加、持续时间等战斗逻辑，且通过GameplayTag实现灵活的触发&#x2F;取消规则，比委托更贴合“技能-属性-状态”的联动需求。</p>
 <p>而简单的多播委托更适配<strong>UI交互场景</strong>：比如角色属性（血量、蓝量）变化时更新UI、技能冷却完成时刷新按钮状态——此时可将委托定义在ASC中，所有UI组件绑定该委托，当属性&#x2F;状态变更时广播委托，UI组件自动更新显示，无需业务逻辑层关心具体UI实现。这也是GAS框架中ASC、AS的核心作用之一：作为“通用事件枢纽”，统一管理属性变更、技能状态等事件的广播与回调，兼顾解耦与扩展性。</p>
-
+<h1 id="蓝图中的广播-Event-Dispatcher"><a href="#蓝图中的广播-Event-Dispatcher" class="headerlink" title="蓝图中的广播 Event Dispatcher"></a>蓝图中的广播 Event Dispatcher</h1>
     </div>
 
     
@@ -323,13 +323,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Interface/" rel="prev" title="接口 (Interface)">
-                  <i class="fa fa-angle-left"></i> 接口 (Interface)
+                <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Reflection/" rel="prev" title="反射系统 (Reflection)">
+                  <i class="fa fa-angle-left"></i> 反射系统 (Reflection)
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/" rel="next" title="类的继承 (Inheritance)">
-                  类的继承 (Inheritance) <i class="fa fa-angle-right"></i>
+                <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Interface/" rel="next" title="接口 (Interface)">
+                  接口 (Interface) <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
