@@ -19,19 +19,22 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
 
-    <meta name="description" content="核心总结">
+    <meta name="description" content="核心总结GameplayEvent 是 GAS 框架中类委托（Delegate）的消息传递机制，核心作用是实现对象间的事件通知与数据传递：通过自定义事件标签发送包含数据的事件，Actor 所拥有的 GameplayAbility（GA）可通过 WaitGameplayEvent 监听并响应事件，相比普通委托，它是定制化的消息管道，专用于 GAS 体系内的事件交互。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="GameplayEvent">
 <meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/12/GAS-GameplayEvent/index.html">
 <meta property="og:site_name" content="UE5学习笔记博客">
-<meta property="og:description" content="核心总结">
+<meta property="og:description" content="核心总结GameplayEvent 是 GAS 框架中类委托（Delegate）的消息传递机制，核心作用是实现对象间的事件通知与数据传递：通过自定义事件标签发送包含数据的事件，Actor 所拥有的 GameplayAbility（GA）可通过 WaitGameplayEvent 监听并响应事件，相比普通委托，它是定制化的消息管道，专用于 GAS 体系内的事件交互。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://larry-lyx.github.io/ue5-blog/ue5-blog/images/GameplayEvent_1.png">
+<meta property="og:image" content="https://larry-lyx.github.io/ue5-blog/ue5-blog/images/GameplayEvent_2.png">
 <meta property="article:published_time" content="2025-12-11T16:00:00.000Z">
-<meta property="article:modified_time" content="2025-12-12T07:35:41.190Z">
+<meta property="article:modified_time" content="2025-12-13T09:04:20.088Z">
 <meta property="article:author" content="Larry-lyx">
 <meta property="article:tag" content="GAS">
 <meta property="article:tag" content="GameplayEvent">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://larry-lyx.github.io/ue5-blog/ue5-blog/images/GameplayEvent_1.png">
 
 
 <link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/12/GAS-GameplayEvent/">
@@ -159,7 +162,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GameplayEvent-%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">GameplayEvent 的作用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GameplayEvent-%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text">GameplayEvent 的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF1%EF%BC%9A%E6%9D%A5%E8%87%AA%E5%8A%A8%E7%94%BB%E7%9A%84%E9%80%9A%E7%9F%A5%EF%BC%88%E6%97%A0%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">场景1：来自动画的通知（无数据传递）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF2%EF%BC%9A%E4%BD%BF%E7%94%A8%E5%B1%9E%E6%80%A7%E7%82%B9%E5%A2%9E%E5%8A%A0%E5%B1%9E%E6%80%A7%EF%BC%88%E5%B8%A6%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%92%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">场景2：使用属性点增加属性（带数据传递）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A41%EF%BC%9A%E5%8F%91%E9%80%81-GameplayEvent%EF%BC%88%E5%B8%A6Payload%E6%95%B0%E6%8D%AE%EF%BC%89"><span class="nav-number">3.2.1.</span> <span class="nav-text">步骤1：发送 GameplayEvent（带Payload数据）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A42%EF%BC%9A%E6%8E%A5%E6%94%B6-GameplayEvent%EF%BC%88%E6%8C%81%E7%BB%AD%E7%9B%91%E5%90%AC%EF%BC%89"><span class="nav-number">3.2.2.</span> <span class="nav-text">步骤2：接收 GameplayEvent（持续监听）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#GE-%E6%A8%A1%E6%9D%BF%E7%B1%BB%EF%BC%88GE-ListenForEvent%EF%BC%89%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">GE 模板类（GE_ListenForEvent）设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E8%AF%B4%E6%98%8E"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">设计说明</span></a></li></ol></li></ol></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -238,9 +241,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2025-12-12 00:00:00 / 修改时间：15:35:41" itemprop="dateCreated datePublished" datetime="2025-12-12T00:00:00+08:00">2025-12-12</time>
+      <time title="创建时间：2025-12-12 00:00:00" itemprop="dateCreated datePublished" datetime="2025-12-12T00:00:00+08:00">2025-12-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-12-13 17:04:20" itemprop="dateModified" datetime="2025-12-13T17:04:20+08:00">2025-12-13</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -265,7 +274,38 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>GameplayEvent 是 GAS 框架中类委托（Delegate）的消息传递机制，核心作用是实现对象间的事件通知与数据传递：通过自定义事件标签发送包含数据的事件，Actor 所拥有的 GameplayAbility（GA）可通过 <code>WaitGameplayEvent</code> 监听并响应事件，相比普通委托，它是定制化的消息管道，专用于 GAS 体系内的事件交互。</p>
+<span id="more"></span>
+
+<h1 id="GameplayEvent-的作用"><a href="#GameplayEvent-的作用" class="headerlink" title="GameplayEvent 的作用"></a>GameplayEvent 的作用</h1><p>GameplayEvent 功能上与委托（Delegate）相似，核心用于<strong>对象间的事件通知与数据传递</strong>：当一个对象需要触发另一个对象执行特定逻辑时，可发送带有自定义标签的 GameplayEvent，并在事件中承载数据供接收方处理。</p>
+<p>其与普通委托的核心区别在于：GameplayEvent 是 GAS 体系下的定制化消息管道，事件会发送至目标 Actor，该 Actor 挂载的 GA 可通过 <code>WaitGameplayEvent</code> 节点&#x2F;函数监听并捕获对应事件，适配 GAS 框架的能力体系设计。</p>
+<h1 id="GameplayEvent-的使用"><a href="#GameplayEvent-的使用" class="headerlink" title="GameplayEvent 的使用"></a>GameplayEvent 的使用</h1><p>以下通过两个典型场景，说明 GameplayEvent 的发送、接收及数据传递方式：</p>
+<h2 id="场景1：来自动画的通知（无数据传递）"><a href="#场景1：来自动画的通知（无数据传递）" class="headerlink" title="场景1：来自动画的通知（无数据传递）"></a>场景1：来自动画的通知（无数据传递）</h2><p>以火球技能（GA_FireBolt）为例，需求是“角色动画播放到指定帧时，生成并释放火球”，核心流程如下：</p>
+<ol>
+<li><strong>插入动画通知</strong>：在火球技能对应的动画蒙太奇（Montage）中，在目标时间点插入 Anim_Notify，绑定事件标签 <code>Event.Montage.FireBolt</code>；</li>
+<li><strong>发送 GameplayEvent</strong>：在该 Anim_Notify 的逻辑中，向角色 Actor 发送带有 <code>Event.Montage.FireBolt</code> 标签的 GameplayEvent（无额外数据）；<br><img src="/ue5-blog/ue5-blog/images/GameplayEvent_1.png" alt="alt text"></li>
+<li><strong>监听并响应事件</strong>：在 GA_FireBolt 中播放动画蒙太奇的同时，启用 <code>WaitGameplayEvent</code> 监听 <code>Event.Montage.FireBolt</code> 标签；一旦捕获到该事件，即判定动画播放至指定时机，执行火球生成与释放逻辑。<br><img src="/ue5-blog/ue5-blog/images/GameplayEvent_2.png" alt="alt text"></li>
+</ol>
+<h2 id="场景2：使用属性点增加属性（带数据传递）"><a href="#场景2：使用属性点增加属性（带数据传递）" class="headerlink" title="场景2：使用属性点增加属性（带数据传递）"></a>场景2：使用属性点增加属性（带数据传递）</h2><p>需求是“消耗1个属性点，提升指定属性数值”，需实现<strong>带数据的事件发送</strong>与<strong>持续监听的事件接收</strong>，核心分为发送、接收两步：</p>
+<h3 id="步骤1：发送-GameplayEvent（带Payload数据）"><a href="#步骤1：发送-GameplayEvent（带Payload数据）" class="headerlink" title="步骤1：发送 GameplayEvent（带Payload数据）"></a>步骤1：发送 GameplayEvent（带Payload数据）</h3><p>与无数据传递的场景不同，需将“提升的属性标签”“提升数值”封装到 <code>FGameplayEventData</code>（Payload）中，再发送事件：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::ServerUpgradeAttribute_Implementation</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; AttributeTag)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	FGameplayEventData Payload;</span><br><span class="line">	Payload.EventTag = AttributeTag;</span><br><span class="line">	Payload.EventMagnitude = <span class="number">1.f</span>;</span><br><span class="line"></span><br><span class="line">	UAbilitySystemBlueprintLibrary::<span class="built_in">SendGameplayEventToActor</span>(<span class="built_in">GetAvatarActor</span>() , AttributeTag , Payload);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">GetAvatarActor</span>()-&gt;<span class="built_in">Implements</span>&lt;UPlayerInterface&gt;())</span><br><span class="line">	&#123;</span><br><span class="line">		IPlayerInterface::<span class="built_in">Execute_AddToAttributePoints</span>(<span class="built_in">GetAvatarActor</span>() , <span class="number">-1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="步骤2：接收-GameplayEvent（持续监听）"><a href="#步骤2：接收-GameplayEvent（持续监听）" class="headerlink" title="步骤2：接收 GameplayEvent（持续监听）"></a>步骤2：接收 GameplayEvent（持续监听）</h3><p>GameplayEvent 的接收端固定为 GA，需为玩家角色配置一个全程激活的 GA（如 GA_ListenForEvent），核心逻辑：</p>
+<ol>
+<li>持续通过 <code>WaitGameplayEvent</code> 监听属性提升相关事件，捕获“待修改属性标签”“提升数值”；</li>
+<li>基于通用 GE 模板类（GE_ListenForEvent）制作 GE 实例，修改目标属性数值。</li>
+</ol>
+<h4 id="GE-模板类（GE-ListenForEvent）设计"><a href="#GE-模板类（GE-ListenForEvent）设计" class="headerlink" title="GE 模板类（GE_ListenForEvent）设计"></a>GE 模板类（GE_ListenForEvent）设计</h4><p>为减少 GE 资源开销，仅创建一个通用 GE 模板类，包含所有可提升属性的 Modifier，通过 Set By Caller 传递数值：</p>
+<ul>
+<li>为每个可修改属性创建对应的 Modifier；</li>
+<li>无需修改的属性传入 0 值，仅对目标属性传入有效数值。</li>
+</ul>
+<h4 id="设计说明"><a href="#设计说明" class="headerlink" title="设计说明"></a>设计说明</h4><p>优先在单个 GE 中包含多属性 Modifier，而非创建多个专用 GE：</p>
+<ul>
+<li>优势：GE 是包含 Context 的重量级资源，单个通用 GE 可大幅减少资源开销（本场景中 Context 无实际作用）；</li>
+<li>劣势：每次构建 GE 需遍历所有 Modifier 并填充 Set By Caller 数值，但因可修改属性数量有限，性能损耗可忽略。</li>
+</ul>
+
     </div>
 
     
@@ -282,13 +322,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/11/GAS-GA/" rel="prev" title="GameplayAbility (GA)">
-                  <i class="fa fa-angle-left"></i> GameplayAbility (GA)
+                <a href="/ue5-blog/2025/12/12/GAS-GE/" rel="prev" title="GameplayEffect (GE)">
+                  <i class="fa fa-angle-left"></i> GameplayEffect (GE)
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/12/GAS-GE/" rel="next" title="GameplayEffect (GE)">
-                  GameplayEffect (GE) <i class="fa fa-angle-right"></i>
+                <a href="/ue5-blog/2025/12/12/GAS-AS/" rel="next" title="AttributeSet (AS)">
+                  AttributeSet (AS) <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
