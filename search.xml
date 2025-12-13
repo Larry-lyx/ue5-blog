@@ -1,14 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>实例化 (Instance)</title>
-    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Instance/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+    <title>类的继承 (Inheritance)</title>
+    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>类的继承是游戏开发中实现代码复用、逻辑扩展的核心手段，其核心价值在于：</p>
+<ul>
+<li>通过基类统一抽象通用逻辑，子类定制差异化行为；</li>
+<li>保证代码可维护性，尤其在C++&#x2F;蓝图混合开发中，需兼顾封装性与灵活扩展。</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="基类"><a href="#基类" class="headerlink" title="基类"></a>基类</h1><p>游戏开发中，为同类对象构建基类是提升开发效率的核心习惯，核心原因有二：</p>
+<ol>
+<li><strong>通用逻辑复用</strong>：大量游戏对象（如敌人、道具、技能）存在共性属性&#x2F;行为（如血量、受击逻辑、销毁逻辑），基类可集中封装这些通用逻辑，避免重复编码；</li>
+<li><strong>批量扩展便捷</strong>：后续需为某类对象新增功能（如所有敌人添加“被击硬直”）时，只需修改基类，所有子类自动继承，无需逐个调整。</li>
+</ol>
+<p>在UE开发中，几乎所有自定义C++类都会配套创建<strong>蓝图基类</strong>，核心优势在于：</p>
+<ul>
+<li>配置灵活：无需硬编码&#x2F;重新编译，即可调整Mesh、数值参数（如敌人血量、技能冷却时间），快速验证效果；</li>
+<li>轻量逻辑快速迭代：简单逻辑（如UI提示、音效触发）可直接在蓝图中实现，开发效率高，且非密集计算类逻辑几乎无性能损耗。</li>
+</ul>
+<p>但蓝图也有明确的使用边界：</p>
+<ul>
+<li>复杂逻辑易因节点布线混乱导致维护成本高；</li>
+<li>版本控制中难以追踪蓝图的具体修改内容。<br>因此最佳实践是：蓝图仅处理“配置+极简逻辑”，复杂逻辑仍放在C++中实现。</li>
+</ul>
+<h1 id="继承关系"><a href="#继承关系" class="headerlink" title="继承关系"></a>继承关系</h1><p>丰富的功能实现依赖灵活的继承体系：子类可继承父类的变量&#x2F;函数，也可重写函数逻辑，极大提升代码扩展性。</p>
+<h2 id="核心问题：为何要区分-public-protected-private-访问权限？"><a href="#核心问题：为何要区分-public-protected-private-访问权限？" class="headerlink" title="核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？"></a>核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？</h2><p>个人开发中，若类的规模小、仅自己维护，权限区分的影响不明显；但在团队协作或源码复用场景下，权限划分是“降低理解成本、避免逻辑混乱”的关键：</p>
+<ul>
+<li><strong>public</strong>：对外暴露的核心接口（如<code>GetHealth()</code>），使用者无需关注内部实现，直接调用即可；</li>
+<li><strong>protected</strong>：仅子类可访问&#x2F;重写的逻辑（如<code>OnTakeDamage()</code>），保证子类可定制，又避免外部随意调用；</li>
+<li><strong>private</strong>：父类纯内部逻辑（如辅助计算的临时变量），完全隐藏实现细节，防止意外篡改。</li>
+</ul>
+<p>因此，当类的逻辑逐渐复杂时，需梳理头文件：明确权限划分、添加注释说明接口用途，让使用者快速知晓“哪些可调用、哪些可重写、哪些不可触碰”，无需深挖实现细节。</p>
+<h1 id="类与实例"><a href="#类与实例" class="headerlink" title="类与实例"></a>类与实例</h1><p>类是“模板”，实例是基于模板创建的“具体对象”：类中定义的非静态变量&#x2F;函数，会在每个实例中独立存在（如两个Enemy实例的血量、位置相互独立）。</p>
+<h2 id="静态成员的适用场景"><a href="#静态成员的适用场景" class="headerlink" title="静态成员的适用场景"></a>静态成员的适用场景</h2><p>对无需区分实例的通用逻辑&#x2F;数据（如全局配置、工具函数），可添加<code>static</code>关键字绑定到类上，核心优势：</p>
+<ol>
+<li>性能优化：无需创建实例即可调用，减少内存占用；</li>
+<li>逻辑统一：所有实例共享同一数据&#x2F;逻辑。</li>
+</ol>
+<h2 id="关键注意点"><a href="#关键注意点" class="headerlink" title="关键注意点"></a>关键注意点</h2><p>UE开发中需牢记：继承后的属性&#x2F;函数始终归属于“具体实例”，而非类本身。例如：</p>
+<ul>
+<li>为<code>Enemy1</code>实例绑定的受击回调，仅会响应该实例的受击事件；</li>
+<li>修改<code>Enemy2</code>实例的血量，不会影响其他Enemy实例的状态。<br>即使IDE的自动提示已经十分完善，也需时刻明确“操作的是类模板还是实例对象”，避免因边界混淆导致逻辑错误。</li>
+</ul>
+]]></content>
       <categories>
         <category>ProgrammingSkills</category>
       </categories>
       <tags>
-        <tag>Instance</tag>
+        <tag>Inheritance</tag>
       </tags>
   </entry>
   <entry>
@@ -91,12 +132,24 @@
 <h2 id="3-场景适配：委托-vs-GAS的GE（GameplayEffect）"><a href="#3-场景适配：委托-vs-GAS的GE（GameplayEffect）" class="headerlink" title="3. 场景适配：委托 vs GAS的GE（GameplayEffect）"></a>3. 场景适配：委托 vs GAS的GE（GameplayEffect）</h2><p>子弹击中造成伤害、附加Debuff、击飞（Knockback）等战斗事件，看似可用委托实现，但这类事件的上下文（伤害数值、Debuff类型、击飞力度等）复杂且需支持扩展，纯委托方案会因参数膨胀、逻辑分散变得难以维护。</p>
 <p>在GAS框架中，这类战斗事件更适合用 <strong>GE</strong> 处理：GE天然封装了属性修改、效果叠加、持续时间等战斗逻辑，且通过GameplayTag实现灵活的触发&#x2F;取消规则，比委托更贴合“技能-属性-状态”的联动需求。</p>
 <p>而简单的多播委托更适配<strong>UI交互场景</strong>：比如角色属性（血量、蓝量）变化时更新UI、技能冷却完成时刷新按钮状态——此时可将委托定义在ASC中，所有UI组件绑定该委托，当属性&#x2F;状态变更时广播委托，UI组件自动更新显示，无需业务逻辑层关心具体UI实现。这也是GAS框架中ASC、AS的核心作用之一：作为“通用事件枢纽”，统一管理属性变更、技能状态等事件的广播与回调，兼顾解耦与扩展性。</p>
-<h1 id="蓝图中的广播-Event-Dispatcher"><a href="#蓝图中的广播-Event-Dispatcher" class="headerlink" title="蓝图中的广播 Event Dispatcher"></a>蓝图中的广播 Event Dispatcher</h1>]]></content>
+<h1 id="蓝图中的广播-Event-Dispatcher"><a href="#蓝图中的广播-Event-Dispatcher" class="headerlink" title="蓝图中的广播 Event Dispatcher"></a>蓝图中的广播 Event Dispatcher</h1><p>蓝图中使用广播很简单，仍然是三步：注册、广播、回调；<br><img src="/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/image.png" alt="alt text"><br><img src="/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/image1.png" alt="alt text"></p>
+]]></content>
       <categories>
         <category>ProgrammingSkills</category>
       </categories>
       <tags>
         <tag>Delegate</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>实例化 (Instance)</title>
+    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Instance/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Instance</tag>
       </tags>
   </entry>
   <entry>
@@ -150,73 +203,6 @@
       <tags>
         <tag>Pointer</tag>
         <tag>Handle</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>函数库 (Library)</title>
-    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Library/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>自定义函数库是UE开发中解耦跨类通用逻辑、提升代码复用性的核心手段，通过封装静态通用函数，可避免重复编码、减少性能损耗（如频繁Cast），同时让跨模块&#x2F;无继承关系的类高效共享算法与工具逻辑。</p>
-<span id="more"></span>
-
-<h1 id="自定义函数库的优势"><a href="#自定义函数库的优势" class="headerlink" title="自定义函数库的优势"></a>自定义函数库的优势</h1><ol>
-<li><strong>解耦跨类复用逻辑</strong>：许多通用算法（如位置计算、数据校验）的使用方无明显继承关系（如敌人召唤逻辑、战利品生成、弹道计算），函数库可作为“公共逻辑容器”，脱离类的继承层级限制；</li>
-<li><strong>提升开发效率</strong>：将可复用逻辑（如角色周围随机位置生成）提前封装为通用函数，后续开发无需重复编写&#x2F;调试，直接调用即可；</li>
-<li><strong>全局高效访问</strong>：函数库中的函数需声明为<code>static</code>（静态），无需创建类实例即可调用，兼顾全局访问性与性能；</li>
-<li><strong>统一维护入口</strong>：通用逻辑集中管理，后续修改（如调整位置算法的精度）只需改函数库，所有调用方自动生效，降低维护成本。</li>
-</ol>
-<h1 id="自定义函数库的核心内容"><a href="#自定义函数库的核心内容" class="headerlink" title="自定义函数库的核心内容"></a>自定义函数库的核心内容</h1><h2 id="1-通用算法（通用化参数设计）"><a href="#1-通用算法（通用化参数设计）" class="headerlink" title="1. 通用算法（通用化参数设计）"></a>1. 通用算法（通用化参数设计）</h2><p>封装无业务耦合的纯算法逻辑，参数设计需足够通用，避免硬编码，适配多场景调用。</p>
-<h3 id="2-轻量化类型转换（封装static-cast的Setter-Getter）"><a href="#2-轻量化类型转换（封装static-cast的Setter-Getter）" class="headerlink" title="2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）"></a>2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）</h3><p>UE中<code>Cast</code>操作（动态类型转换）性能开销大，需尽量避免；对于自定义扩展的框架类型（如GAS的<code>GameplayEffectContext</code>），可将<code>static_cast</code>封装到函数库，减少重复转换逻辑，提升调用效率。</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemLibrary::SetIsBlockedHit</span><span class="params">(FGameplayEffectContextHandle&amp; EffectContextHandle, <span class="type">bool</span> bInIsBlockedHit)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (FCustomGameplayEffectContext* CustomContext = <span class="built_in">static_cast</span>&lt;FCustomGameplayEffectContext*&gt;(EffectContextHandle.<span class="built_in">Get</span>()))</span><br><span class="line">	&#123;</span><br><span class="line">		CustomContext-&gt;<span class="built_in">SetBlockedHit</span>(bInIsBlockedHit);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="自定义函数库的关键规范"><a href="#自定义函数库的关键规范" class="headerlink" title="自定义函数库的关键规范"></a>自定义函数库的关键规范</h3><ol>
-<li><strong>类继承要求</strong>：必须继承<code>UBlueprintFunctionLibrary</code>，否则无法作为全局函数库使用；</li>
-<li><strong>函数声明规则</strong>：<ul>
-<li>函数需为<code>static</code> + <code>UFUNCTION(BlueprintCallable)</code>，支持C++&#x2F;蓝图双端调用；</li>
-<li>加<code>Category</code>分类，便于蓝图中搜索和管理；</li>
-</ul>
-</li>
-<li><strong>参数设计原则</strong>：<ul>
-<li>通用算法参数“按需开放”（如角度范围设默认值），适配多场景；</li>
-<li>避免传入冗余参数，核心参数前置，可选参数后置并设默认值；</li>
-</ul>
-</li>
-<li><strong>性能注意</strong>：<ul>
-<li>函数库仅封装轻量逻辑（算法、类型转换），不存放状态变量；</li>
-<li>避免在函数库中执行耗时操作（如加载资源、遍历大量数据）；</li>
-</ul>
-</li>
-<li><strong>头文件循环引用提醒</strong>：<br>函数库中若直接引用其他类的头文件，这些被引用的类将无法反向包含函数库头文件（触发循环引用报错）。建议通过“前向声明”替代直接包含：仅在函数库头文件中对所需类做前向声明（如<code>class FCustomGameplayEffectContext;</code>），函数具体实现放在cpp文件中，且仅在cpp里包含对应类的头文件，避免循环引用问题。</li>
-</ol>
-]]></content>
-      <categories>
-        <category>ProgrammingSkills</category>
-      </categories>
-      <tags>
-        <tag>Library</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>单例 (Singleton)</title>
-    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Singleton/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>单例的核心是确保类&#x2F;结构体在程序运行期间仅有<strong>一个全局实例</strong>，并提供统一的静态访问入口。<br>实际应用中，最常见的场景式采用原生C++单例实现GameplayTag的集中管理，避免多实例导致Tag重复注册、数值不一致，保证各个模块共享一套Tag。</p>
-<span id="more"></span>
-
-<h1 id="单例的使用场景"><a href="#单例的使用场景" class="headerlink" title="单例的使用场景"></a>单例的使用场景</h1><p>单例适用于“需全局统一访问、仅初始化一次”的场景：</p>
-<ol>
-<li><strong>全局常量&#x2F;配置管理</strong>：GameplayTag是游戏内通用标记（属性、技能、状态等），需全局唯一注册、跨模块共享，单例可确保所有模块使用同一套Tag，避免重复定义；</li>
-<li><strong>全局状态管理</strong>：如游戏全局开关（音效、无敌模式）、跨场景共享的核心参数，单例保证状态唯一且修改可全局感知；</li>
-<li><strong>全局服务类</strong>：如日志管理、网络请求封装，单例避免多实例导致的资源冲突（如重复创建网络连接）。</li>
-</ol>
-<h1 id="单例的构建和引用"><a href="#单例的构建和引用" class="headerlink" title="单例的构建和引用"></a>单例的构建和引用</h1><h2 id="1-单例的核心构建规则"><a href="#1-单例的核心构建规则" class="headerlink" title="1. 单例的核心构建规则"></a>1. 单例的核心构建规则</h2><h3 id="头文件（-h）设计：封闭实例-开放访问"><a href="#头文件（-h）设计：封闭实例-开放访问" class="headerlink" title="头文件（.h）设计：封闭实例+开放访问"></a>头文件（.h）设计：封闭实例+开放访问</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 核心：私有静态实例 + 公有静态Get方法，确保唯一实例 + 全局访问</span></span><br><span class="line"><span class="keyword">struct</span>  <span class="title class_">FCustomGameplayTags</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 全局访问入口：返回const引用，避免外部修改实例</span></span><br><span class="line">	<span class="function"><span class="type">static</span> <span class="type">const</span> FCustomGameplayTags&amp; <span class="title">Get</span><span class="params">()</span></span>&#123;<span class="keyword">return</span> GameplayTags;&#125;</span><br><span class="line">    <span class="comment">// 初始化方法：单独封装Tag注册逻辑，在游戏启动时执行</span></span><br><span class="line">	<span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">InitializeNativeGameplayTags</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 需全局共享的GameplayTag变量</span></span><br><span class="line">    FGameplayTag Attributes_Primary_Strength;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 私有静态实例：仅类内可访问，避免外部创建多实例</span></span><br><span class="line">	<span class="type">static</span> FCustomGameplayTags GameplayTags;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<h3 id="源文件（-cpp）实现：初始化实例-注册逻辑"><a href="#源文件（-cpp）实现：初始化实例-注册逻辑" class="headerlink" title="源文件（.cpp）实现：初始化实例+注册逻辑"></a>源文件（.cpp）实现：初始化实例+注册逻辑</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 初始化静态实例（程序启动时创建，全局唯一）</span></span><br><span class="line">FCustomGameplayTags FCustomGameplayTags::GameplayTags;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 封装GameplayTag的注册逻辑，仅需执行一次</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">FCustomGameplayTags::InitializeNativeGameplayTags</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 向UE引擎注册自定义Native GameplayTag，绑定标记名和说明</span></span><br><span class="line">	GameplayTags.Attributes_Primary_Strength = UGameplayTagsManager::<span class="built_in">Get</span>().<span class="built_in">AddNativeGameplayTag</span>(</span><br><span class="line">		<span class="built_in">FName</span>(<span class="string">&quot;Attributes.Primary.Strength&quot;</span>) ,</span><br><span class="line">		<span class="built_in">FString</span>(<span class="string">&quot;Increases physical damage&quot;</span>)</span><br><span class="line">	);</span><br><span class="line">	<span class="comment">// 可扩展：注册更多Tag</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="2-单例的全局引用方式"><a href="#2-单例的全局引用方式" class="headerlink" title="2. 单例的全局引用方式"></a>2. 单例的全局引用方式</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 任意模块/类中，通过Get()获取唯一实例，访问已注册的Tag</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AEnemy::CalculateDamage</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 全局访问单例中的Tag，无需创建FCustomGameplayTags实例</span></span><br><span class="line">    <span class="type">const</span> FGameplayTag StrengthTag = FCustomGameplayTags::<span class="built_in">Get</span>().Attributes_Primary_Strength;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>ProgrammingSkills</category>
-      </categories>
-      <tags>
-        <tag>Singleton</tag>
       </tags>
   </entry>
   <entry>
@@ -307,77 +293,46 @@
       </tags>
   </entry>
   <entry>
-    <title>游戏开发中的锁：以FScopedAbilityListLock为例</title>
-    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Lock/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>锁的作用是保护<strong>临界资源</strong>避免并发读写冲突，<code>FScopedAbilityListLock</code>是针对GAS中ActivatableAbilities的轻量级封装锁，只要遍历<code>GetActivatableAbilities()</code>,就需要申请锁进行保护。</p>
+    <title>函数库 (Library)</title>
+    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Library/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>自定义函数库是UE开发中解耦跨类通用逻辑、提升代码复用性的核心手段，通过封装静态通用函数，可避免重复编码、减少性能损耗（如频繁Cast），同时让跨模块&#x2F;无继承关系的类高效共享算法与工具逻辑。</p>
 <span id="more"></span>
 
-<h1 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h1><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAbilitySystemComponent::ClearAbilityOfSlot</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; Slot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="function">FScopedAbilityListLock <span class="title">ActiveScopLock</span><span class="params">(*<span class="keyword">this</span>)</span></span>;</span><br><span class="line">	<span class="keyword">for</span> (FGameplayAbilitySpec&amp; Spec : <span class="built_in">GetActivatableAbilities</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="built_in">AbilityHasSlot</span>(&amp;Spec , Slot))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">ClearSlot</span>(&amp;Spec);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="自定义函数库的优势"><a href="#自定义函数库的优势" class="headerlink" title="自定义函数库的优势"></a>自定义函数库的优势</h1><ol>
+<li><strong>解耦跨类复用逻辑</strong>：许多通用算法（如位置计算、数据校验）的使用方无明显继承关系（如敌人召唤逻辑、战利品生成、弹道计算），函数库可作为“公共逻辑容器”，脱离类的继承层级限制；</li>
+<li><strong>提升开发效率</strong>：将可复用逻辑（如角色周围随机位置生成）提前封装为通用函数，后续开发无需重复编写&#x2F;调试，直接调用即可；</li>
+<li><strong>全局高效访问</strong>：函数库中的函数需声明为<code>static</code>（静态），无需创建类实例即可调用，兼顾全局访问性与性能；</li>
+<li><strong>统一维护入口</strong>：通用逻辑集中管理，后续修改（如调整位置算法的精度）只需改函数库，所有调用方自动生效，降低维护成本。</li>
+</ol>
+<h1 id="自定义函数库的核心内容"><a href="#自定义函数库的核心内容" class="headerlink" title="自定义函数库的核心内容"></a>自定义函数库的核心内容</h1><h2 id="1-通用算法（通用化参数设计）"><a href="#1-通用算法（通用化参数设计）" class="headerlink" title="1. 通用算法（通用化参数设计）"></a>1. 通用算法（通用化参数设计）</h2><p>封装无业务耦合的纯算法逻辑，参数设计需足够通用，避免硬编码，适配多场景调用。</p>
+<h3 id="2-轻量化类型转换（封装static-cast的Setter-Getter）"><a href="#2-轻量化类型转换（封装static-cast的Setter-Getter）" class="headerlink" title="2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）"></a>2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）</h3><p>UE中<code>Cast</code>操作（动态类型转换）性能开销大，需尽量避免；对于自定义扩展的框架类型（如GAS的<code>GameplayEffectContext</code>），可将<code>static_cast</code>封装到函数库，减少重复转换逻辑，提升调用效率。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemLibrary::SetIsBlockedHit</span><span class="params">(FGameplayEffectContextHandle&amp; EffectContextHandle, <span class="type">bool</span> bInIsBlockedHit)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (FCustomGameplayEffectContext* CustomContext = <span class="built_in">static_cast</span>&lt;FCustomGameplayEffectContext*&gt;(EffectContextHandle.<span class="built_in">Get</span>()))</span><br><span class="line">	&#123;</span><br><span class="line">		CustomContext-&gt;<span class="built_in">SetBlockedHit</span>(bInIsBlockedHit);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h1 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h1><p><code>GetActivatableAbilities()</code> 返回的技能列表在游戏运行中会被高频修改（如技能锁定、添加、冷却禁用等），若读取列表时被其他代码路径修改，会导致迭代器失效、程序崩溃，因此需通过锁保护该临界资源。</p>
-<p>这一设计与操作系统中的互斥锁思想一致，但存在两点关键差异：</p>
-<ol>
-<li>此处使用的是“作用域锁”，会随作用域结束（如函数执行完毕）自动析构解锁，无需手动调用<code>Unlock()</code>；</li>
-<li>列表遍历操作耗时极短，无“线程等待资源”场景，因此锁的底层采用自旋锁实现——让线程短暂自旋等待锁释放，而非执行休眠&#x2F;唤醒操作，兼顾效率与安全性。</li>
+<h3 id="自定义函数库的关键规范"><a href="#自定义函数库的关键规范" class="headerlink" title="自定义函数库的关键规范"></a>自定义函数库的关键规范</h3><ol>
+<li><strong>类继承要求</strong>：必须继承<code>UBlueprintFunctionLibrary</code>，否则无法作为全局函数库使用；</li>
+<li><strong>函数声明规则</strong>：<ul>
+<li>函数需为<code>static</code> + <code>UFUNCTION(BlueprintCallable)</code>，支持C++&#x2F;蓝图双端调用；</li>
+<li>加<code>Category</code>分类，便于蓝图中搜索和管理；</li>
+</ul>
+</li>
+<li><strong>参数设计原则</strong>：<ul>
+<li>通用算法参数“按需开放”（如角度范围设默认值），适配多场景；</li>
+<li>避免传入冗余参数，核心参数前置，可选参数后置并设默认值；</li>
+</ul>
+</li>
+<li><strong>性能注意</strong>：<ul>
+<li>函数库仅封装轻量逻辑（算法、类型转换），不存放状态变量；</li>
+<li>避免在函数库中执行耗时操作（如加载资源、遍历大量数据）；</li>
+</ul>
+</li>
+<li><strong>头文件循环引用提醒</strong>：<br>函数库中若直接引用其他类的头文件，这些被引用的类将无法反向包含函数库头文件（触发循环引用报错）。建议通过“前向声明”替代直接包含：仅在函数库头文件中对所需类做前向声明（如<code>class FCustomGameplayEffectContext;</code>），函数具体实现放在cpp文件中，且仅在cpp里包含对应类的头文件，避免循环引用问题。</li>
 </ol>
 ]]></content>
       <categories>
         <category>ProgrammingSkills</category>
       </categories>
       <tags>
-        <tag>Lock</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>类的继承 (Inheritance)</title>
-    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>类的继承是游戏开发中实现代码复用、逻辑扩展的核心手段，其核心价值在于：</p>
-<ul>
-<li>通过基类统一抽象通用逻辑，子类定制差异化行为；</li>
-<li>保证代码可维护性，尤其在C++&#x2F;蓝图混合开发中，需兼顾封装性与灵活扩展。</li>
-</ul>
-<span id="more"></span>
-
-<h1 id="基类"><a href="#基类" class="headerlink" title="基类"></a>基类</h1><p>游戏开发中，为同类对象构建基类是提升开发效率的核心习惯，核心原因有二：</p>
-<ol>
-<li><strong>通用逻辑复用</strong>：大量游戏对象（如敌人、道具、技能）存在共性属性&#x2F;行为（如血量、受击逻辑、销毁逻辑），基类可集中封装这些通用逻辑，避免重复编码；</li>
-<li><strong>批量扩展便捷</strong>：后续需为某类对象新增功能（如所有敌人添加“被击硬直”）时，只需修改基类，所有子类自动继承，无需逐个调整。</li>
-</ol>
-<p>在UE开发中，几乎所有自定义C++类都会配套创建<strong>蓝图基类</strong>，核心优势在于：</p>
-<ul>
-<li>配置灵活：无需硬编码&#x2F;重新编译，即可调整Mesh、数值参数（如敌人血量、技能冷却时间），快速验证效果；</li>
-<li>轻量逻辑快速迭代：简单逻辑（如UI提示、音效触发）可直接在蓝图中实现，开发效率高，且非密集计算类逻辑几乎无性能损耗。</li>
-</ul>
-<p>但蓝图也有明确的使用边界：</p>
-<ul>
-<li>复杂逻辑易因节点布线混乱导致维护成本高；</li>
-<li>版本控制中难以追踪蓝图的具体修改内容。<br>因此最佳实践是：蓝图仅处理“配置+极简逻辑”，复杂逻辑仍放在C++中实现。</li>
-</ul>
-<h1 id="继承关系"><a href="#继承关系" class="headerlink" title="继承关系"></a>继承关系</h1><p>丰富的功能实现依赖灵活的继承体系：子类可继承父类的变量&#x2F;函数，也可重写函数逻辑，极大提升代码扩展性。</p>
-<h2 id="核心问题：为何要区分-public-protected-private-访问权限？"><a href="#核心问题：为何要区分-public-protected-private-访问权限？" class="headerlink" title="核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？"></a>核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？</h2><p>个人开发中，若类的规模小、仅自己维护，权限区分的影响不明显；但在团队协作或源码复用场景下，权限划分是“降低理解成本、避免逻辑混乱”的关键：</p>
-<ul>
-<li><strong>public</strong>：对外暴露的核心接口（如<code>GetHealth()</code>），使用者无需关注内部实现，直接调用即可；</li>
-<li><strong>protected</strong>：仅子类可访问&#x2F;重写的逻辑（如<code>OnTakeDamage()</code>），保证子类可定制，又避免外部随意调用；</li>
-<li><strong>private</strong>：父类纯内部逻辑（如辅助计算的临时变量），完全隐藏实现细节，防止意外篡改。</li>
-</ul>
-<p>因此，当类的逻辑逐渐复杂时，需梳理头文件：明确权限划分、添加注释说明接口用途，让使用者快速知晓“哪些可调用、哪些可重写、哪些不可触碰”，无需深挖实现细节。</p>
-<h1 id="类与实例"><a href="#类与实例" class="headerlink" title="类与实例"></a>类与实例</h1><p>类是“模板”，实例是基于模板创建的“具体对象”：类中定义的非静态变量&#x2F;函数，会在每个实例中独立存在（如两个Enemy实例的血量、位置相互独立）。</p>
-<h2 id="静态成员的适用场景"><a href="#静态成员的适用场景" class="headerlink" title="静态成员的适用场景"></a>静态成员的适用场景</h2><p>对无需区分实例的通用逻辑&#x2F;数据（如全局配置、工具函数），可添加<code>static</code>关键字绑定到类上，核心优势：</p>
-<ol>
-<li>性能优化：无需创建实例即可调用，减少内存占用；</li>
-<li>逻辑统一：所有实例共享同一数据&#x2F;逻辑。</li>
-</ol>
-<h2 id="关键注意点"><a href="#关键注意点" class="headerlink" title="关键注意点"></a>关键注意点</h2><p>UE开发中需牢记：继承后的属性&#x2F;函数始终归属于“具体实例”，而非类本身。例如：</p>
-<ul>
-<li>为<code>Enemy1</code>实例绑定的受击回调，仅会响应该实例的受击事件；</li>
-<li>修改<code>Enemy2</code>实例的血量，不会影响其他Enemy实例的状态。<br>即使IDE的自动提示已经十分完善，也需时刻明确“操作的是类模板还是实例对象”，避免因边界混淆导致逻辑错误。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>ProgrammingSkills</category>
-      </categories>
-      <tags>
-        <tag>Inheritance</tag>
+        <tag>Library</tag>
       </tags>
   </entry>
   <entry>
@@ -435,6 +390,30 @@
       </tags>
   </entry>
   <entry>
+    <title>单例 (Singleton)</title>
+    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Singleton/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>单例的核心是确保类&#x2F;结构体在程序运行期间仅有<strong>一个全局实例</strong>，并提供统一的静态访问入口。<br>实际应用中，最常见的场景式采用原生C++单例实现GameplayTag的集中管理，避免多实例导致Tag重复注册、数值不一致，保证各个模块共享一套Tag。</p>
+<span id="more"></span>
+
+<h1 id="单例的使用场景"><a href="#单例的使用场景" class="headerlink" title="单例的使用场景"></a>单例的使用场景</h1><p>单例适用于“需全局统一访问、仅初始化一次”的场景：</p>
+<ol>
+<li><strong>全局常量&#x2F;配置管理</strong>：GameplayTag是游戏内通用标记（属性、技能、状态等），需全局唯一注册、跨模块共享，单例可确保所有模块使用同一套Tag，避免重复定义；</li>
+<li><strong>全局状态管理</strong>：如游戏全局开关（音效、无敌模式）、跨场景共享的核心参数，单例保证状态唯一且修改可全局感知；</li>
+<li><strong>全局服务类</strong>：如日志管理、网络请求封装，单例避免多实例导致的资源冲突（如重复创建网络连接）。</li>
+</ol>
+<h1 id="单例的构建和引用"><a href="#单例的构建和引用" class="headerlink" title="单例的构建和引用"></a>单例的构建和引用</h1><h2 id="1-单例的核心构建规则"><a href="#1-单例的核心构建规则" class="headerlink" title="1. 单例的核心构建规则"></a>1. 单例的核心构建规则</h2><h3 id="头文件（-h）设计：封闭实例-开放访问"><a href="#头文件（-h）设计：封闭实例-开放访问" class="headerlink" title="头文件（.h）设计：封闭实例+开放访问"></a>头文件（.h）设计：封闭实例+开放访问</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 核心：私有静态实例 + 公有静态Get方法，确保唯一实例 + 全局访问</span></span><br><span class="line"><span class="keyword">struct</span>  <span class="title class_">FCustomGameplayTags</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 全局访问入口：返回const引用，避免外部修改实例</span></span><br><span class="line">	<span class="function"><span class="type">static</span> <span class="type">const</span> FCustomGameplayTags&amp; <span class="title">Get</span><span class="params">()</span></span>&#123;<span class="keyword">return</span> GameplayTags;&#125;</span><br><span class="line">    <span class="comment">// 初始化方法：单独封装Tag注册逻辑，在游戏启动时执行</span></span><br><span class="line">	<span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">InitializeNativeGameplayTags</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 需全局共享的GameplayTag变量</span></span><br><span class="line">    FGameplayTag Attributes_Primary_Strength;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 私有静态实例：仅类内可访问，避免外部创建多实例</span></span><br><span class="line">	<span class="type">static</span> FCustomGameplayTags GameplayTags;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="源文件（-cpp）实现：初始化实例-注册逻辑"><a href="#源文件（-cpp）实现：初始化实例-注册逻辑" class="headerlink" title="源文件（.cpp）实现：初始化实例+注册逻辑"></a>源文件（.cpp）实现：初始化实例+注册逻辑</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 初始化静态实例（程序启动时创建，全局唯一）</span></span><br><span class="line">FCustomGameplayTags FCustomGameplayTags::GameplayTags;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 封装GameplayTag的注册逻辑，仅需执行一次</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">FCustomGameplayTags::InitializeNativeGameplayTags</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 向UE引擎注册自定义Native GameplayTag，绑定标记名和说明</span></span><br><span class="line">	GameplayTags.Attributes_Primary_Strength = UGameplayTagsManager::<span class="built_in">Get</span>().<span class="built_in">AddNativeGameplayTag</span>(</span><br><span class="line">		<span class="built_in">FName</span>(<span class="string">&quot;Attributes.Primary.Strength&quot;</span>) ,</span><br><span class="line">		<span class="built_in">FString</span>(<span class="string">&quot;Increases physical damage&quot;</span>)</span><br><span class="line">	);</span><br><span class="line">	<span class="comment">// 可扩展：注册更多Tag</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-单例的全局引用方式"><a href="#2-单例的全局引用方式" class="headerlink" title="2. 单例的全局引用方式"></a>2. 单例的全局引用方式</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 任意模块/类中，通过Get()获取唯一实例，访问已注册的Tag</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AEnemy::CalculateDamage</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 全局访问单例中的Tag，无需创建FCustomGameplayTags实例</span></span><br><span class="line">    <span class="type">const</span> FGameplayTag StrengthTag = FCustomGameplayTags::<span class="built_in">Get</span>().Attributes_Primary_Strength;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Singleton</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>行为树 (BehaviorTree)</title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/AI/BehaviorTree/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
@@ -448,72 +427,25 @@
       </tags>
   </entry>
   <entry>
-    <title>AbilityTask</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilityTask/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>AbilityTask</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>AttributeSet (AS)</title>
-    <url>/ue5-blog//2025/12/12/GAS-AS/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>AttributeSet（AS）是GAS框架中统一管理角色属性的核心类，承担“属性存储+属性变化处理”两大核心职责：按属性特性划分存储策略（通用属性存AS、玩家特有属性存PlayerState），通过“普通属性+元属性”分层处理简单&#x2F;复杂属性修改逻辑，最终依托重写核心函数完成属性变化的标准化处理。</p>
+    <title>游戏开发中的锁：以FScopedAbilityListLock为例</title>
+    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Lock/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>锁的作用是保护<strong>临界资源</strong>避免并发读写冲突，<code>FScopedAbilityListLock</code>是针对GAS中ActivatableAbilities的轻量级封装锁，只要遍历<code>GetActivatableAbilities()</code>,就需要申请锁进行保护。</p>
 <span id="more"></span>
 
-<h1 id="定义属性"><a href="#定义属性" class="headerlink" title="定义属性"></a>定义属性</h1><h2 id="核心说明"><a href="#核心说明" class="headerlink" title="核心说明"></a>核心说明</h2><p>AS的属性存储与生命周期按角色类型和属性用途区分：</p>
+<h1 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h1><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAbilitySystemComponent::ClearAbilityOfSlot</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; Slot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="function">FScopedAbilityListLock <span class="title">ActiveScopLock</span><span class="params">(*<span class="keyword">this</span>)</span></span>;</span><br><span class="line">	<span class="keyword">for</span> (FGameplayAbilitySpec&amp; Spec : <span class="built_in">GetActivatableAbilities</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="built_in">AbilityHasSlot</span>(&amp;Spec , Slot))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">ClearSlot</span>(&amp;Spec);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h1><p><code>GetActivatableAbilities()</code> 返回的技能列表在游戏运行中会被高频修改（如技能锁定、添加、冷却禁用等），若读取列表时被其他代码路径修改，会导致迭代器失效、程序崩溃，因此需通过锁保护该临界资源。</p>
+<p>这一设计与操作系统中的互斥锁思想一致，但存在两点关键差异：</p>
 <ol>
-<li><strong>通用属性</strong>（血量、蓝量、力量等）：存放于AS中，适配所有角色（玩家&#x2F;敌人）；</li>
-<li><strong>玩家特有属性</strong>（XP、属性点、技能点等）：存放于PlayerState（PS）中（敌人无此类属性）；</li>
-<li><strong>AS挂载策略</strong>：<ul>
-<li>玩家AS：挂载在PS中，死亡后可继承属性（满足存档&#x2F;持久化需求）；</li>
-<li>敌人AS：挂载在角色类中，随角色创建实例化、销毁后自动释放。</li>
-</ul>
-</li>
+<li>此处使用的是“作用域锁”，会随作用域结束（如函数执行完毕）自动析构解锁，无需手动调用<code>Unlock()</code>；</li>
+<li>列表遍历操作耗时极短，无“线程等待资源”场景，因此锁的底层采用自旋锁实现——让线程短暂自旋等待锁释放，而非执行休眠&#x2F;唤醒操作，兼顾效率与安全性。</li>
 </ol>
-<h2 id="普通属性"><a href="#普通属性" class="headerlink" title="普通属性"></a>普通属性</h2><p>普通属性是角色长期持有的核心属性（如血量、力量），需网络复制保证多端数据一致，定义流程如下：</p>
-<h3 id="1-封装属性访问器"><a href="#1-封装属性访问器" class="headerlink" title="1. 封装属性访问器"></a>1. 封装属性访问器</h3><p>通过自定义宏快速生成属性的Getter&#x2F;Setter&#x2F;Initter，避免重复编写访问逻辑：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \</span></span><br><span class="line"><span class="meta">	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \</span></span><br><span class="line"><span class="meta">	GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \</span></span><br><span class="line"><span class="meta">	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \</span></span><br><span class="line"><span class="meta">	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="2-定义Tag-属性映射模板"><a href="#2-定义Tag-属性映射模板" class="headerlink" title="2. 定义Tag-属性映射模板"></a>2. 定义Tag-属性映射模板</h3><p>模板用于构建GameplayTag与属性的映射表，每个AS实例持有该映射，支持通过Tag快速定位属性：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">template&lt;class T&gt;</span><br><span class="line">using TStaticFuncPtr = TBaseStaticDelegateInstance&lt;T , FDefaultDelegateUserPolicy&gt;::FFuncPtr;</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-AS类核心定义（含网络复制）"><a href="#3-AS类核心定义（含网络复制）" class="headerlink" title="3. AS类核心定义（含网络复制）"></a>3. AS类核心定义（含网络复制）</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAS_Custom_API</span> UCustomAttributeSet : <span class="keyword">public</span> UAttributeSet</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line">	</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="comment">// 构造函数：初始化Tag与属性的映射关系</span></span><br><span class="line">	<span class="built_in">UCustomAttributeSet</span>();</span><br><span class="line">	<span class="comment">// Tag-属性映射表：通过Tag快速获取属性，避免硬编码</span></span><br><span class="line">	TMap&lt;FGameplayTag , TStaticFuncPtr&lt;<span class="built_in">FGameplayAttribute</span>()&gt;&gt; TagToAttribute;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 重写：注册需网络复制的属性</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">GetLifetimeReplicatedProps</span><span class="params">(TArray&lt;<span class="keyword">class</span> FLifetimeProperty&gt;&amp; OutLifetimeProps)</span> <span class="type">const</span> <span class="keyword">override</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 生命值属性：GAS标准数据类型，指定同步回调</span></span><br><span class="line">    <span class="built_in">UPROPERTY</span>(BlueprintReadOnly , ReplicatedUsing = OnRep_Health , Category = <span class="string">&quot;Vital Attributes&quot;</span>)</span><br><span class="line">	FGameplayAttributeData Health;</span><br><span class="line">	<span class="comment">// 生命值同步回调：Server属性变化后触发Client逻辑</span></span><br><span class="line">	<span class="built_in">UFUNCTION</span>()</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">OnRep_Health</span><span class="params">(<span class="type">const</span> FGameplayAttributeData&amp; OldHealth)</span> <span class="type">const</span></span>;</span><br><span class="line">	<span class="comment">// 生成生命值访问器（复用自定义宏）</span></span><br><span class="line">	<span class="built_in">ATTRIBUTE_ACCESSORS</span>(UCustomAttributeSet , Health);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 构造函数：绑定Tag与属性的映射</span></span><br><span class="line">UCustomAttributeSet::<span class="built_in">UCustomAttributeSet</span>()</span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">const</span> FCustomGameplayTags&amp; GameplayTags = FCustomGameplayTags::<span class="built_in">Get</span>();</span><br><span class="line">	TagToAttribute.<span class="built_in">Add</span>(GameplayTags.Attributes_Primary_Health , GetHealthAttribute);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 注册网络复制规则</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::GetLifetimeReplicatedProps</span><span class="params">(TArray&lt;<span class="keyword">class</span> FLifetimeProperty&gt;&amp; OutLifetimeProps)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">GetLifetimeReplicatedProps</span>(OutLifetimeProps);</span><br><span class="line">	<span class="comment">// COND_None：属性变化即同步；REPNOTIFY_Always：同步必触发回调</span></span><br><span class="line">	<span class="built_in">DOREPLIFETIME_CONDITION_NOTIFY</span>(UCustomAttributeSet , Health , COND_None , REPNOTIFY_Always);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 属性同步回调：处理Client端属性变化逻辑</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::OnRep_Health</span><span class="params">(<span class="type">const</span> FGameplayAttributeData&amp; OldHealth)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// GAS内置宏：触发属性变化全局回调（如UI更新、死亡判定）</span></span><br><span class="line">	<span class="built_in">GAMEPLAYATTRIBUTE_REPNOTIFY</span>(UCustomAttributeSet , Health , OldHealth);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="元属性（Meta-Attribute）"><a href="#元属性（Meta-Attribute）" class="headerlink" title="元属性（Meta Attribute）"></a>元属性（Meta Attribute）</h2><p>元属性是临时属性，仅用于复杂属性变化的过渡计算，无需网络复制（仅Server端处理）：</p>
-<h3 id="1-元属性的必要性"><a href="#1-元属性的必要性" class="headerlink" title="1. 元属性的必要性"></a>1. 元属性的必要性</h3><p>GE对属性的作用常包含复杂逻辑（如伤害附带击退、Debuff），无法直接修改普通属性完成。通过元属性（如IncomingDamage）作为“过渡载体”：</p>
-<ul>
-<li>GE先计算最终效果值，修改元属性；</li>
-<li>AS监听元属性变化，完成最终属性修改+附加效果（击退、Debuff）。</li>
-</ul>
-<h3 id="2-元属性定义方式"><a href="#2-元属性定义方式" class="headerlink" title="2. 元属性定义方式"></a>2. 元属性定义方式</h3><p>仅需声明属性（无网络复制），复用访问器宏即可：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">UPROPERTY</span>(BlueprintReadOnly , Category = <span class="string">&quot;Meta Attributes&quot;</span>)</span><br><span class="line">FGameplayAttributeData IncomingDamage;</span><br><span class="line"><span class="built_in">ATTRIBUTE_ACCESSORS</span>(UCustomAttributeSet , IncomingDamage);</span><br></pre></td></tr></table></figure>
-
-<h1 id="处理属性变化"><a href="#处理属性变化" class="headerlink" title="处理属性变化"></a>处理属性变化</h1><h2 id="基本方法"><a href="#基本方法" class="headerlink" title="基本方法"></a>基本方法</h2><p>核心是重写<code>PostGameplayEffectExecute</code>函数，按属性类型处理修改逻辑：简单属性仅做合法性校验，复杂属性调用自定义处理函数。</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::PostGameplayEffectExecute</span><span class="params">(<span class="type">const</span> FGameplayEffectModCallbackData&amp; Data)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">PostGameplayEffectExecute</span>(Data);</span><br><span class="line"></span><br><span class="line">	FEffectProperties Props;</span><br><span class="line">	<span class="built_in">SetEffectProperties</span>(Data , Props);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 角色已死亡则跳过属性处理</span></span><br><span class="line">	<span class="keyword">if</span> (Props.TargetCharacter-&gt;<span class="built_in">Implements</span>&lt;UCombatInterface&gt;() &amp;&amp; ICombatInterface::<span class="built_in">Execute_IsDead</span>(Props.TargetCharacter)) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 简单属性：法力值范围校验</span></span><br><span class="line">	<span class="keyword">if</span> (Data.EvaluatedData.Attribute == <span class="built_in">GetManaAttribute</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">SetMana</span>(FMath::<span class="built_in">Clamp</span>(<span class="built_in">GetMana</span>() , <span class="number">0.f</span> , <span class="built_in">GetMaxMana</span>()));</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 复杂属性：调用自定义伤害处理逻辑</span></span><br><span class="line">	<span class="keyword">if</span> (Data.EvaluatedData.Attribute == <span class="built_in">GetIncomingDamageAttribute</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">HandleIncomingDamage</span>(Props);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="属性变化后处理"><a href="#属性变化后处理" class="headerlink" title="属性变化后处理"></a>属性变化后处理</h3><p>重写<code>PostAttributeChange</code>可在属性最终修改后执行附加逻辑，例：满血状态下最大血量提升时自动补满当前血量（否则UI上看起来血量反而下降）：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::PostAttributeChange</span><span class="params">(<span class="type">const</span> FGameplayAttribute&amp; Attribute, <span class="type">float</span> OldValue, <span class="type">float</span> NewValue)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">PostAttributeChange</span>(Attribute, OldValue, NewValue);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (Attribute == <span class="built_in">GetMaxHealthAttribute</span>() &amp;&amp; bTopOffHealth)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">SetHealth</span>(<span class="built_in">GetMaxHealth</span>());</span><br><span class="line">		bTopOffHealth = <span class="literal">false</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="自定义数据结构"><a href="#自定义数据结构" class="headerlink" title="自定义数据结构"></a>自定义数据结构</h2><p>从GE回调数据中提取核心信息封装为结构体，便于复用和代码整洁：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">USTRUCT</span>()</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">FEffectProperties</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line">	<span class="built_in">FEffectProperties</span>()&#123;&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// GE上下文句柄：存储施法者、目标、伤害类型等信息</span></span><br><span class="line">	FGameplayEffectContextHandle EffectContextHandle;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 源端（施法者）数据</span></span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	UAbilitySystemComponent* SourceASC = <span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	AActor* SourceAvatarActor = <span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	AController* SourceController =	<span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	ACharacter* SourceCharacter = <span class="literal">nullptr</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 目标端（受击者）数据</span></span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	UAbilitySystemComponent* TargetASC = <span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	AActor* TargetAvatarActor = <span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	AController* TargetController =	<span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	ACharacter* TargetCharacter = <span class="literal">nullptr</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 填充结构体数据：从GE回调中提取源/目标信息</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::SetEffectProperties</span><span class="params">(<span class="type">const</span> FGameplayEffectModCallbackData&amp; Data, FEffectProperties&amp; Props)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Props.EffectContextHandle = Data.EffectSpec.<span class="built_in">GetContext</span>();</span><br><span class="line">	Props.SourceASC = Props.EffectContextHandle.<span class="built_in">GetOriginalInstigatorAbilitySystemComponent</span>();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 填充源端数据</span></span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">IsValid</span>(Props.SourceASC) &amp;&amp; Props.SourceASC-&gt;AbilityActorInfo.<span class="built_in">IsValid</span>() &amp;&amp; Props.SourceASC-&gt;AbilityActorInfo-&gt;AvatarActor.<span class="built_in">IsValid</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		Props.SourceAvatarActor = Props.SourceASC-&gt;AbilityActorInfo-&gt;AvatarActor.<span class="built_in">Get</span>();</span><br><span class="line">		Props.SourceController = Props.SourceASC-&gt;AbilityActorInfo-&gt;PlayerController.<span class="built_in">Get</span>();</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (Props.SourceController == <span class="literal">nullptr</span> &amp;&amp; Props.SourceAvatarActor != <span class="literal">nullptr</span>)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (APawn* Pawn = <span class="built_in">Cast</span>&lt;APawn&gt;(Props.SourceAvatarActor))</span><br><span class="line">			&#123;</span><br><span class="line">				Props.SourceController = Pawn-&gt;<span class="built_in">GetController</span>();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (Props.SourceController)</span><br><span class="line">		&#123;</span><br><span class="line">			Props.SourceCharacter = <span class="built_in">Cast</span>&lt;ACharacter&gt;(Props.SourceController-&gt;<span class="built_in">GetPawn</span>());</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 填充目标端数据</span></span><br><span class="line">	<span class="keyword">if</span> (Data.Target.AbilityActorInfo.<span class="built_in">IsValid</span>() &amp;&amp; Data.Target.AbilityActorInfo-&gt;AvatarActor.<span class="built_in">IsValid</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		Props.TargetAvatarActor = Data.Target.AbilityActorInfo-&gt;AvatarActor.<span class="built_in">Get</span>();</span><br><span class="line">		Props.TargetController = Data.Target.AbilityActorInfo-&gt;PlayerController.<span class="built_in">Get</span>();</span><br><span class="line">		Props.TargetCharacter = <span class="built_in">Cast</span>&lt;ACharacter&gt;(Props.TargetAvatarActor);</span><br><span class="line">		Props.TargetASC = UAbilitySystemBlueprintLibrary::<span class="built_in">GetAbilitySystemComponent</span>(Props.TargetAvatarActor);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="解耦操作"><a href="#解耦操作" class="headerlink" title="解耦操作"></a>解耦操作</h2><p>AS仅负责属性变化的分发，具体业务逻辑（如伤害、击退）解耦到FunctionLibrary中，保证AS职责单一：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::HandleIncomingDamage</span><span class="params">(<span class="type">const</span> FEffectProperties&amp; Props)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">const</span> <span class="type">float</span> LocalIncomingDamage = <span class="built_in">GetIncomingDamage</span>();</span><br><span class="line">	<span class="built_in">SetIncomingDamage</span>(<span class="number">0.f</span>); <span class="comment">// 重置元属性</span></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span> (LocalIncomingDamage &gt; <span class="number">0.f</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// 1. 计算最终血量并校验范围</span></span><br><span class="line">		<span class="type">const</span> <span class="type">float</span> NewHealth = <span class="built_in">GetHealth</span>() - LocalIncomingDamage;</span><br><span class="line">		<span class="built_in">SetHealth</span>(FMath::<span class="built_in">Clamp</span>(NewHealth , <span class="number">0.f</span> , <span class="built_in">GetMaxHealth</span>()));</span><br><span class="line"></span><br><span class="line">		<span class="type">const</span> <span class="type">bool</span> bFatal = (NewHealth &lt;= <span class="number">0.f</span>);</span><br><span class="line">		<span class="keyword">if</span> (!bFatal)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="comment">// 2. 非致命伤害：触发受击反应（GA）</span></span><br><span class="line">			<span class="keyword">if</span> (Props.TargetCharacter-&gt;<span class="built_in">Implements</span>&lt;UCombatInterface&gt;() &amp;&amp; !ICombatInterface::<span class="built_in">Execute_IsBeingShocked</span>(Props.TargetCharacter))</span><br><span class="line">			&#123;</span><br><span class="line">				FGameplayTagContainer TagContainer;</span><br><span class="line">				TagContainer.<span class="built_in">AddTag</span>(FCustomGameplayTags::<span class="built_in">Get</span>().Effects_HitReact);</span><br><span class="line">				Props.TargetASC-&gt;<span class="built_in">TryActivateAbilitiesByTag</span>(TagContainer);</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 3. 触发击退效果</span></span><br><span class="line">			<span class="type">const</span> FVector KnockbackForce = UCustomAbilitySystemLibrary::<span class="built_in">GetKnockbackForce</span>(Props.EffectContextHandle);</span><br><span class="line">			<span class="keyword">if</span> (!KnockbackForce.<span class="built_in">IsNearlyZero</span>(<span class="number">1.f</span>))</span><br><span class="line">			&#123;</span><br><span class="line">				Props.TargetCharacter-&gt;<span class="built_in">LaunchCharacter</span>(KnockbackForce , <span class="literal">true</span> , <span class="literal">true</span>);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">		&#123;</span><br><span class="line">			<span class="comment">// 4. 致命伤害：触发死亡逻辑</span></span><br><span class="line">			ICombatInterface* CombatInterface = <span class="built_in">Cast</span>&lt;ICombatInterface&gt;(Props.TargetAvatarActor);</span><br><span class="line">			<span class="keyword">if</span> (CombatInterface)</span><br><span class="line">			&#123;</span><br><span class="line">				CombatInterface-&gt;<span class="built_in">Die</span>(UCustomAbilitySystemLibrary::<span class="built_in">GetDeathImpulse</span>(Props.EffectContextHandle));</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 5. 击杀奖励：发放经验</span></span><br><span class="line">			<span class="built_in">SendXPEvent</span>(Props);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 6. 显示伤害飘字（区分格挡/暴击）</span></span><br><span class="line">		<span class="type">const</span> <span class="type">bool</span> bBlockedHit = UCustomAbilitySystemLibrary::<span class="built_in">IsBlockedHit</span>(Props.EffectContextHandle);</span><br><span class="line">		<span class="type">const</span> <span class="type">bool</span> bCriticalHit = UCustomAbilitySystemLibrary::<span class="built_in">IsCriticalHit</span>(Props.EffectContextHandle);</span><br><span class="line">		<span class="built_in">ShowFloatingText</span>(Props , LocalIncomingDamage , bBlockedHit , bCriticalHit);</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 7. 触发Debuff效果</span></span><br><span class="line">		<span class="keyword">if</span> (UCustomAbilitySystemLibrary::<span class="built_in">IsSuccessfulDebuff</span>(Props.EffectContextHandle))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">HandleDebuff</span>(Props);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>注：HandleDebuff需结合自定义GE实现，详情见<a href="/ue5-blog/2025/12/12/GAS-GE">此处</a>。</p>
 ]]></content>
       <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
+        <category>ProgrammingSkills</category>
       </categories>
       <tags>
-        <tag>GAS</tag>
-        <tag>AS</tag>
+        <tag>Lock</tag>
       </tags>
   </entry>
   <entry>
@@ -625,19 +557,6 @@
         <tag>GAS</tag>
         <tag>GA</tag>
         <tag>GameplayAbilitySpec</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>GameplayCue (GC)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayCue/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>GAS</tag>
-        <tag>GC</tag>
       </tags>
   </entry>
   <entry>
@@ -776,6 +695,88 @@
       </tags>
   </entry>
   <entry>
+    <title>GameplayCue (GC)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayCue/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>GC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>AttributeSet (AS)</title>
+    <url>/ue5-blog//2025/12/12/GAS-AS/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>AttributeSet（AS）是GAS框架中统一管理角色属性的核心类，承担“属性存储+属性变化处理”两大核心职责：按属性特性划分存储策略（通用属性存AS、玩家特有属性存PlayerState），通过“普通属性+元属性”分层处理简单&#x2F;复杂属性修改逻辑，最终依托重写核心函数完成属性变化的标准化处理。</p>
+<span id="more"></span>
+
+<h1 id="定义属性"><a href="#定义属性" class="headerlink" title="定义属性"></a>定义属性</h1><h2 id="核心说明"><a href="#核心说明" class="headerlink" title="核心说明"></a>核心说明</h2><p>AS的属性存储与生命周期按角色类型和属性用途区分：</p>
+<ol>
+<li><strong>通用属性</strong>（血量、蓝量、力量等）：存放于AS中，适配所有角色（玩家&#x2F;敌人）；</li>
+<li><strong>玩家特有属性</strong>（XP、属性点、技能点等）：存放于PlayerState（PS）中（敌人无此类属性）；</li>
+<li><strong>AS挂载策略</strong>：<ul>
+<li>玩家AS：挂载在PS中，死亡后可继承属性（满足存档&#x2F;持久化需求）；</li>
+<li>敌人AS：挂载在角色类中，随角色创建实例化、销毁后自动释放。</li>
+</ul>
+</li>
+</ol>
+<h2 id="普通属性"><a href="#普通属性" class="headerlink" title="普通属性"></a>普通属性</h2><p>普通属性是角色长期持有的核心属性（如血量、力量），需网络复制保证多端数据一致，定义流程如下：</p>
+<h3 id="1-封装属性访问器"><a href="#1-封装属性访问器" class="headerlink" title="1. 封装属性访问器"></a>1. 封装属性访问器</h3><p>通过自定义宏快速生成属性的Getter&#x2F;Setter&#x2F;Initter，避免重复编写访问逻辑：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \</span></span><br><span class="line"><span class="meta">	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \</span></span><br><span class="line"><span class="meta">	GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \</span></span><br><span class="line"><span class="meta">	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \</span></span><br><span class="line"><span class="meta">	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-定义Tag-属性映射模板"><a href="#2-定义Tag-属性映射模板" class="headerlink" title="2. 定义Tag-属性映射模板"></a>2. 定义Tag-属性映射模板</h3><p>模板用于构建GameplayTag与属性的映射表，每个AS实例持有该映射，支持通过Tag快速定位属性：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">template&lt;class T&gt;</span><br><span class="line">using TStaticFuncPtr = TBaseStaticDelegateInstance&lt;T , FDefaultDelegateUserPolicy&gt;::FFuncPtr;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-AS类核心定义（含网络复制）"><a href="#3-AS类核心定义（含网络复制）" class="headerlink" title="3. AS类核心定义（含网络复制）"></a>3. AS类核心定义（含网络复制）</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAS_Custom_API</span> UCustomAttributeSet : <span class="keyword">public</span> UAttributeSet</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line">	</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="comment">// 构造函数：初始化Tag与属性的映射关系</span></span><br><span class="line">	<span class="built_in">UCustomAttributeSet</span>();</span><br><span class="line">	<span class="comment">// Tag-属性映射表：通过Tag快速获取属性，避免硬编码</span></span><br><span class="line">	TMap&lt;FGameplayTag , TStaticFuncPtr&lt;<span class="built_in">FGameplayAttribute</span>()&gt;&gt; TagToAttribute;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 重写：注册需网络复制的属性</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">GetLifetimeReplicatedProps</span><span class="params">(TArray&lt;<span class="keyword">class</span> FLifetimeProperty&gt;&amp; OutLifetimeProps)</span> <span class="type">const</span> <span class="keyword">override</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 生命值属性：GAS标准数据类型，指定同步回调</span></span><br><span class="line">    <span class="built_in">UPROPERTY</span>(BlueprintReadOnly , ReplicatedUsing = OnRep_Health , Category = <span class="string">&quot;Vital Attributes&quot;</span>)</span><br><span class="line">	FGameplayAttributeData Health;</span><br><span class="line">	<span class="comment">// 生命值同步回调：Server属性变化后触发Client逻辑</span></span><br><span class="line">	<span class="built_in">UFUNCTION</span>()</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">OnRep_Health</span><span class="params">(<span class="type">const</span> FGameplayAttributeData&amp; OldHealth)</span> <span class="type">const</span></span>;</span><br><span class="line">	<span class="comment">// 生成生命值访问器（复用自定义宏）</span></span><br><span class="line">	<span class="built_in">ATTRIBUTE_ACCESSORS</span>(UCustomAttributeSet , Health);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 构造函数：绑定Tag与属性的映射</span></span><br><span class="line">UCustomAttributeSet::<span class="built_in">UCustomAttributeSet</span>()</span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">const</span> FCustomGameplayTags&amp; GameplayTags = FCustomGameplayTags::<span class="built_in">Get</span>();</span><br><span class="line">	TagToAttribute.<span class="built_in">Add</span>(GameplayTags.Attributes_Primary_Health , GetHealthAttribute);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 注册网络复制规则</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::GetLifetimeReplicatedProps</span><span class="params">(TArray&lt;<span class="keyword">class</span> FLifetimeProperty&gt;&amp; OutLifetimeProps)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">GetLifetimeReplicatedProps</span>(OutLifetimeProps);</span><br><span class="line">	<span class="comment">// COND_None：属性变化即同步；REPNOTIFY_Always：同步必触发回调</span></span><br><span class="line">	<span class="built_in">DOREPLIFETIME_CONDITION_NOTIFY</span>(UCustomAttributeSet , Health , COND_None , REPNOTIFY_Always);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 属性同步回调：处理Client端属性变化逻辑</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::OnRep_Health</span><span class="params">(<span class="type">const</span> FGameplayAttributeData&amp; OldHealth)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// GAS内置宏：触发属性变化全局回调（如UI更新、死亡判定）</span></span><br><span class="line">	<span class="built_in">GAMEPLAYATTRIBUTE_REPNOTIFY</span>(UCustomAttributeSet , Health , OldHealth);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="元属性（Meta-Attribute）"><a href="#元属性（Meta-Attribute）" class="headerlink" title="元属性（Meta Attribute）"></a>元属性（Meta Attribute）</h2><p>元属性是临时属性，仅用于复杂属性变化的过渡计算，无需网络复制（仅Server端处理）：</p>
+<h3 id="1-元属性的必要性"><a href="#1-元属性的必要性" class="headerlink" title="1. 元属性的必要性"></a>1. 元属性的必要性</h3><p>GE对属性的作用常包含复杂逻辑（如伤害附带击退、Debuff），无法直接修改普通属性完成。通过元属性（如IncomingDamage）作为“过渡载体”：</p>
+<ul>
+<li>GE先计算最终效果值，修改元属性；</li>
+<li>AS监听元属性变化，完成最终属性修改+附加效果（击退、Debuff）。</li>
+</ul>
+<h3 id="2-元属性定义方式"><a href="#2-元属性定义方式" class="headerlink" title="2. 元属性定义方式"></a>2. 元属性定义方式</h3><p>仅需声明属性（无网络复制），复用访问器宏即可：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">UPROPERTY</span>(BlueprintReadOnly , Category = <span class="string">&quot;Meta Attributes&quot;</span>)</span><br><span class="line">FGameplayAttributeData IncomingDamage;</span><br><span class="line"><span class="built_in">ATTRIBUTE_ACCESSORS</span>(UCustomAttributeSet , IncomingDamage);</span><br></pre></td></tr></table></figure>
+
+<h1 id="处理属性变化"><a href="#处理属性变化" class="headerlink" title="处理属性变化"></a>处理属性变化</h1><h2 id="基本方法"><a href="#基本方法" class="headerlink" title="基本方法"></a>基本方法</h2><p>核心是重写<code>PostGameplayEffectExecute</code>函数，按属性类型处理修改逻辑：简单属性仅做合法性校验，复杂属性调用自定义处理函数。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::PostGameplayEffectExecute</span><span class="params">(<span class="type">const</span> FGameplayEffectModCallbackData&amp; Data)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">PostGameplayEffectExecute</span>(Data);</span><br><span class="line"></span><br><span class="line">	FEffectProperties Props;</span><br><span class="line">	<span class="built_in">SetEffectProperties</span>(Data , Props);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 角色已死亡则跳过属性处理</span></span><br><span class="line">	<span class="keyword">if</span> (Props.TargetCharacter-&gt;<span class="built_in">Implements</span>&lt;UCombatInterface&gt;() &amp;&amp; ICombatInterface::<span class="built_in">Execute_IsDead</span>(Props.TargetCharacter)) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 简单属性：法力值范围校验</span></span><br><span class="line">	<span class="keyword">if</span> (Data.EvaluatedData.Attribute == <span class="built_in">GetManaAttribute</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">SetMana</span>(FMath::<span class="built_in">Clamp</span>(<span class="built_in">GetMana</span>() , <span class="number">0.f</span> , <span class="built_in">GetMaxMana</span>()));</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 复杂属性：调用自定义伤害处理逻辑</span></span><br><span class="line">	<span class="keyword">if</span> (Data.EvaluatedData.Attribute == <span class="built_in">GetIncomingDamageAttribute</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">HandleIncomingDamage</span>(Props);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="属性变化后处理"><a href="#属性变化后处理" class="headerlink" title="属性变化后处理"></a>属性变化后处理</h3><p>重写<code>PostAttributeChange</code>可在属性最终修改后执行附加逻辑，例：满血状态下最大血量提升时自动补满当前血量（否则UI上看起来血量反而下降）：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::PostAttributeChange</span><span class="params">(<span class="type">const</span> FGameplayAttribute&amp; Attribute, <span class="type">float</span> OldValue, <span class="type">float</span> NewValue)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">PostAttributeChange</span>(Attribute, OldValue, NewValue);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (Attribute == <span class="built_in">GetMaxHealthAttribute</span>() &amp;&amp; bTopOffHealth)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">SetHealth</span>(<span class="built_in">GetMaxHealth</span>());</span><br><span class="line">		bTopOffHealth = <span class="literal">false</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="自定义数据结构"><a href="#自定义数据结构" class="headerlink" title="自定义数据结构"></a>自定义数据结构</h2><p>从GE回调数据中提取核心信息封装为结构体，便于复用和代码整洁：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">USTRUCT</span>()</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">FEffectProperties</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line">	<span class="built_in">FEffectProperties</span>()&#123;&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// GE上下文句柄：存储施法者、目标、伤害类型等信息</span></span><br><span class="line">	FGameplayEffectContextHandle EffectContextHandle;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 源端（施法者）数据</span></span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	UAbilitySystemComponent* SourceASC = <span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	AActor* SourceAvatarActor = <span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	AController* SourceController =	<span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	ACharacter* SourceCharacter = <span class="literal">nullptr</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 目标端（受击者）数据</span></span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	UAbilitySystemComponent* TargetASC = <span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	AActor* TargetAvatarActor = <span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	AController* TargetController =	<span class="literal">nullptr</span>;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	ACharacter* TargetCharacter = <span class="literal">nullptr</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 填充结构体数据：从GE回调中提取源/目标信息</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::SetEffectProperties</span><span class="params">(<span class="type">const</span> FGameplayEffectModCallbackData&amp; Data, FEffectProperties&amp; Props)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Props.EffectContextHandle = Data.EffectSpec.<span class="built_in">GetContext</span>();</span><br><span class="line">	Props.SourceASC = Props.EffectContextHandle.<span class="built_in">GetOriginalInstigatorAbilitySystemComponent</span>();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 填充源端数据</span></span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">IsValid</span>(Props.SourceASC) &amp;&amp; Props.SourceASC-&gt;AbilityActorInfo.<span class="built_in">IsValid</span>() &amp;&amp; Props.SourceASC-&gt;AbilityActorInfo-&gt;AvatarActor.<span class="built_in">IsValid</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		Props.SourceAvatarActor = Props.SourceASC-&gt;AbilityActorInfo-&gt;AvatarActor.<span class="built_in">Get</span>();</span><br><span class="line">		Props.SourceController = Props.SourceASC-&gt;AbilityActorInfo-&gt;PlayerController.<span class="built_in">Get</span>();</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (Props.SourceController == <span class="literal">nullptr</span> &amp;&amp; Props.SourceAvatarActor != <span class="literal">nullptr</span>)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (APawn* Pawn = <span class="built_in">Cast</span>&lt;APawn&gt;(Props.SourceAvatarActor))</span><br><span class="line">			&#123;</span><br><span class="line">				Props.SourceController = Pawn-&gt;<span class="built_in">GetController</span>();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (Props.SourceController)</span><br><span class="line">		&#123;</span><br><span class="line">			Props.SourceCharacter = <span class="built_in">Cast</span>&lt;ACharacter&gt;(Props.SourceController-&gt;<span class="built_in">GetPawn</span>());</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 填充目标端数据</span></span><br><span class="line">	<span class="keyword">if</span> (Data.Target.AbilityActorInfo.<span class="built_in">IsValid</span>() &amp;&amp; Data.Target.AbilityActorInfo-&gt;AvatarActor.<span class="built_in">IsValid</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		Props.TargetAvatarActor = Data.Target.AbilityActorInfo-&gt;AvatarActor.<span class="built_in">Get</span>();</span><br><span class="line">		Props.TargetController = Data.Target.AbilityActorInfo-&gt;PlayerController.<span class="built_in">Get</span>();</span><br><span class="line">		Props.TargetCharacter = <span class="built_in">Cast</span>&lt;ACharacter&gt;(Props.TargetAvatarActor);</span><br><span class="line">		Props.TargetASC = UAbilitySystemBlueprintLibrary::<span class="built_in">GetAbilitySystemComponent</span>(Props.TargetAvatarActor);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="解耦操作"><a href="#解耦操作" class="headerlink" title="解耦操作"></a>解耦操作</h2><p>AS仅负责属性变化的分发，具体业务逻辑（如伤害、击退）解耦到FunctionLibrary中，保证AS职责单一：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::HandleIncomingDamage</span><span class="params">(<span class="type">const</span> FEffectProperties&amp; Props)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">const</span> <span class="type">float</span> LocalIncomingDamage = <span class="built_in">GetIncomingDamage</span>();</span><br><span class="line">	<span class="built_in">SetIncomingDamage</span>(<span class="number">0.f</span>); <span class="comment">// 重置元属性</span></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span> (LocalIncomingDamage &gt; <span class="number">0.f</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// 1. 计算最终血量并校验范围</span></span><br><span class="line">		<span class="type">const</span> <span class="type">float</span> NewHealth = <span class="built_in">GetHealth</span>() - LocalIncomingDamage;</span><br><span class="line">		<span class="built_in">SetHealth</span>(FMath::<span class="built_in">Clamp</span>(NewHealth , <span class="number">0.f</span> , <span class="built_in">GetMaxHealth</span>()));</span><br><span class="line"></span><br><span class="line">		<span class="type">const</span> <span class="type">bool</span> bFatal = (NewHealth &lt;= <span class="number">0.f</span>);</span><br><span class="line">		<span class="keyword">if</span> (!bFatal)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="comment">// 2. 非致命伤害：触发受击反应（GA）</span></span><br><span class="line">			<span class="keyword">if</span> (Props.TargetCharacter-&gt;<span class="built_in">Implements</span>&lt;UCombatInterface&gt;() &amp;&amp; !ICombatInterface::<span class="built_in">Execute_IsBeingShocked</span>(Props.TargetCharacter))</span><br><span class="line">			&#123;</span><br><span class="line">				FGameplayTagContainer TagContainer;</span><br><span class="line">				TagContainer.<span class="built_in">AddTag</span>(FCustomGameplayTags::<span class="built_in">Get</span>().Effects_HitReact);</span><br><span class="line">				Props.TargetASC-&gt;<span class="built_in">TryActivateAbilitiesByTag</span>(TagContainer);</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 3. 触发击退效果</span></span><br><span class="line">			<span class="type">const</span> FVector KnockbackForce = UCustomAbilitySystemLibrary::<span class="built_in">GetKnockbackForce</span>(Props.EffectContextHandle);</span><br><span class="line">			<span class="keyword">if</span> (!KnockbackForce.<span class="built_in">IsNearlyZero</span>(<span class="number">1.f</span>))</span><br><span class="line">			&#123;</span><br><span class="line">				Props.TargetCharacter-&gt;<span class="built_in">LaunchCharacter</span>(KnockbackForce , <span class="literal">true</span> , <span class="literal">true</span>);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">		&#123;</span><br><span class="line">			<span class="comment">// 4. 致命伤害：触发死亡逻辑</span></span><br><span class="line">			ICombatInterface* CombatInterface = <span class="built_in">Cast</span>&lt;ICombatInterface&gt;(Props.TargetAvatarActor);</span><br><span class="line">			<span class="keyword">if</span> (CombatInterface)</span><br><span class="line">			&#123;</span><br><span class="line">				CombatInterface-&gt;<span class="built_in">Die</span>(UCustomAbilitySystemLibrary::<span class="built_in">GetDeathImpulse</span>(Props.EffectContextHandle));</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 5. 击杀奖励：发放经验</span></span><br><span class="line">			<span class="built_in">SendXPEvent</span>(Props);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 6. 显示伤害飘字（区分格挡/暴击）</span></span><br><span class="line">		<span class="type">const</span> <span class="type">bool</span> bBlockedHit = UCustomAbilitySystemLibrary::<span class="built_in">IsBlockedHit</span>(Props.EffectContextHandle);</span><br><span class="line">		<span class="type">const</span> <span class="type">bool</span> bCriticalHit = UCustomAbilitySystemLibrary::<span class="built_in">IsCriticalHit</span>(Props.EffectContextHandle);</span><br><span class="line">		<span class="built_in">ShowFloatingText</span>(Props , LocalIncomingDamage , bBlockedHit , bCriticalHit);</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 7. 触发Debuff效果</span></span><br><span class="line">		<span class="keyword">if</span> (UCustomAbilitySystemLibrary::<span class="built_in">IsSuccessfulDebuff</span>(Props.EffectContextHandle))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">HandleDebuff</span>(Props);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注：HandleDebuff需结合自定义GE实现，详情见<a href="/ue5-blog/2025/12/12/GAS-GE">此处</a>。</p>
+]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>AS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>AbilityTask</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilityTask/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>AbilityTask</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>GameplayEvent</title>
     <url>/ue5-blog//2025/12/12/GAS-GameplayEvent/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>GameplayEvent 是 GAS 框架中类委托（Delegate）的消息传递机制，核心作用是实现对象间的事件通知与数据传递：通过自定义事件标签发送包含数据的事件，Actor 所拥有的 GameplayAbility（GA）可通过 <code>WaitGameplayEvent</code> 监听并响应事件，相比普通委托，它是定制化的消息管道，专用于 GAS 体系内的事件交互。</p>
@@ -787,8 +788,8 @@
 <h2 id="场景1：来自动画的通知（无数据传递）"><a href="#场景1：来自动画的通知（无数据传递）" class="headerlink" title="场景1：来自动画的通知（无数据传递）"></a>场景1：来自动画的通知（无数据传递）</h2><p>以火球技能（GA_FireBolt）为例，需求是“角色动画播放到指定帧时，生成并释放火球”，核心流程如下：</p>
 <ol>
 <li><strong>插入动画通知</strong>：在火球技能对应的动画蒙太奇（Montage）中，在目标时间点插入 Anim_Notify，绑定事件标签 <code>Event.Montage.FireBolt</code>；</li>
-<li><strong>发送 GameplayEvent</strong>：在该 Anim_Notify 的逻辑中，向角色 Actor 发送带有 <code>Event.Montage.FireBolt</code> 标签的 GameplayEvent（无额外数据）；<br><img src="/ue5-blog/GameplayEvent/GameplayEvent_1.png" alt="alt text"></li>
-<li><strong>监听并响应事件</strong>：在 GA_FireBolt 中播放动画蒙太奇的同时，启用 <code>WaitGameplayEvent</code> 监听 <code>Event.Montage.FireBolt</code> 标签；一旦捕获到该事件，即判定动画播放至指定时机，执行火球生成与释放逻辑。<br><img src="/ue5-blog/GameplayEvent/GameplayEvent_2.png" alt="alt text"></li>
+<li><strong>发送 GameplayEvent</strong>：在该 Anim_Notify 的逻辑中，向角色 Actor 发送带有 <code>Event.Montage.FireBolt</code> 标签的 GameplayEvent（无额外数据）；<br><img src="/ue5-blog/2025/12/12/GAS-GameplayEvent/GameplayEvent_1.png" alt="alt text"></li>
+<li><strong>监听并响应事件</strong>：在 GA_FireBolt 中播放动画蒙太奇的同时，启用 <code>WaitGameplayEvent</code> 监听 <code>Event.Montage.FireBolt</code> 标签；一旦捕获到该事件，即判定动画播放至指定时机，执行火球生成与释放逻辑。<br><img src="/ue5-blog/2025/12/12/GAS-GameplayEvent/GameplayEvent_2.png" alt="alt text"></li>
 </ol>
 <h2 id="场景2：使用属性点增加属性（带数据传递）"><a href="#场景2：使用属性点增加属性（带数据传递）" class="headerlink" title="场景2：使用属性点增加属性（带数据传递）"></a>场景2：使用属性点增加属性（带数据传递）</h2><p>需求是“消耗1个属性点，提升指定属性数值”，需实现<strong>带数据的事件发送</strong>与<strong>持续监听的事件接收</strong>，核心分为发送、接收两步：</p>
 <h3 id="步骤1：发送-GameplayEvent（带Payload数据）"><a href="#步骤1：发送-GameplayEvent（带Payload数据）" class="headerlink" title="步骤1：发送 GameplayEvent（带Payload数据）"></a>步骤1：发送 GameplayEvent（带Payload数据）</h3><p>与无数据传递的场景不同，需将“提升的属性标签”“提升数值”封装到 <code>FGameplayEventData</code>（Payload）中，再发送事件：</p>
@@ -833,6 +834,30 @@
       </tags>
   </entry>
   <entry>
+    <title>EnhancedInput</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/EnhancedInput/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>Input</category>
+      </categories>
+      <tags>
+        <tag>EnhancedInput</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Highlight</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>Input</category>
+      </categories>
+      <tags>
+        <tag>Highlight</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>数据驱动系统 (DataDriven)</title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/DataDriven/Data/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
@@ -843,6 +868,31 @@
       <tags>
         <tag>DataAsset</tag>
         <tag>DataTable</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Head Up Display (HUD)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/HUD/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>UI</category>
+      </categories>
+      <tags>
+        <tag>HUD</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Model View ViewModel (MVVM)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/MVVM/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>UI</category>
+      </categories>
+      <tags>
+        <tag>MVVM</tag>
+        <tag>FieldNotify</tag>
       </tags>
   </entry>
   <entry>
@@ -870,15 +920,29 @@
       </tags>
   </entry>
   <entry>
-    <title>WorldTransition</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/Levels/WorldTransition/</url>
+    <title>Model View Controller (MVC)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/MVC/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
       <categories>
         <category>SystemDesigns</category>
-        <category>Levels</category>
+        <category>UI</category>
       </categories>
       <tags>
-        <tag>WorldTransition</tag>
+        <tag>MVC</tag>
+        <tag>Widget</tag>
+        <tag>WidgetController</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Load</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Load/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>SaveAndLoad</category>
+      </categories>
+      <tags>
+        <tag>Load</tag>
       </tags>
   </entry>
   <entry>
@@ -895,78 +959,15 @@
       </tags>
   </entry>
   <entry>
-    <title>Load</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Load/</url>
+    <title>WorldTransition</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Levels/WorldTransition/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
       <categories>
         <category>SystemDesigns</category>
-        <category>SaveAndLoad</category>
+        <category>Levels</category>
       </categories>
       <tags>
-        <tag>Load</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Head Up Display (HUD)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/HUD/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>UI</category>
-      </categories>
-      <tags>
-        <tag>HUD</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Model View Controller (MVC)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/MVC/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>UI</category>
-      </categories>
-      <tags>
-        <tag>MVC</tag>
-        <tag>Widget</tag>
-        <tag>WidgetController</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>EnhancedInput</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/EnhancedInput/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>Input</category>
-      </categories>
-      <tags>
-        <tag>EnhancedInput</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Highlight</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>Input</category>
-      </categories>
-      <tags>
-        <tag>Highlight</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Model View ViewModel (MVVM)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/MVVM/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>UI</category>
-      </categories>
-      <tags>
-        <tag>MVVM</tag>
-        <tag>FieldNotify</tag>
+        <tag>WorldTransition</tag>
       </tags>
   </entry>
   <entry>
