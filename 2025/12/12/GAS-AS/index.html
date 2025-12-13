@@ -22,22 +22,22 @@
     <meta name="description" content="核心总结AttributeSet（AS）是GAS框架中统一管理角色属性的核心类，承担“属性存储+属性变化处理”两大核心职责：按属性特性划分存储策略（通用属性存AS、玩家特有属性存PlayerState），通过“普通属性+元属性”分层处理简单&#x2F;复杂属性修改逻辑，最终依托重写核心函数完成属性变化的标准化处理。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="AttributeSet (AS)">
-<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/12/SystemDesigns/GAS/AttributeSet/index.html">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/12/GAS-AS/index.html">
 <meta property="og:site_name" content="UE5学习笔记博客">
 <meta property="og:description" content="核心总结AttributeSet（AS）是GAS框架中统一管理角色属性的核心类，承担“属性存储+属性变化处理”两大核心职责：按属性特性划分存储策略（通用属性存AS、玩家特有属性存PlayerState），通过“普通属性+元属性”分层处理简单&#x2F;复杂属性修改逻辑，最终依托重写核心函数完成属性变化的标准化处理。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-12-11T16:00:00.000Z">
-<meta property="article:modified_time" content="2025-12-12T07:55:52.705Z">
+<meta property="article:modified_time" content="2025-12-12T08:38:54.454Z">
 <meta property="article:author" content="Larry-lyx">
 <meta property="article:tag" content="AS">
 <meta property="article:tag" content="GAS">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/12/SystemDesigns/GAS/AttributeSet/">
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/12/GAS-AS/">
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/12/SystemDesigns/GAS/AttributeSet/","path":"2025/12/12/SystemDesigns/GAS/AttributeSet/","title":"AttributeSet (AS)"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/12/GAS-AS/","path":"/2025/12/12/GAS-AS/","title":"AttributeSet (AS)"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>AttributeSet (AS) | UE5学习笔记博客</title>
@@ -172,7 +172,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/ue5-blog/archives/">
-          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-count">31</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -183,7 +183,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/ue5-blog/tags/">
-        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-count">39</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -210,7 +210,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/12/SystemDesigns/GAS/AttributeSet/">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/12/GAS-AS/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
@@ -240,7 +240,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2025-12-12 00:00:00 / 修改时间：15:55:52" itemprop="dateCreated datePublished" datetime="2025-12-12T00:00:00+08:00">2025-12-12</time>
+      <time title="创建时间：2025-12-12 00:00:00 / 修改时间：16:38:54" itemprop="dateCreated datePublished" datetime="2025-12-12T00:00:00+08:00">2025-12-12</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -326,11 +326,14 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/" rel="prev" title="AbilitySystemComponent (ASC)">
-                  <i class="fa fa-angle-left"></i> AbilitySystemComponent (ASC)
+                <a href="/ue5-blog/2025/12/12/GAS-GE/" rel="prev" title="GameplayEffect (GE)">
+                  <i class="fa fa-angle-left"></i> GameplayEffect (GE)
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/" rel="next" title="AbilitySystemComponent (ASC)">
+                  AbilitySystemComponent (ASC) <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>

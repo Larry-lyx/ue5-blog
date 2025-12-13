@@ -167,7 +167,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/ue5-blog/archives/">
-          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-count">31</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -178,7 +178,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/ue5-blog/tags/">
-        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-count">39</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -204,7 +204,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Interface/">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
@@ -222,7 +222,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Interface/" class="post-title-link" itemprop="url">接口 (Interface)</a>
+          <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/" class="post-title-link" itemprop="url">类的继承 (Inheritance)</a>
         </h2>
 
         <div class="post-meta-container">
@@ -234,7 +234,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2025-12-09 00:00:00 / 修改时间：15:53:04" itemprop="dateCreated datePublished" datetime="2025-12-09T00:00:00+08:00">2025-12-09</time>
+      <time title="创建时间：2025-12-09 00:00:00 / 修改时间：14:24:58" itemprop="dateCreated datePublished" datetime="2025-12-09T00:00:00+08:00">2025-12-09</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -256,10 +256,14 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>接口是游戏开发中“按功能归类”的核心手段，可突破类继承的层级限制，让不同类型的对象实现同一套功能逻辑；<br>在UE中结合<code>BlueprintNativeEvent</code>使用，既能保证功能统一，又能避免频繁类型转换(Cast)，提升代码效率与扩展性。</p>
+          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>类的继承是游戏开发中实现代码复用、逻辑扩展的核心手段，其核心价值在于：</p>
+<ul>
+<li>通过基类统一抽象通用逻辑，子类定制差异化行为；</li>
+<li>保证代码可维护性，尤其在C++&#x2F;蓝图混合开发中，需兼顾封装性与灵活扩展。</li>
+</ul>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/ue5-blog/2025/12/09/ProgrammingSkills/Interface/#more" rel="contents">
+              <a class="btn" href="/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -376,7 +380,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/09/ProgrammingSkills/Interface/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
@@ -394,7 +398,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/" class="post-title-link" itemprop="url">类的继承 (Inheritance)</a>
+          <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Interface/" class="post-title-link" itemprop="url">接口 (Interface)</a>
         </h2>
 
         <div class="post-meta-container">
@@ -406,7 +410,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2025-12-09 00:00:00 / 修改时间：14:24:58" itemprop="dateCreated datePublished" datetime="2025-12-09T00:00:00+08:00">2025-12-09</time>
+      <time title="创建时间：2025-12-09 00:00:00 / 修改时间：15:53:04" itemprop="dateCreated datePublished" datetime="2025-12-09T00:00:00+08:00">2025-12-09</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -428,14 +432,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>类的继承是游戏开发中实现代码复用、逻辑扩展的核心手段，其核心价值在于：</p>
-<ul>
-<li>通过基类统一抽象通用逻辑，子类定制差异化行为；</li>
-<li>保证代码可维护性，尤其在C++&#x2F;蓝图混合开发中，需兼顾封装性与灵活扩展。</li>
-</ul>
+          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>接口是游戏开发中“按功能归类”的核心手段，可突破类继承的层级限制，让不同类型的对象实现同一套功能逻辑；<br>在UE中结合<code>BlueprintNativeEvent</code>使用，既能保证功能统一，又能避免频繁类型转换(Cast)，提升代码效率与扩展性。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/#more" rel="contents">
+              <a class="btn" href="/ue5-blog/2025/12/09/ProgrammingSkills/Interface/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -836,6 +836,102 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/Input/EnhancedInput/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/ue5-blog/2025/12/08/SystemDesigns/Input/EnhancedInput/" class="post-title-link" itemprop="url">EnhancedInput</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-12-08 00:00:00" itemprop="dateCreated datePublished" datetime="2025-12-08T00:00:00+08:00">2025-12-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-12-10 14:31:42" itemprop="dateModified" datetime="2025-12-10T14:31:42+08:00">2025-12-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/Input/" itemprop="url" rel="index"><span itemprop="name">Input</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/ue5-blog/2025/12/08/SystemDesigns/Input/EnhancedInput/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/AI/BehaviorTree/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -932,7 +1028,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayCue/">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
@@ -950,7 +1046,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayCue/" class="post-title-link" itemprop="url">GameplayCue (GC)</a>
+          <a href="/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/" class="post-title-link" itemprop="url">Highlight</a>
         </h2>
 
         <div class="post-meta-container">
@@ -968,7 +1064,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-12-10 14:22:40" itemprop="dateModified" datetime="2025-12-10T14:22:40+08:00">2025-12-10</time>
+      <time title="修改时间：2025-12-10 14:36:11" itemprop="dateModified" datetime="2025-12-10T14:36:11+08:00">2025-12-10</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -980,7 +1076,7 @@
         </span>
           ，
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/ue5-blog/categories/SystemDesigns/GAS/" itemprop="url" rel="index"><span itemprop="name">GAS</span></a>
+          <a href="/ue5-blog/categories/SystemDesigns/Input/" itemprop="url" rel="index"><span itemprop="name">Input</span></a>
         </span>
     </span>
 
@@ -997,103 +1093,7 @@
           <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayCue/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/GAS/ExecCalc/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
-      <meta itemprop="name" content="Larry-lyx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="UE5学习笔记博客">
-      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | UE5学习笔记博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/08/SystemDesigns/GAS/ExecCalc/" class="post-title-link" itemprop="url">ExecCalc</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2025-12-08 00:00:00" itemprop="dateCreated datePublished" datetime="2025-12-08T00:00:00+08:00">2025-12-08</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-12-10 14:21:51" itemprop="dateModified" datetime="2025-12-10T14:21:51+08:00">2025-12-10</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/ue5-blog/categories/SystemDesigns/GAS/" itemprop="url" rel="index"><span itemprop="name">GAS</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/ue5-blog/2025/12/08/SystemDesigns/GAS/ExecCalc/#more" rel="contents">
+              <a class="btn" href="/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
