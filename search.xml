@@ -1,6 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>类的继承 (Inheritance)</title>
+    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>类的继承是游戏开发中实现代码复用、逻辑扩展的核心手段，其核心价值在于：</p>
+<ul>
+<li>通过基类统一抽象通用逻辑，子类定制差异化行为；</li>
+<li>保证代码可维护性，尤其在C++&#x2F;蓝图混合开发中，需兼顾封装性与灵活扩展。</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="基类"><a href="#基类" class="headerlink" title="基类"></a>基类</h1><p>游戏开发中，为同类对象构建基类是提升开发效率的核心习惯，核心原因有二：</p>
+<ol>
+<li><strong>通用逻辑复用</strong>：大量游戏对象（如敌人、道具、技能）存在共性属性&#x2F;行为（如血量、受击逻辑、销毁逻辑），基类可集中封装这些通用逻辑，避免重复编码；</li>
+<li><strong>批量扩展便捷</strong>：后续需为某类对象新增功能（如所有敌人添加“被击硬直”）时，只需修改基类，所有子类自动继承，无需逐个调整。</li>
+</ol>
+<p>在UE开发中，几乎所有自定义C++类都会配套创建<strong>蓝图基类</strong>，核心优势在于：</p>
+<ul>
+<li>配置灵活：无需硬编码&#x2F;重新编译，即可调整Mesh、数值参数（如敌人血量、技能冷却时间），快速验证效果；</li>
+<li>轻量逻辑快速迭代：简单逻辑（如UI提示、音效触发）可直接在蓝图中实现，开发效率高，且非密集计算类逻辑几乎无性能损耗。</li>
+</ul>
+<p>但蓝图也有明确的使用边界：</p>
+<ul>
+<li>复杂逻辑易因节点布线混乱导致维护成本高；</li>
+<li>版本控制中难以追踪蓝图的具体修改内容。<br>因此最佳实践是：蓝图仅处理“配置+极简逻辑”，复杂逻辑仍放在C++中实现。</li>
+</ul>
+<h1 id="继承关系"><a href="#继承关系" class="headerlink" title="继承关系"></a>继承关系</h1><p>丰富的功能实现依赖灵活的继承体系：子类可继承父类的变量&#x2F;函数，也可重写函数逻辑，极大提升代码扩展性。</p>
+<h2 id="核心问题：为何要区分-public-protected-private-访问权限？"><a href="#核心问题：为何要区分-public-protected-private-访问权限？" class="headerlink" title="核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？"></a>核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？</h2><p>个人开发中，若类的规模小、仅自己维护，权限区分的影响不明显；但在团队协作或源码复用场景下，权限划分是“降低理解成本、避免逻辑混乱”的关键：</p>
+<ul>
+<li><strong>public</strong>：对外暴露的核心接口（如<code>GetHealth()</code>），使用者无需关注内部实现，直接调用即可；</li>
+<li><strong>protected</strong>：仅子类可访问&#x2F;重写的逻辑（如<code>OnTakeDamage()</code>），保证子类可定制，又避免外部随意调用；</li>
+<li><strong>private</strong>：父类纯内部逻辑（如辅助计算的临时变量），完全隐藏实现细节，防止意外篡改。</li>
+</ul>
+<p>因此，当类的逻辑逐渐复杂时，需梳理头文件：明确权限划分、添加注释说明接口用途，让使用者快速知晓“哪些可调用、哪些可重写、哪些不可触碰”，无需深挖实现细节。</p>
+<h1 id="类与实例"><a href="#类与实例" class="headerlink" title="类与实例"></a>类与实例</h1><p>类是“模板”，实例是基于模板创建的“具体对象”：类中定义的非静态变量&#x2F;函数，会在每个实例中独立存在（如两个Enemy实例的血量、位置相互独立）。</p>
+<h2 id="静态成员的适用场景"><a href="#静态成员的适用场景" class="headerlink" title="静态成员的适用场景"></a>静态成员的适用场景</h2><p>对无需区分实例的通用逻辑&#x2F;数据（如全局配置、工具函数），可添加<code>static</code>关键字绑定到类上，核心优势：</p>
+<ol>
+<li>性能优化：无需创建实例即可调用，减少内存占用；</li>
+<li>逻辑统一：所有实例共享同一数据&#x2F;逻辑。</li>
+</ol>
+<h2 id="关键注意点"><a href="#关键注意点" class="headerlink" title="关键注意点"></a>关键注意点</h2><p>UE开发中需牢记：继承后的属性&#x2F;函数始终归属于“具体实例”，而非类本身。例如：</p>
+<ul>
+<li>为<code>Enemy1</code>实例绑定的受击回调，仅会响应该实例的受击事件；</li>
+<li>修改<code>Enemy2</code>实例的血量，不会影响其他Enemy实例的状态。<br>即使IDE的自动提示已经十分完善，也需时刻明确“操作的是类模板还是实例对象”，避免因边界混淆导致逻辑错误。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Inheritance</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>委托 (Delegate)</title>
     <url>/ue5-blog/2025/12/09/ProgrammingSkills/Delegate/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>委托的核心价值可概括为两点：</p>
@@ -165,101 +217,6 @@
       </tags>
   </entry>
   <entry>
-    <title>类的继承 (Inheritance)</title>
-    <url>/ue5-blog/2025/12/09/ProgrammingSkills/Inheritance/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>类的继承是游戏开发中实现代码复用、逻辑扩展的核心手段，其核心价值在于：</p>
-<ul>
-<li>通过基类统一抽象通用逻辑，子类定制差异化行为；</li>
-<li>保证代码可维护性，尤其在C++&#x2F;蓝图混合开发中，需兼顾封装性与灵活扩展。</li>
-</ul>
-<span id="more"></span>
-
-<h1 id="基类"><a href="#基类" class="headerlink" title="基类"></a>基类</h1><p>游戏开发中，为同类对象构建基类是提升开发效率的核心习惯，核心原因有二：</p>
-<ol>
-<li><strong>通用逻辑复用</strong>：大量游戏对象（如敌人、道具、技能）存在共性属性&#x2F;行为（如血量、受击逻辑、销毁逻辑），基类可集中封装这些通用逻辑，避免重复编码；</li>
-<li><strong>批量扩展便捷</strong>：后续需为某类对象新增功能（如所有敌人添加“被击硬直”）时，只需修改基类，所有子类自动继承，无需逐个调整。</li>
-</ol>
-<p>在UE开发中，几乎所有自定义C++类都会配套创建<strong>蓝图基类</strong>，核心优势在于：</p>
-<ul>
-<li>配置灵活：无需硬编码&#x2F;重新编译，即可调整Mesh、数值参数（如敌人血量、技能冷却时间），快速验证效果；</li>
-<li>轻量逻辑快速迭代：简单逻辑（如UI提示、音效触发）可直接在蓝图中实现，开发效率高，且非密集计算类逻辑几乎无性能损耗。</li>
-</ul>
-<p>但蓝图也有明确的使用边界：</p>
-<ul>
-<li>复杂逻辑易因节点布线混乱导致维护成本高；</li>
-<li>版本控制中难以追踪蓝图的具体修改内容。<br>因此最佳实践是：蓝图仅处理“配置+极简逻辑”，复杂逻辑仍放在C++中实现。</li>
-</ul>
-<h1 id="继承关系"><a href="#继承关系" class="headerlink" title="继承关系"></a>继承关系</h1><p>丰富的功能实现依赖灵活的继承体系：子类可继承父类的变量&#x2F;函数，也可重写函数逻辑，极大提升代码扩展性。</p>
-<h2 id="核心问题：为何要区分-public-protected-private-访问权限？"><a href="#核心问题：为何要区分-public-protected-private-访问权限？" class="headerlink" title="核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？"></a>核心问题：为何要区分 public&#x2F;protected&#x2F;private 访问权限？</h2><p>个人开发中，若类的规模小、仅自己维护，权限区分的影响不明显；但在团队协作或源码复用场景下，权限划分是“降低理解成本、避免逻辑混乱”的关键：</p>
-<ul>
-<li><strong>public</strong>：对外暴露的核心接口（如<code>GetHealth()</code>），使用者无需关注内部实现，直接调用即可；</li>
-<li><strong>protected</strong>：仅子类可访问&#x2F;重写的逻辑（如<code>OnTakeDamage()</code>），保证子类可定制，又避免外部随意调用；</li>
-<li><strong>private</strong>：父类纯内部逻辑（如辅助计算的临时变量），完全隐藏实现细节，防止意外篡改。</li>
-</ul>
-<p>因此，当类的逻辑逐渐复杂时，需梳理头文件：明确权限划分、添加注释说明接口用途，让使用者快速知晓“哪些可调用、哪些可重写、哪些不可触碰”，无需深挖实现细节。</p>
-<h1 id="类与实例"><a href="#类与实例" class="headerlink" title="类与实例"></a>类与实例</h1><p>类是“模板”，实例是基于模板创建的“具体对象”：类中定义的非静态变量&#x2F;函数，会在每个实例中独立存在（如两个Enemy实例的血量、位置相互独立）。</p>
-<h2 id="静态成员的适用场景"><a href="#静态成员的适用场景" class="headerlink" title="静态成员的适用场景"></a>静态成员的适用场景</h2><p>对无需区分实例的通用逻辑&#x2F;数据（如全局配置、工具函数），可添加<code>static</code>关键字绑定到类上，核心优势：</p>
-<ol>
-<li>性能优化：无需创建实例即可调用，减少内存占用；</li>
-<li>逻辑统一：所有实例共享同一数据&#x2F;逻辑。</li>
-</ol>
-<h2 id="关键注意点"><a href="#关键注意点" class="headerlink" title="关键注意点"></a>关键注意点</h2><p>UE开发中需牢记：继承后的属性&#x2F;函数始终归属于“具体实例”，而非类本身。例如：</p>
-<ul>
-<li>为<code>Enemy1</code>实例绑定的受击回调，仅会响应该实例的受击事件；</li>
-<li>修改<code>Enemy2</code>实例的血量，不会影响其他Enemy实例的状态。<br>即使IDE的自动提示已经十分完善，也需时刻明确“操作的是类模板还是实例对象”，避免因边界混淆导致逻辑错误。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>ProgrammingSkills</category>
-      </categories>
-      <tags>
-        <tag>Inheritance</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>函数库 (Library)</title>
-    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Library/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>自定义函数库是UE开发中解耦跨类通用逻辑、提升代码复用性的核心手段，通过封装静态通用函数，可避免重复编码、减少性能损耗（如频繁Cast），同时让跨模块&#x2F;无继承关系的类高效共享算法与工具逻辑。</p>
-<span id="more"></span>
-
-<h1 id="自定义函数库的优势"><a href="#自定义函数库的优势" class="headerlink" title="自定义函数库的优势"></a>自定义函数库的优势</h1><ol>
-<li><strong>解耦跨类复用逻辑</strong>：许多通用算法（如位置计算、数据校验）的使用方无明显继承关系（如敌人召唤逻辑、战利品生成、弹道计算），函数库可作为“公共逻辑容器”，脱离类的继承层级限制；</li>
-<li><strong>提升开发效率</strong>：将可复用逻辑（如角色周围随机位置生成）提前封装为通用函数，后续开发无需重复编写&#x2F;调试，直接调用即可；</li>
-<li><strong>全局高效访问</strong>：函数库中的函数需声明为<code>static</code>（静态），无需创建类实例即可调用，兼顾全局访问性与性能；</li>
-<li><strong>统一维护入口</strong>：通用逻辑集中管理，后续修改（如调整位置算法的精度）只需改函数库，所有调用方自动生效，降低维护成本。</li>
-</ol>
-<h1 id="自定义函数库的核心内容"><a href="#自定义函数库的核心内容" class="headerlink" title="自定义函数库的核心内容"></a>自定义函数库的核心内容</h1><h2 id="1-通用算法（通用化参数设计）"><a href="#1-通用算法（通用化参数设计）" class="headerlink" title="1. 通用算法（通用化参数设计）"></a>1. 通用算法（通用化参数设计）</h2><p>封装无业务耦合的纯算法逻辑，参数设计需足够通用，避免硬编码，适配多场景调用。</p>
-<h3 id="2-轻量化类型转换（封装static-cast的Setter-Getter）"><a href="#2-轻量化类型转换（封装static-cast的Setter-Getter）" class="headerlink" title="2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）"></a>2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）</h3><p>UE中<code>Cast</code>操作（动态类型转换）性能开销大，需尽量避免；对于自定义扩展的框架类型（如GAS的<code>GameplayEffectContext</code>），可将<code>static_cast</code>封装到函数库，减少重复转换逻辑，提升调用效率。</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemLibrary::SetIsBlockedHit</span><span class="params">(FGameplayEffectContextHandle&amp; EffectContextHandle, <span class="type">bool</span> bInIsBlockedHit)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (FCustomGameplayEffectContext* CustomContext = <span class="built_in">static_cast</span>&lt;FCustomGameplayEffectContext*&gt;(EffectContextHandle.<span class="built_in">Get</span>()))</span><br><span class="line">	&#123;</span><br><span class="line">		CustomContext-&gt;<span class="built_in">SetBlockedHit</span>(bInIsBlockedHit);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="自定义函数库的关键规范"><a href="#自定义函数库的关键规范" class="headerlink" title="自定义函数库的关键规范"></a>自定义函数库的关键规范</h3><ol>
-<li><strong>类继承要求</strong>：必须继承<code>UBlueprintFunctionLibrary</code>，否则无法作为全局函数库使用；</li>
-<li><strong>函数声明规则</strong>：<ul>
-<li>函数需为<code>static</code> + <code>UFUNCTION(BlueprintCallable)</code>，支持C++&#x2F;蓝图双端调用；</li>
-<li>加<code>Category</code>分类，便于蓝图中搜索和管理；</li>
-</ul>
-</li>
-<li><strong>参数设计原则</strong>：<ul>
-<li>通用算法参数“按需开放”（如角度范围设默认值），适配多场景；</li>
-<li>避免传入冗余参数，核心参数前置，可选参数后置并设默认值；</li>
-</ul>
-</li>
-<li><strong>性能注意</strong>：<ul>
-<li>函数库仅封装轻量逻辑（算法、类型转换），不存放状态变量；</li>
-<li>避免在函数库中执行耗时操作（如加载资源、遍历大量数据）；</li>
-</ul>
-</li>
-<li><strong>头文件循环引用提醒</strong>：<br>函数库中若直接引用其他类的头文件，这些被引用的类将无法反向包含函数库头文件（触发循环引用报错）。建议通过“前向声明”替代直接包含：仅在函数库头文件中对所需类做前向声明（如<code>class FCustomGameplayEffectContext;</code>），函数具体实现放在cpp文件中，且仅在cpp里包含对应类的头文件，避免循环引用问题。</li>
-</ol>
-]]></content>
-      <categories>
-        <category>ProgrammingSkills</category>
-      </categories>
-      <tags>
-        <tag>Library</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>反射系统 (Reflection)</title>
     <url>/ue5-blog/2025/12/09/ProgrammingSkills/Reflection/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>UE的反射系统是突破C++静态编译限制的核心机制，通过一系列宏为C++代码注入“运行时类型信息”，实现蓝图交互、序列化、编辑器可视化、属性自动同步等关键功能；<br>在实际应用中最需要的，就是熟悉一些常用的反射宏。</p>
@@ -347,6 +304,61 @@
       </tags>
   </entry>
   <entry>
+    <title>行为树 (BehaviorTree)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/AI/BehaviorTree/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>AI</category>
+      </categories>
+      <tags>
+        <tag>BehavoirTree</tag>
+        <tag>Blackboard</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>计时器 (Timer)</title>
+    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Timer/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>ProgrammingSkills</category>
+      </categories>
+      <tags>
+        <tag>Timer</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>AbilityTask</title>
+    <url>/ue5-blog/2025/12/14/SystemDesigns/GAS/AbilityTask/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>AbilityTask 是 GAS 框架中解耦 GameplayAbility（GA）可复用异步逻辑的核心组件，主打“异步数据获取+跨端数据传输+网络同步”，可将鼠标击中对象获取、异步动画回调等通用逻辑封装为独立任务，提升 GA 代码复用性与逻辑整洁度。</p>
+<span id="more"></span>
+
+<h1 id="AbilityTask-的作用"><a href="#AbilityTask-的作用" class="headerlink" title="AbilityTask 的作用"></a>AbilityTask 的作用</h1><p>在 GA 开发中，鼠标击中对象获取、异步事件监听等通用数据获取逻辑，需解耦为独立模块以复用，AbilityTask 为此设计，核心流程包含三步：</p>
+<ol>
+<li>执行异步任务，获取目标数据；</li>
+<li>将数据回调传递给调用该任务的 GA；</li>
+<li>完成客户端与服务端的网络同步。</li>
+</ol>
+<p>以下以「获取鼠标指向目标数据（TargetDataUnderMouse）」为例，拆解 AbilityTask 的完整实现流程。</p>
+<h1 id="TargetDataUnderMouse-任务实现"><a href="#TargetDataUnderMouse-任务实现" class="headerlink" title="TargetDataUnderMouse 任务实现"></a>TargetDataUnderMouse 任务实现</h1><h2 id="1-蓝图可调用设计"><a href="#1-蓝图可调用设计" class="headerlink" title="1. 蓝图可调用设计"></a>1. 蓝图可调用设计</h2><p>GA 的核心逻辑通常在蓝图中实现，因此自定义 AbilityTask 需适配蓝图调用，关键是定义动态多播委托与蓝图可调用的创建函数：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam</span>(FMouseTargetDataSignature, <span class="type">const</span> FGameplayAbilityTargetDataHandle&amp;, DataHandle);</span><br><span class="line"></span><br><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAS_Custom_API</span> UTargetDataUnderMouse : <span class="keyword">public</span> UAbilityTask</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="built_in">UFUNCTION</span>(BlueprintCallable , Category = <span class="string">&quot;Ability|Tasks&quot;</span> , meta = (DisplayName = <span class="string">&quot;TargetDataUnderMouse&quot;</span> , HidePin = <span class="string">&quot;OwningAbility&quot;</span> , DefaultToSelf = <span class="string">&quot;OwningAbility&quot;</span> , BlueprintInternalUseOnly = <span class="string">&quot;true&quot;</span>) )</span><br><span class="line">	<span class="function"><span class="type">static</span> UTargetDataUnderMouse* <span class="title">CreateTargetDataUnderMouse</span><span class="params">(UGameplayAbility* OwningAbility)</span></span>;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(BlueprintAssignable)</span><br><span class="line">	FMouseTargetDataSignature ValidData;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>蓝图中可通过「TargetDataUnderMouse」节点创建任务，该节点包含「ValidData」执行线与「DataHandle」数据输出：</p>
+<ul>
+<li>节点右上角的时钟标识表明其为异步任务，后续逻辑需绑定至「ValidData」执行线触发；</li>
+<li>异步特性意味着节点后接的函数不会立即执行，需等待数据获取完成。<br><img src="/ue5-blog/2025/12/14/SystemDesigns/GAS/AbilityTask/image.png" alt="alt text"></li>
+</ul>
+<h2 id="2-任务核心实现"><a href="#2-任务核心实现" class="headerlink" title="2. 任务核心实现"></a>2. 任务核心实现</h2><p>自定义 AbilityTask 需重写 Activate 函数（创建任务后自动调用），核心完成“客户端获取数据、服务端同步数据、回调传递给GA”三大逻辑：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">UTargetDataUnderMouse* <span class="title">UTargetDataUnderMouse::CreateTargetDataUnderMouse</span><span class="params">(UGameplayAbility* OwningAbility)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	UTargetDataUnderMouse* MyObj = <span class="built_in">NewAbilityTask</span>&lt;UTargetDataUnderMouse&gt;(OwningAbility);</span><br><span class="line">	<span class="keyword">return</span> MyObj;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UTargetDataUnderMouse::Activate</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 本地控制：直接获取鼠标数据；非本地控制：等待客户端同步数据</span></span><br><span class="line">	<span class="type">const</span> <span class="type">bool</span> bIsLocallyControlled = Ability-&gt;<span class="built_in">GetCurrentActorInfo</span>()-&gt;<span class="built_in">IsLocallyControlled</span>();</span><br><span class="line">	<span class="keyword">if</span> (bIsLocallyControlled)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">SendMouseCursorData</span>();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="type">const</span> FGameplayAbilitySpecHandle SpecHandle = <span class="built_in">GetAbilitySpecHandle</span>();</span><br><span class="line">		<span class="type">const</span> FPredictionKey PredictionKey = <span class="built_in">GetActivationPredictionKey</span>();</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 绑定客户端数据同步的回调</span></span><br><span class="line">		AbilitySystemComponent.<span class="built_in">Get</span>()-&gt;<span class="built_in">AbilityTargetDataSetDelegate</span>(SpecHandle , PredictionKey).<span class="built_in">AddUObject</span>(<span class="keyword">this</span> , &amp;UTargetDataUnderMouse::OnTargetDataReplicatedCallback);</span><br><span class="line"></span><br><span class="line">		<span class="type">const</span> <span class="type">bool</span> bCalledDelegate = AbilitySystemComponent.<span class="built_in">Get</span>()-&gt;<span class="built_in">CallReplicatedTargetDataDelegatesIfSet</span>(SpecHandle , PredictionKey);</span><br><span class="line">		<span class="keyword">if</span> (!bCalledDelegate)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">SetWaitingOnRemotePlayerData</span>();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UTargetDataUnderMouse::SendMouseCursorData</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="function">FScopedPredictionWindow <span class="title">ScopedPredictionWindow</span><span class="params">(AbilitySystemComponent.Get())</span></span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 1. 获取鼠标指向的命中结果</span></span><br><span class="line">	APlayerController* PC = Ability-&gt;<span class="built_in">GetCurrentActorInfo</span>()-&gt;PlayerController.<span class="built_in">Get</span>();</span><br><span class="line">	FHitResult CursorHitResult;</span><br><span class="line">	PC-&gt;<span class="built_in">GetHitResultUnderCursor</span>(ECC_Target , <span class="literal">false</span> , CursorHitResult);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 2. 封装命中数据并同步至服务端</span></span><br><span class="line">	FGameplayAbilityTargetDataHandle DataHandle;</span><br><span class="line">	FGameplayAbilityTargetData_SingleTargetHit* Data = <span class="keyword">new</span> <span class="built_in">FGameplayAbilityTargetData_SingleTargetHit</span>();</span><br><span class="line">	Data-&gt;HitResult = CursorHitResult;</span><br><span class="line">	DataHandle.<span class="built_in">Add</span>(Data);</span><br><span class="line"></span><br><span class="line">	AbilitySystemComponent-&gt;<span class="built_in">ServerSetReplicatedTargetData</span>(</span><br><span class="line">		<span class="built_in">GetAbilitySpecHandle</span>() ,</span><br><span class="line">		<span class="built_in">GetActivationPredictionKey</span>() ,</span><br><span class="line">		DataHandle ,</span><br><span class="line">		<span class="built_in">FGameplayTag</span>() ,</span><br><span class="line">		AbilitySystemComponent-&gt;ScopedPredictionKey);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 3. 回调传递数据给GA</span></span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">ShouldBroadcastAbilityTaskDelegates</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		ValidData.<span class="built_in">Broadcast</span>(DataHandle);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UTargetDataUnderMouse::OnTargetDataReplicatedCallback</span><span class="params">(<span class="type">const</span> FGameplayAbilityTargetDataHandle&amp; DataHandle, FGameplayTag ActivationTag)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 1. 消费同步数据，避免重复处理</span></span><br><span class="line">	AbilitySystemComponent-&gt;<span class="built_in">ConsumeClientReplicatedTargetData</span>(<span class="built_in">GetAbilitySpecHandle</span>() , <span class="built_in">GetActivationPredictionKey</span>());</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 2. 回调传递同步后的数据给GA</span></span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">ShouldBroadcastAbilityTaskDelegates</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		ValidData.<span class="built_in">Broadcast</span>(DataHandle);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>AbilityTask</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>序列化 (Serialize)</title>
     <url>/ue5-blog/2025/12/10/ProgrammingSkills/Serialize/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>序列化本质是将内存中的数据（变量、对象、结构体）转换为二进制&#x2F;字节流格式，便于持久化存储（存档）、网络传输（同步）；反序列化则是将字节流还原为内存中的原始数据。<br>在实际使用中，最常见的是存档读档、网络同步两大场景。对于如何进行相应的序列化操作，应当充分了解。</p>
@@ -401,14 +413,139 @@
       </tags>
   </entry>
   <entry>
-    <title>计时器 (Timer)</title>
-    <url>/ue5-blog/2025/12/08/ProgrammingSkills/Timer/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+    <title>GameplayCue (GC)</title>
+    <url>/ue5-blog/2025/12/14/SystemDesigns/GAS/GameplayCue/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>GameplayCue（GC）是 GAS 框架中实现技能视听效果的核心组件，专门承接 GA 中非数值逻辑的视听表现（如粒子、音效、镜头震动），核心优势为“解耦视听效果与属性计算逻辑”“自动支持网络同步”，并提供不同类型的 GC 适配瞬间&#x2F;持续等不同视听场景。</p>
+<span id="more"></span>
+
+<h1 id="为什么要用-GameplayCue"><a href="#为什么要用-GameplayCue" class="headerlink" title="为什么要用 GameplayCue"></a>为什么要用 GameplayCue</h1><p>GA（GameplayAbility）的核心功能分为两类：一是通过 GE 实现属性数值变化（如伤害、回血）；二是呈现技能配套的视听效果，后者通常由 GameplayCue 实现。</p>
+<p>使用 GameplayCue 的核心优势：</p>
+<ol>
+<li>解耦视听表现与核心逻辑计算，便于单独调试、修改视听效果；</li>
+<li>内置网络复制逻辑，无需手动处理多客户端视听同步。</li>
+</ol>
+<h1 id="GameplayCue-的常见用法"><a href="#GameplayCue-的常见用法" class="headerlink" title="GameplayCue 的常见用法"></a>GameplayCue 的常见用法</h1><h2 id="1-GCN-Burst"><a href="#1-GCN-Burst" class="headerlink" title="1. GCN Burst"></a>1. GCN Burst</h2><p>GCN Burst 是高集成度的 GC 类型，专为爆炸、冲击等瞬时视听效果设计，可直接在蓝图中配置 Burst Particles（爆炸粒子）、Burst Sounds（爆炸音效）、Burst Camera Shake（镜头震动）等资产，并绑定专属 Tag。</p>
+<h3 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h3><p>在 GA 合适位置调用 <code>Execute GameplayCueWithParams On Owner</code> 函数，传递关键参数（通常仅需位置信息）即可触发：<br><img src="/ue5-blog/2025/12/14/SystemDesigns/GAS/GameplayCue/image.png" alt="alt text"></p>
+<h3 id="关键注意点"><a href="#关键注意点" class="headerlink" title="关键注意点"></a>关键注意点</h3><ul>
+<li>GC 并非通过类型引用匹配，而是通过 Tag 关联，同一 Tag 可绑定多个 GC，一次 Execute 会触发所有绑定该 Tag 的 GC 逻辑；</li>
+<li>Tag 必须以 <code>GameplayCue.</code> 为前缀（如 <code>GameplayCue.FireBall</code>），所有类型 GC 均通过该规则匹配。</li>
+</ul>
+<h2 id="2-GameplayCue-Notify-Static"><a href="#2-GameplayCue-Notify-Static" class="headerlink" title="2. GameplayCue Notify Static"></a>2. GameplayCue Notify Static</h2><p>该类型 GC 同样用于瞬时视听效果，是更底层的实现类，相比 GCN Burst 自由度更高——GCN Burst 的粒子、音效等资产为硬编码配置，而 Static 可基于传入参数动态选择资产。</p>
+<h3 id="典型场景（动态血液效果）"><a href="#典型场景（动态血液效果）" class="headerlink" title="典型场景（动态血液效果）"></a>典型场景（动态血液效果）</h3><p>需求：击中不同类型敌人时，显示对应颜色的血液粒子，实现步骤：</p>
+<ol>
+<li>将敌人类 Actor 作为参数传入 GC；</li>
+<li>在敌人类&#x2F;相关接口中，实现“根据敌人类型匹配对应血液粒子系统”的函数；</li>
+<li>重写 GC 的 <code>OnExecute</code> 函数，调用上述函数获取粒子系统并生成。</li>
+</ol>
+<h3 id="使用方式-1"><a href="#使用方式-1" class="headerlink" title="使用方式"></a>使用方式</h3><p>与 GCN Burst 一致，在 GA 中调用 <code>Execute GameplayCueWithParams On Owner</code> 并传递自定义参数即可；参数类型无限制，支持在 GC 中实现复杂逻辑。</p>
+<h3 id="网络同步"><a href="#网络同步" class="headerlink" title="网络同步"></a>网络同步</h3><p>瞬时类 GC 的网络同步由框架自动封装，无需手动处理，确保多客户端看到的视听效果一致。</p>
+<h2 id="3-GameplayCue-Notify-Actor"><a href="#3-GameplayCue-Notify-Actor" class="headerlink" title="3. GameplayCue Notify Actor"></a>3. GameplayCue Notify Actor</h2><p>该类型 GC 生成的对象以 Actor 形式存在，拥有独立生命周期，适用于持续型视听效果（如持续灼烧粒子、光环音效）。</p>
+<h3 id="使用方式-2"><a href="#使用方式-2" class="headerlink" title="使用方式"></a>使用方式</h3><ul>
+<li>启用 GC：调用 <code>AddGameplayCueOnActor</code> 函数，通过 Tag 匹配 GC 并传入自定义参数；</li>
+<li>停用 GC：调用 <code>RemoveGameplayCueOnActor</code> 函数，需传入与启用时一致的 Tag 和参数（因此 GA 中需保存传入 GC 的参数）。</li>
+</ul>
+<h3 id="核心实现逻辑"><a href="#核心实现逻辑" class="headerlink" title="核心实现逻辑"></a>核心实现逻辑</h3><p>持续型 GC 的多客户端管理由 Server 主导：Server 判断客户端是否与该 GC 相关，仅向相关客户端同步视听效果，无关时停止同步。需重写两个核心函数：</p>
+<ol>
+<li><code>OnBecomeRelevant</code>：实现视听效果的生成逻辑（如创建粒子组件、播放循环音效）；</li>
+<li><code>OnCeaseRelevant</code>：实现视听效果的停止逻辑（如销毁粒子组件、停止音效），需将生成的组件保存为变量，以便此处销毁。</li>
+</ol>
+<h3 id="优化技巧"><a href="#优化技巧" class="headerlink" title="优化技巧"></a>优化技巧</h3><p>销毁音效时直接删除组件会导致效果突兀，可调用 <code>FadeOut</code> 函数让音效渐变消失，提升体验。</p>
+<h3 id="额外配置（多-GC-启用场景）"><a href="#额外配置（多-GC-启用场景）" class="headerlink" title="额外配置（多 GC 启用场景）"></a>额外配置（多 GC 启用场景）</h3><p>若需同时启用大量持续型 GC，需提升项目 RPC 容量，避免同步卡顿：<br>打开 <code>config/DefaultGame.ini</code>，修改如下配置（默认值为 3）：<br>[ConsoleVariables]<br>net.MaxRPCPerNetUpdate&#x3D;10</p>
+]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>GC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>函数库 (Library)</title>
+    <url>/ue5-blog/2025/12/10/ProgrammingSkills/Library/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>自定义函数库是UE开发中解耦跨类通用逻辑、提升代码复用性的核心手段，通过封装静态通用函数，可避免重复编码、减少性能损耗（如频繁Cast），同时让跨模块&#x2F;无继承关系的类高效共享算法与工具逻辑。</p>
+<span id="more"></span>
+
+<h1 id="自定义函数库的优势"><a href="#自定义函数库的优势" class="headerlink" title="自定义函数库的优势"></a>自定义函数库的优势</h1><ol>
+<li><strong>解耦跨类复用逻辑</strong>：许多通用算法（如位置计算、数据校验）的使用方无明显继承关系（如敌人召唤逻辑、战利品生成、弹道计算），函数库可作为“公共逻辑容器”，脱离类的继承层级限制；</li>
+<li><strong>提升开发效率</strong>：将可复用逻辑（如角色周围随机位置生成）提前封装为通用函数，后续开发无需重复编写&#x2F;调试，直接调用即可；</li>
+<li><strong>全局高效访问</strong>：函数库中的函数需声明为<code>static</code>（静态），无需创建类实例即可调用，兼顾全局访问性与性能；</li>
+<li><strong>统一维护入口</strong>：通用逻辑集中管理，后续修改（如调整位置算法的精度）只需改函数库，所有调用方自动生效，降低维护成本。</li>
+</ol>
+<h1 id="自定义函数库的核心内容"><a href="#自定义函数库的核心内容" class="headerlink" title="自定义函数库的核心内容"></a>自定义函数库的核心内容</h1><h2 id="1-通用算法（通用化参数设计）"><a href="#1-通用算法（通用化参数设计）" class="headerlink" title="1. 通用算法（通用化参数设计）"></a>1. 通用算法（通用化参数设计）</h2><p>封装无业务耦合的纯算法逻辑，参数设计需足够通用，避免硬编码，适配多场景调用。</p>
+<h3 id="2-轻量化类型转换（封装static-cast的Setter-Getter）"><a href="#2-轻量化类型转换（封装static-cast的Setter-Getter）" class="headerlink" title="2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）"></a>2. 轻量化类型转换（封装static_cast的Setter&#x2F;Getter）</h3><p>UE中<code>Cast</code>操作（动态类型转换）性能开销大，需尽量避免；对于自定义扩展的框架类型（如GAS的<code>GameplayEffectContext</code>），可将<code>static_cast</code>封装到函数库，减少重复转换逻辑，提升调用效率。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemLibrary::SetIsBlockedHit</span><span class="params">(FGameplayEffectContextHandle&amp; EffectContextHandle, <span class="type">bool</span> bInIsBlockedHit)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (FCustomGameplayEffectContext* CustomContext = <span class="built_in">static_cast</span>&lt;FCustomGameplayEffectContext*&gt;(EffectContextHandle.<span class="built_in">Get</span>()))</span><br><span class="line">	&#123;</span><br><span class="line">		CustomContext-&gt;<span class="built_in">SetBlockedHit</span>(bInIsBlockedHit);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="自定义函数库的关键规范"><a href="#自定义函数库的关键规范" class="headerlink" title="自定义函数库的关键规范"></a>自定义函数库的关键规范</h3><ol>
+<li><strong>类继承要求</strong>：必须继承<code>UBlueprintFunctionLibrary</code>，否则无法作为全局函数库使用；</li>
+<li><strong>函数声明规则</strong>：<ul>
+<li>函数需为<code>static</code> + <code>UFUNCTION(BlueprintCallable)</code>，支持C++&#x2F;蓝图双端调用；</li>
+<li>加<code>Category</code>分类，便于蓝图中搜索和管理；</li>
+</ul>
+</li>
+<li><strong>参数设计原则</strong>：<ul>
+<li>通用算法参数“按需开放”（如角度范围设默认值），适配多场景；</li>
+<li>避免传入冗余参数，核心参数前置，可选参数后置并设默认值；</li>
+</ul>
+</li>
+<li><strong>性能注意</strong>：<ul>
+<li>函数库仅封装轻量逻辑（算法、类型转换），不存放状态变量；</li>
+<li>避免在函数库中执行耗时操作（如加载资源、遍历大量数据）；</li>
+</ul>
+</li>
+<li><strong>头文件循环引用提醒</strong>：<br>函数库中若直接引用其他类的头文件，这些被引用的类将无法反向包含函数库头文件（触发循环引用报错）。建议通过“前向声明”替代直接包含：仅在函数库头文件中对所需类做前向声明（如<code>class FCustomGameplayEffectContext;</code>），函数具体实现放在cpp文件中，且仅在cpp里包含对应类的头文件，避免循环引用问题。</li>
+</ol>
+]]></content>
       <categories>
         <category>ProgrammingSkills</category>
       </categories>
       <tags>
-        <tag>Timer</tag>
+        <tag>Library</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameplayEvent</title>
+    <url>/ue5-blog//2025/12/12/GAS-GameplayEvent/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>GameplayEvent 是 GAS 框架中类委托（Delegate）的消息传递机制，核心作用是实现对象间的事件通知与数据传递：通过自定义事件标签发送包含数据的事件，Actor 所拥有的 GameplayAbility（GA）可通过 <code>WaitGameplayEvent</code> 监听并响应事件，相比普通委托，它是定制化的消息管道，专用于 GAS 体系内的事件交互。</p>
+<span id="more"></span>
+
+<h1 id="GameplayEvent-的作用"><a href="#GameplayEvent-的作用" class="headerlink" title="GameplayEvent 的作用"></a>GameplayEvent 的作用</h1><p>GameplayEvent 功能上与委托（Delegate）相似，核心用于<strong>对象间的事件通知与数据传递</strong>：当一个对象需要触发另一个对象执行特定逻辑时，可发送带有自定义标签的 GameplayEvent，并在事件中承载数据供接收方处理。</p>
+<p>其与普通委托的核心区别在于：GameplayEvent 是 GAS 体系下的定制化消息管道，事件会发送至目标 Actor，该 Actor 挂载的 GA 可通过 <code>WaitGameplayEvent</code> 节点&#x2F;函数监听并捕获对应事件，适配 GAS 框架的能力体系设计。</p>
+<h1 id="GameplayEvent-的使用"><a href="#GameplayEvent-的使用" class="headerlink" title="GameplayEvent 的使用"></a>GameplayEvent 的使用</h1><p>以下通过两个典型场景，说明 GameplayEvent 的发送、接收及数据传递方式：</p>
+<h2 id="场景1：来自动画的通知（无数据传递）"><a href="#场景1：来自动画的通知（无数据传递）" class="headerlink" title="场景1：来自动画的通知（无数据传递）"></a>场景1：来自动画的通知（无数据传递）</h2><p>以火球技能（GA_FireBolt）为例，需求是“角色动画播放到指定帧时，生成并释放火球”，核心流程如下：</p>
+<ol>
+<li><strong>插入动画通知</strong>：在火球技能对应的动画蒙太奇（Montage）中，在目标时间点插入 Anim_Notify，绑定事件标签 <code>Event.Montage.FireBolt</code>；</li>
+<li><strong>发送 GameplayEvent</strong>：在该 Anim_Notify 的逻辑中，向角色 Actor 发送带有 <code>Event.Montage.FireBolt</code> 标签的 GameplayEvent（无额外数据）；<br><img src="/ue5-blog/2025/12/12/GAS-GameplayEvent/GameplayEvent_1.png" alt="alt text"></li>
+<li><strong>监听并响应事件</strong>：在 GA_FireBolt 中播放动画蒙太奇的同时，启用 <code>WaitGameplayEvent</code> 监听 <code>Event.Montage.FireBolt</code> 标签；一旦捕获到该事件，即判定动画播放至指定时机，执行火球生成与释放逻辑。<br><img src="/ue5-blog/2025/12/12/GAS-GameplayEvent/GameplayEvent_2.png" alt="alt text"></li>
+</ol>
+<h2 id="场景2：使用属性点增加属性（带数据传递）"><a href="#场景2：使用属性点增加属性（带数据传递）" class="headerlink" title="场景2：使用属性点增加属性（带数据传递）"></a>场景2：使用属性点增加属性（带数据传递）</h2><p>需求是“消耗1个属性点，提升指定属性数值”，需实现<strong>带数据的事件发送</strong>与<strong>持续监听的事件接收</strong>，核心分为发送、接收两步：</p>
+<h3 id="步骤1：发送-GameplayEvent（带Payload数据）"><a href="#步骤1：发送-GameplayEvent（带Payload数据）" class="headerlink" title="步骤1：发送 GameplayEvent（带Payload数据）"></a>步骤1：发送 GameplayEvent（带Payload数据）</h3><p>与无数据传递的场景不同，需将“提升的属性标签”“提升数值”封装到 <code>FGameplayEventData</code>（Payload）中，再发送事件：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::ServerUpgradeAttribute_Implementation</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; AttributeTag)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	FGameplayEventData Payload;</span><br><span class="line">	Payload.EventTag = AttributeTag;</span><br><span class="line">	Payload.EventMagnitude = <span class="number">1.f</span>;</span><br><span class="line"></span><br><span class="line">	UAbilitySystemBlueprintLibrary::<span class="built_in">SendGameplayEventToActor</span>(<span class="built_in">GetAvatarActor</span>() , AttributeTag , Payload);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">GetAvatarActor</span>()-&gt;<span class="built_in">Implements</span>&lt;UPlayerInterface&gt;())</span><br><span class="line">	&#123;</span><br><span class="line">		IPlayerInterface::<span class="built_in">Execute_AddToAttributePoints</span>(<span class="built_in">GetAvatarActor</span>() , <span class="number">-1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="步骤2：接收-GameplayEvent（持续监听）"><a href="#步骤2：接收-GameplayEvent（持续监听）" class="headerlink" title="步骤2：接收 GameplayEvent（持续监听）"></a>步骤2：接收 GameplayEvent（持续监听）</h3><p>GameplayEvent 的接收端固定为 GA，需为玩家角色配置一个全程激活的 GA（如 GA_ListenForEvent），核心逻辑：</p>
+<ol>
+<li>持续通过 <code>WaitGameplayEvent</code> 监听属性提升相关事件，捕获“待修改属性标签”“提升数值”；</li>
+<li>基于通用 GE 模板类（GE_ListenForEvent）制作 GE 实例，修改目标属性数值。</li>
+</ol>
+<h4 id="GE-模板类（GE-ListenForEvent）设计"><a href="#GE-模板类（GE-ListenForEvent）设计" class="headerlink" title="GE 模板类（GE_ListenForEvent）设计"></a>GE 模板类（GE_ListenForEvent）设计</h4><p>为减少 GE 资源开销，仅创建一个通用 GE 模板类，包含所有可提升属性的 Modifier，通过 Set By Caller 传递数值：</p>
+<ul>
+<li>为每个可修改属性创建对应的 Modifier；</li>
+<li>无需修改的属性传入 0 值，仅对目标属性传入有效数值。</li>
+</ul>
+<h4 id="设计说明"><a href="#设计说明" class="headerlink" title="设计说明"></a>设计说明</h4><p>优先在单个 GE 中包含多属性 Modifier，而非创建多个专用 GE：</p>
+<ul>
+<li>优势：GE 是包含 Context 的重量级资源，单个通用 GE 可大幅减少资源开销（本场景中 Context 无实际作用）；</li>
+<li>劣势：每次构建 GE 需遍历所有 Modifier 并填充 Set By Caller 数值，但因可修改属性数量有限，性能损耗可忽略。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>GameplayEvent</tag>
       </tags>
   </entry>
   <entry>
@@ -436,6 +573,160 @@
       </tags>
   </entry>
   <entry>
+    <title>GameplayTag</title>
+    <url>/ue5-blog/2025/12/14/SystemDesigns/GAS/GameplayTag/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>GameplayTag 是 GAS 框架的核心全局标识工具，通过轻量化的标签体系实现“数值映射、信息传递、资产区分、状态&#x2F;类型标记”等核心功能，其核心价值在于全局共识性——当对象间需基于统一标识完成交互时，GameplayTag 是最优选择。</p>
+<span id="more"></span>
+
+<h1 id="Tag-的作用"><a href="#Tag-的作用" class="headerlink" title="Tag 的作用"></a>Tag 的作用</h1><p>GAS 框架中 GameplayTag 应用场景灵活且广泛，核心作用可归纳为：</p>
+<ol>
+<li>数值映射标识：作为变量名标记需修改的属性，如 Set By Caller 机制通过 Tag 关联待修改的属性数值；</li>
+<li>信息传递验证：如 Anim Notify 中通过 GameplayEvent 传递 Tag，标识动画蒙太奇（Montage）的特定播放阶段；</li>
+<li>资产索引区分：为同类资产（如技能动画）打 Tag，通过 Tag 快速索引目标资产；</li>
+<li>状态标记：标记技能&#x2F;角色的状态（如技能锁定、装备中），用于状态校验与逻辑分支判断；</li>
+<li>类型标识：区分不同类别（如主动&#x2F;被动技能、火攻&#x2F;雷攻伤害类型），替代枚举实现更灵活的类型管理。</li>
+</ol>
+<p>GameplayTag 的核心优势是全局通用性，只要两个对象需基于“全局共识的标识”完成交互，即可优先使用 Tag。</p>
+<h1 id="Tag-的创建"><a href="#Tag-的创建" class="headerlink" title="Tag 的创建"></a>Tag 的创建</h1><h2 id="蓝图创建"><a href="#蓝图创建" class="headerlink" title="蓝图创建"></a>蓝图创建</h2><p>进入「Project Settings → GameplayTag」可可视化管理蓝图层面的 Tag：</p>
+<ul>
+<li>操作便捷，适合快速定义蓝图专属 Tag；</li>
+<li>局限性：仅能在蓝图中使用，C++ 代码无法访问。</li>
+</ul>
+<h2 id="C-端-Native-Tag"><a href="#C-端-Native-Tag" class="headerlink" title="C++ 端 Native Tag"></a>C++ 端 Native Tag</h2><p>通过单例模式注册 Native Tag（单例实现详见<a href="/ue5-blog/2025/12/10/ProgrammingSkills/Singleton">这里</a>），需将 Tag 注册到自定义 AssetManager 并配置生效：</p>
+<h3 id="1-自定义-AssetManager-注册-Tag"><a href="#1-自定义-AssetManager-注册-Tag" class="headerlink" title="1. 自定义 AssetManager 注册 Tag"></a>1. 自定义 AssetManager 注册 Tag</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAS_Custom_API</span> UCustomAssetManager : <span class="keyword">public</span> UAssetManager</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="function"><span class="type">static</span> UCustomAssetManager&amp; <span class="title">Get</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">StartInitialLoading</span><span class="params">()</span> <span class="keyword">override</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function">UCustomAssetManager&amp; <span class="title">UCustomAssetManager::Get</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">check</span>(GEngine);</span><br><span class="line"></span><br><span class="line">	UCustomAssetManager* CustomAssetManager = <span class="built_in">Cast</span>&lt;UCustomAssetManager&gt;(GEngine-&gt;AssetManager);</span><br><span class="line">	<span class="keyword">return</span> * CustomAssetManager;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAssetManager::StartInitialLoading</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">StartInitialLoading</span>();</span><br><span class="line"></span><br><span class="line">	FCustomGameplayTags::<span class="built_in">InitializeNativeGameplayTags</span>();</span><br><span class="line">	<span class="comment">// 初始化 GAS 全局数据</span></span><br><span class="line">	UAbilitySystemGlobals::<span class="built_in">Get</span>().<span class="built_in">InitGlobalData</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-修改项目配置文件"><a href="#2-修改项目配置文件" class="headerlink" title="2. 修改项目配置文件"></a>2. 修改项目配置文件</h3><p>打开「Config&#x2F;DefaultEngine.ini」，找到「[&#x2F;Script&#x2F;Engine.Engine]」节点，添加如下配置指定自定义 AssetManager：<br>AssetManagerClassName&#x3D;&#x2F;Script&#x2F;ProjectName.CustomAssetManager</p>
+]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>GameplayTag</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>WorldTransition</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Levels/WorldTransition/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>Levels</category>
+      </categories>
+      <tags>
+        <tag>WorldTransition</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameplayAbility (GA)</title>
+    <url>/ue5-blog//2025/12/11/GAS-GA/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>GameplayAbility（GA）是 GAS 框架中封装技能逻辑的核心单元，其运行依赖「GameplayAbilitySpec（技能规格）」与「GameplayAbilityInstance（技能实例）」的分工协作：Spec 负责技能的长期管理与配置（如装配位置、是否锁定等），Instance 负责技能单次激活的实际执行（如施法、伤害、特效）。<br>GA 的实现兼顾蓝图的灵活性（流程可视化、参数快速调整）与 C++ 的性能优势（通用逻辑封装），并通过内置的冷却&#x2F;消耗体系、Tag 状态管理，标准化技能的核心行为。</p>
+<span id="more"></span>
+
+<h1 id="Gameplay-Ability-Spec-与-Gameplay-Ability-Instance"><a href="#Gameplay-Ability-Spec-与-Gameplay-Ability-Instance" class="headerlink" title="Gameplay Ability Spec 与 Gameplay Ability Instance"></a>Gameplay Ability Spec 与 Gameplay Ability Instance</h1><p>在 GAS 框架中，Spec 与 Instance 是支撑 GA 运行的两大核心对象，二者分工明确，共同实现技能的“管理”与“执行”分离。</p>
+<h2 id="核心概念区分"><a href="#核心概念区分" class="headerlink" title="核心概念区分"></a>核心概念区分</h2><h3 id="1-Gameplay-Ability-Spec：技能的“管理槽位”"><a href="#1-Gameplay-Ability-Spec：技能的“管理槽位”" class="headerlink" title="1. Gameplay Ability Spec：技能的“管理槽位”"></a>1. Gameplay Ability Spec：技能的“管理槽位”</h3><p>Spec 是 ASC（AbilitySystemComponent）对技能的核心管理对象，可类比为角色的“技能槽位”：</p>
+<ul>
+<li>核心职责：存储技能的基础配置（等级、冷却时长、资源消耗数值、释放所需 GameplayTag），管控技能的可用状态（是否可释放、是否冷却中、是否满足释放条件）；</li>
+<li>生命周期：与“技能授予”绑定——ASC 授予技能时创建 Spec，移除技能时销毁 Spec，长期存在于 ASC 的技能列表中，不随技能释放&#x2F;结束而变化。</li>
+</ul>
+<h3 id="2-Gameplay-Ability-Instance：技能的“执行实例”"><a href="#2-Gameplay-Ability-Instance：技能的“执行实例”" class="headerlink" title="2. Gameplay Ability Instance：技能的“执行实例”"></a>2. Gameplay Ability Instance：技能的“执行实例”</h3><p>Instance 是 GA 的单次运行实例，可类比为“角色释放一次火球术的具体行为”：</p>
+<ul>
+<li>核心职责：执行技能的具体逻辑（播放动画、生成目标数据、施加伤害、播放视听特效），仅聚焦单次技能的生命周期；</li>
+<li>生命周期：与“技能激活”绑定——每次激活技能（如点击释放），ASC 基于 Spec 创建 Instance；技能执行完毕（或被打断）后，Instance 立即销毁，多次释放同一技能会生成多个独立 Instance。</li>
+</ul>
+<h2 id="关键关系与特性"><a href="#关键关系与特性" class="headerlink" title="关键关系与特性"></a>关键关系与特性</h2><ol>
+<li>一对多关联：一个 Spec（技能槽）可对应多个 Instance（多次释放）——例如火球术的 Spec 长期存在，每次点击释放都会基于该 Spec 生成新的 Instance，也可对同一 Instance 执行激活、暂停、打断等操作；</li>
+<li>交互逻辑分工：<ul>
+<li>Spec 面向 ASC：所有技能管理操作（修改等级、重置冷却、判断释放权限）均通过 ASC 作用于 Spec；</li>
+<li>Instance 面向游戏世界：仅负责与场景&#x2F;角色的交互逻辑（生成特效、检测碰撞、施加 GE），无需感知 ASC 层面的管理规则。</li>
+</ul>
+</li>
+</ol>
+<h1 id="GA-的实现"><a href="#GA-的实现" class="headerlink" title="GA 的实现"></a>GA 的实现</h1><p>GA 的最终逻辑通常在蓝图中完成，核心原因是蓝图的可视化特性更适配技能开发的迭代需求，同时结合 C++ 封装高性能&#x2F;通用逻辑，形成“蓝图做流程、C++ 做底层”的分工模式：</p>
+<h3 id="1-蓝图实现的核心优势"><a href="#1-蓝图实现的核心优势" class="headerlink" title="1. 蓝图实现的核心优势"></a>1. 蓝图实现的核心优势</h3><ul>
+<li>流程可视化：清晰呈现技能从激活到结束的完整逻辑（如动画播放→目标获取→伤害施加→特效播放），便于调试与迭代；</li>
+<li>参数灵活调整：技能等级、伤害数值、冷却时长等参数可直接在蓝图 ClassDefaults 中修改，无需重新编译代码。</li>
+</ul>
+<h3 id="2-GA-蓝图的核心执行步骤"><a href="#2-GA-蓝图的核心执行步骤" class="headerlink" title="2. GA 蓝图的核心执行步骤"></a>2. GA 蓝图的核心执行步骤</h3><p>技能逻辑通常包含四大核心环节，各环节可复用 GAS 生态组件：</p>
+<ul>
+<li>播放技能动画：绑定并播放角色施法蒙太奇，可通过 GameplayEvent 触发动画关键帧逻辑（如火球生成）；</li>
+<li>获取目标数据：通过 AbilityTask（如 TargetDataUnderMouse）异步获取鼠标指向的目标，解耦通用数据获取逻辑；</li>
+<li>施加伤害&#x2F;属性修改：制作并应用 GameplayEffect（GE），实现伤害、回血等属性数值变化；</li>
+<li>播放视听效果：调用 GameplayCue（GC）实现粒子、音效、镜头震动等技能表现。</li>
+</ul>
+<h3 id="3-C-封装的场景"><a href="#3-C-封装的场景" class="headerlink" title="3. C++ 封装的场景"></a>3. C++ 封装的场景</h3><p>为保证性能和逻辑复用性，以下逻辑建议封装在 C++ 端：</p>
+<ul>
+<li>性能敏感逻辑：如多火球生成位置的批量计算、高频碰撞检测；</li>
+<li>通用工具逻辑：如技能描述文本的格式化、跨技能复用的目标筛选规则；</li>
+<li>底层数据交互：如技能与 UI 数据的绑定、网络同步的核心逻辑。</li>
+</ul>
+<h1 id="GA-的实例化"><a href="#GA-的实例化" class="headerlink" title="GA 的实例化"></a>GA 的实例化</h1><p>在 GA 的 ClassDefaults 中，「Instancing Policy（实例化策略）」决定了 Instance 的创建规则，需根据技能类型选择：</p>
+<ul>
+<li>Instance per Actor（推荐）：每个技能拥有者（Actor）仅创建一个 Instance，复用性高、性能开销低，适配绝大多数技能（如普攻、单体技能）；</li>
+<li>Instance per Execution：每次激活技能都创建新 Instance，适配需同时运行多个实例的技能（如持续施法的范围技能）；</li>
+<li>Non Instanced：不创建 Instance，仅通过 Spec 管理，适配无执行逻辑的被动技能。</li>
+</ul>
+<h3 id="关键注意点"><a href="#关键注意点" class="headerlink" title="关键注意点"></a>关键注意点</h3><p>技能执行完毕后<strong>必须手动调用 <code>EndAbility</code></strong>：若未调用，Instance 不会销毁，会导致技能槽被占用，无法再次激活该技能。需确保所有逻辑分支（如施法完成、被打断、目标丢失）最终都执行 <code>EndAbility</code>。</p>
+<h1 id="Cooldown（冷却）和-Cost（消耗）"><a href="#Cooldown（冷却）和-Cost（消耗）" class="headerlink" title="Cooldown（冷却）和 Cost（消耗）"></a>Cooldown（冷却）和 Cost（消耗）</h1><p>GAS 已封装冷却与资源消耗的核心逻辑，无需手动实现，仅需配置对应的 GE 并关联到 GA 即可：</p>
+<h3 id="配置步骤"><a href="#配置步骤" class="headerlink" title="配置步骤"></a>配置步骤</h3><ol>
+<li>制作 GE_Cost（资源消耗）：<ul>
+<li>类型：Instant（瞬时生效）；</li>
+<li>配置 Modifier：修改资源属性（如法力值、怒气值），设置扣减数值（如每次释放消耗 20 法力）。</li>
+</ul>
+</li>
+<li>制作 GE_Cooldown（冷却）：<ul>
+<li>类型：Duration（持续生效）；</li>
+<li>配置 Modifier：无需修改属性，仅设置持续时长（冷却时间）；</li>
+<li>赋予 GrantedTags：添加冷却标识 Tag（如 GameplayCue.Cooldown.FireBolt），供 UI 识别并显示冷却进度。</li>
+</ul>
+</li>
+<li>关联到 GA：在 GA 的 ClassDefaults 中，将 GE_Cost 和 GE_Cooldown 分别绑定到「Cost Gameplay Effects」和「Cooldown Gameplay Effects」。</li>
+<li>提交消耗与冷却：在 GA 的 <code>EventActivateAbility</code> 后立即调用 <code>CommitAbility</code>——该函数会自动应用 GE_Cost 和 GE_Cooldown，若资源不足（如法力不够）或处于冷却中，会直接阻止技能激活。</li>
+</ol>
+<h1 id="Tags-管理"><a href="#Tags-管理" class="headerlink" title="Tags 管理"></a>Tags 管理</h1><p>GA 提供多维度的 Tag 配置能力，可灵活控制技能的激活、状态与交互逻辑：</p>
+<table>
+<thead>
+<tr>
+<th>Tag 类型</th>
+<th>核心作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AssetTags</td>
+<td>GA 自身的固定标识 Tag，不可动态修改，用于技能分类（如 Skill.Fire、Skill.Passive）；</td>
+</tr>
+<tr>
+<td>Activation Owned Tags</td>
+<td>技能激活时自动添加的 Tag，如添加「Input_Block」Tag 禁用玩家输入，避免同时释放多个技能；</td>
+</tr>
+<tr>
+<td>Activation Blocked Tags</td>
+<td>技能激活的阻断 Tag，如添加「State.Stun」Tag，角色眩晕时无法激活该技能；</td>
+</tr>
+<tr>
+<td>Block Abilities With Tags</td>
+<td>主动阻断其他技能的 Tag，如释放无敌技能时，阻断所有攻击技能的激活；</td>
+</tr>
+</tbody></table>
+<h3 id="动态-Tag-管理（Spec-层面）"><a href="#动态-Tag-管理（Spec-层面）" class="headerlink" title="动态 Tag 管理（Spec 层面）"></a>动态 Tag 管理（Spec 层面）</h3><p>AbilitySpec 也支持动态 Tag 管理，核心用法是通过 <code>AbilitySpec.GetDynamicSpecSourceTags()</code> 获取&#x2F;修改动态 Tag，适配临时状态变化：</p>
+<ul>
+<li>场景1：装备脱落后，移除「Skill.Enabled.Sword」Tag，临时禁用剑术技能；</li>
+<li>场景2：角色进入狂暴状态，添加「Skill.Buff.DamageUp」Tag，提升技能伤害。</li>
+</ul>
+<p>动态 Tag 仅作用于 Spec 生命周期，技能移除后自动失效，无需手动清理。</p>
+]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>GAS</category>
+      </categories>
+      <tags>
+        <tag>GAS</tag>
+        <tag>GA</tag>
+        <tag>GameplayAbilitySpec</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>数据驱动系统 (DataDriven)</title>
     <url>/ue5-blog/2025/12/08/SystemDesigns/DataDriven/Data/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
@@ -449,79 +740,16 @@
       </tags>
   </entry>
   <entry>
-    <title>AbilitySystemComponent (ASC)</title>
-    <url>/ue5-blog/2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>AbilitySystemComponent（ASC）是GAS框架的核心中枢，作为挂载在Actor&#x2F;Character上的“逻辑容器”，承接对象所有GAS相关能力与交互。GAS的核心逻辑（属性变更、效果施加、技能执行）均围绕ASC展开，所有交互遵循“ASC发起→ASC接收”的模式，是连接GE、GA、AttributeSet的核心桥梁。</p>
-<span id="more"></span>
-
-<h1 id="ASC-是什么"><a href="#ASC-是什么" class="headerlink" title="ASC 是什么"></a>ASC 是什么</h1><p>从GAS的核心逻辑视角，ASC是承载对象GAS能力的“逻辑核心”（Actor&#x2F;Character仅作为宿主，GAS层面无需关注其原生逻辑）——可将GAS需处理的所有对象，抽象为一个个独立的ASC实例。</p>
-<p>每个ASC独立管理如下核心内容，构成GAS交互的基础：</p>
-<h2 id="1-游戏效果（GameplayEffect，GE）：世界对ASC的作用载体"><a href="#1-游戏效果（GameplayEffect，GE）：世界对ASC的作用载体" class="headerlink" title="1. 游戏效果（GameplayEffect，GE）：世界对ASC的作用载体"></a>1. 游戏效果（GameplayEffect，GE）：世界对ASC的作用载体</h2><p>游戏世界中所有事件对当前ASC产生的影响，均通过挂载在该ASC上的GE实现；处理ASC对外部作用的反馈，核心是围绕GE的挂载、移除与响应展开。</p>
-<h2 id="2-游戏技能（GameplayAbility，GA）：ASC对世界的作用载体"><a href="#2-游戏技能（GameplayAbility，GA）：ASC对世界的作用载体" class="headerlink" title="2. 游戏技能（GameplayAbility，GA）：ASC对世界的作用载体"></a>2. 游戏技能（GameplayAbility，GA）：ASC对世界的作用载体</h2><p>ASC对游戏世界产生的所有影响（如播放角色动画、生成带伤害GE的子弹），均依赖其拥有的GA实现。需注意：ASC管理的并非GA实例，而是Gameplay Ability Spec（技能规格）；关于Spec与Instance的区别见<a href="/ue5-blog/2025/12/11/GAS-GA/">此处</a>。</p>
-<h2 id="3-补充：属性（Attribute）的管理"><a href="#3-补充：属性（Attribute）的管理" class="headerlink" title="3. 补充：属性（Attribute）的管理"></a>3. 补充：属性（Attribute）的管理</h2><p>属性用于描述对象的核心状态（如血量、蓝量、力量），虽可直接由ASC管理，但为逻辑解耦，通常单独通过AttributeSet封装；特殊属性（如玩家XP、技能点、属性点）可存储在PlayerState中，由ASC关联访问。</p>
-<h2 id="ASC的核心交互逻辑"><a href="#ASC的核心交互逻辑" class="headerlink" title="ASC的核心交互逻辑"></a>ASC的核心交互逻辑</h2><p>GAS框架下所有交互均遵循“ASC发起→ASC接收”：</p>
-<ol>
-<li>发起方ASC通过自身拥有的GA触发对外作用；</li>
-<li>GA执行过程中产生的各类影响（如伤害、视觉效果等），最终以GE的形式施加到目标ASC；</li>
-<li>目标ASC接收GE后，修改自身Attribute，并触发配套的世界交互（如血量降低同步更新UI、触发死亡特效）。</li>
-</ol>
-<h1 id="ASC类提供的核心功能"><a href="#ASC类提供的核心功能" class="headerlink" title="ASC类提供的核心功能"></a>ASC类提供的核心功能</h1><h2 id="1-响应GE挂载：处理自身被施加GE后的逻辑"><a href="#1-响应GE挂载：处理自身被施加GE后的逻辑" class="headerlink" title="1. 响应GE挂载：处理自身被施加GE后的逻辑"></a>1. 响应GE挂载：处理自身被施加GE后的逻辑</h2><p>通过绑定ASC内置的<code>OnGameplayEffectAppliedDelegateToSelf</code>委托回调，可监听并处理GE施加到自身的逻辑。需注意：该委托仅在Server端生效（GE的核心生效逻辑均在Server执行），Client端需通过Server广播同步UI等视觉&#x2F;交互变化。</p>
-<p>该委托回调会传入两个核心参数：<code>FGameplayEffectSpec</code>（GE的配置规格）、<code>FActiveGameplayEffectHandle</code>（GE实例的句柄），用于精准识别并处理对应的GE。</p>
-<h2 id="2-管理GA：核心是管理Gameplay-Ability-Spec"><a href="#2-管理GA：核心是管理Gameplay-Ability-Spec" class="headerlink" title="2. 管理GA：核心是管理Gameplay Ability Spec"></a>2. 管理GA：核心是管理Gameplay Ability Spec</h2><p>ASC不直接与GA实例交互，所有GA相关操作均围绕Spec展开，核心能力包括：</p>
-<h3 id="（1）Tag与Spec的关联管理"><a href="#（1）Tag与Spec的关联管理" class="headerlink" title="（1）Tag与Spec的关联管理"></a>（1）Tag与Spec的关联管理</h3><p>提供一系列工具函数，实现GameplayTag（Ability&#x2F;Status&#x2F;Input类标签）与Spec的绑定、查询与校验，例如：</p>
-<ul>
-<li><code>GetInputTagFromSpec</code>：从Spec中提取绑定的输入Tag；</li>
-<li><code>AbilityHasSlot</code>：校验Spec是否绑定了指定技能槽位；</li>
-<li><code>AssignSlotToAbility</code>：为Spec分配技能槽位。</li>
-</ul>
-<p>关键注意点：</p>
-<ul>
-<li>Spec的动态标签（如Status、Input Tag）：通过<code>Spec.GetDynamicSourceTags()</code>获取&#x2F;管理；</li>
-<li>Spec的固定标签（如AbilityTag）：通过<code>Spec.Ability.Get()-&gt;GetAssetTags()</code>获取&#x2F;管理；</li>
-<li>遍历已授予（granted）的技能Spec：调用<code>GetActivatableAbilities()</code>，返回值为Spec列表；<strong>遍历激活技能时必须加锁</strong>（如<code>FScopedAbilityListLock</code>），避免多线程冲突。</li>
-</ul>
-<h3 id="（2）授予新技能（Spec）"><a href="#（2）授予新技能（Spec）" class="headerlink" title="（2）授予新技能（Spec）"></a>（2）授予新技能（Spec）</h3><p>ASC的“技能槽”不仅包含UI可见技能，还涵盖所有已授予的技能；授予逻辑仅针对Spec，而非GA实例，核心步骤：</p>
-<ol>
-<li>创建新的Gameplay Ability Spec；</li>
-<li>为Spec填充配置（如绑定Tag、设置等级、配置冷却）；</li>
-<li>调用<code>GiveAbility(Spec)</code>完成授予（按需激活：<code>GiveAbilityAndActivateOnce(Spec)</code>会直接实例化并执行GA）；</li>
-<li>向UI广播技能授予事件，同步界面展示，按需进行。</li>
-</ol>
-<h3 id="（3）处理技能输入响应"><a href="#（3）处理技能输入响应" class="headerlink" title="（3）处理技能输入响应"></a>（3）处理技能输入响应</h3><p>这是GA实例化（激活）的核心逻辑，ASC通过<code>AbilityInputTagPressed/Held/Released</code>等函数响应输入：</p>
-<ul>
-<li>职责边界：ASC仅负责触发GA的实例化&#x2F;激活，GA的结束逻辑由其自身控制；</li>
-<li>输入习惯适配：通常在<code>AbilityInputTagHeld</code>中处理激活逻辑（绑定<code>ETriggerEvent::Triggered</code>，按下期间每帧触发），支持长按连续释放技能（需结合冷却&#x2F;激活状态判断）；</li>
-</ul>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::AbilityInputTagHeld</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; InputTag)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (!InputTag.<span class="built_in">IsValid</span>()) <span class="keyword">return</span>;</span><br><span class="line">	<span class="function">FScopedAbilityListLock <span class="title">ActiveScopeLock</span><span class="params">(*<span class="keyword">this</span>)</span></span>;</span><br><span class="line">	<span class="keyword">for</span> (FGameplayAbilitySpec&amp; AbilitySpec : <span class="built_in">GetActivatableAbilities</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (AbilitySpec.<span class="built_in">GetDynamicSpecSourceTags</span>().<span class="built_in">HasTagExact</span>(InputTag))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">AbilitySpecInputPressed</span>(AbilitySpec);</span><br><span class="line">			<span class="keyword">if</span> (!AbilitySpec.<span class="built_in">IsActive</span>())</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="built_in">TryActivateAbility</span>(AbilitySpec.Handle);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>网络同步：输入事件发生在Client端，需同步到Server端以保证效果一致：</li>
-</ul>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (AbilitySpec.<span class="built_in">IsActive</span>())</span><br><span class="line">&#123;</span><br><span class="line">    TArray&lt;UGameplayAbility*&gt; Instances = AbilitySpec.<span class="built_in">GetAbilityInstances</span>();</span><br><span class="line">    <span class="type">const</span> FGameplayAbilityActivationInfo&amp; ActivationInfo = Instances.<span class="built_in">Last</span>()-&gt;<span class="built_in">GetCurrentActivationInfoRef</span>();</span><br><span class="line">    FPredictionKey OriginalPredictionKey = ActivationInfo.<span class="built_in">GetActivationPredictionKey</span>();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">InvokeReplicatedEvent</span>(EAbilityGenericReplicatedEvent::InputPressed , AbilitySpec.Handle , OriginalPredictionKey);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-处理属性变化"><a href="#3-处理属性变化" class="headerlink" title="3. 处理属性变化"></a>3. 处理属性变化</h2><p>属性变化的核心逻辑通常封装在AttributeSet中，ASC仅处理与技能强关联的属性变更场景：</p>
-<ul>
-<li>典型场景：角色等级提升解锁&#x2F;升级技能（需ASC执行技能授予&#x2F;更新Spec配置）；</li>
-<li>实现方式：ASC通过<code>GetAvatarActor()</code>获取宿主对象，关联AttributeSet或PlayerState读取&#x2F;修改属性；</li>
-<li>扩展方案：可通过GameplayEvent转发属性变化事件（详情见<a href="/ue5-blog/2025/12/12/GAS-GameplayEvent/">此处</a>查看）。</li>
-</ul>
-<h1 id="网络复制"><a href="#网络复制" class="headerlink" title="网络复制"></a>网络复制</h1><h2 id="Server与Client的职责"><a href="#Server与Client的职责" class="headerlink" title="Server与Client的职责"></a>Server与Client的职责</h2><p>为适配多人游戏，需明确ASC相关逻辑在Server&#x2F;Client的分工：</p>
-<ul>
-<li>Server端：执行核心逻辑（属性修改、技能授予、GE施加），保证数据权威；</li>
-<li>Client端：仅处理UI同步、视觉反馈等非核心逻辑。</li>
-</ul>
-<p>设计范式：拆分“Server执行+Client广播”两套函数：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::ServerEquipAbility_Implementation</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; AbilityTag,</span></span></span><br><span class="line"><span class="params"><span class="function">                                                                    <span class="type">const</span> FGameplayTag&amp; Slot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (FGameplayAbilitySpec* AbilitySpec = <span class="built_in">GetSpecFromAbilityTag</span>(AbilityTag))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// Server端修改Spec的核心逻辑</span></span><br><span class="line"></span><br><span class="line">		<span class="built_in">ClientEquipAbility</span>(AbilityTag , GameplayTags.Abilities_Status_Equipped , Slot , PrevSlot);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::ClientEquipAbility_Implementation</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; AbilityTag, <span class="type">const</span> FGameplayTag&amp; Status,</span></span></span><br><span class="line"><span class="params"><span class="function">                                                                    <span class="type">const</span> FGameplayTag&amp; Slot, <span class="type">const</span> FGameplayTag&amp; PreviousSlot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	AbilityEquipped.<span class="built_in">Broadcast</span>(AbilityTag , Status , Slot , PreviousSlot);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="代码解析"><a href="#代码解析" class="headerlink" title="代码解析"></a>代码解析</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">AbilitySpec.<span class="built_in">GetDynamicSpecSourceTags</span>().<span class="built_in">AddTag</span>(GameplayTags.Abilities_Status_Eligible);</span><br><span class="line"><span class="built_in">MarkAbilitySpecDirty</span>(AbilitySpec);</span><br><span class="line"><span class="comment">// 同步 “Spec 配置数据”，传递 Spec 的完整状态，用于保证配置一致。</span></span><br></pre></td></tr></table></figure>
-<p>当手动修改了 AbilitySpec 的成员变量后（如设置目标、调整冷却），调用 MarkAbilitySpecDirty 可以立即生效这些更改，避免延迟或不同步状况。</p>
-]]></content>
+    <title>SpawnVolume and SpawnPoint</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Levels/SpawnVolume/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
       <categories>
         <category>SystemDesigns</category>
-        <category>GAS</category>
+        <category>Levels</category>
       </categories>
       <tags>
-        <tag>GAS</tag>
-        <tag>ASC</tag>
+        <tag>SpawnVolume</tag>
+        <tag>SpawnPoint</tag>
       </tags>
   </entry>
   <entry>
@@ -579,41 +807,6 @@
       <tags>
         <tag>GAS</tag>
         <tag>AS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>GameplayAbility (GA)</title>
-    <url>/ue5-blog//2025/12/11/GAS-GA/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>
-
-<h1 id="Gameplay-Ability-Spec-与-Gameplay-Ability-Instance"><a href="#Gameplay-Ability-Spec-与-Gameplay-Ability-Instance" class="headerlink" title="Gameplay Ability Spec 与 Gameplay Ability Instance"></a>Gameplay Ability Spec 与 Gameplay Ability Instance</h1><p>在GAS框架中，Gameplay Ability Spec（简称Spec，技能规格）与Gameplay Ability Instance（简称Instance，技能实例）是GA（Gameplay Ability）的两个核心要素，二者分工明确：Spec负责技能的“管理与配置”，Instance负责技能的“实际执行”。</p>
-<h2 id="核心概念区分"><a href="#核心概念区分" class="headerlink" title="核心概念区分"></a>核心概念区分</h2><h3 id="1-Gameplay-Ability-Spec：技能的“管理槽位”"><a href="#1-Gameplay-Ability-Spec：技能的“管理槽位”" class="headerlink" title="1. Gameplay Ability Spec：技能的“管理槽位”"></a>1. Gameplay Ability Spec：技能的“管理槽位”</h3><p>Spec是ASC（AbilitySystemComponent）对技能的管理与配置对象，可类比为角色的“技能槽”：</p>
-<ul>
-<li>核心职责：存储并管控该技能的核心配置（等级、冷却时间、资源消耗、释放条件如所需GameplayTag），以及技能的可用状态（是否可释放、是否处于冷却）；</li>
-<li>生命周期：与“技能授予”绑定——ASC授予技能时创建Spec，移除技能时销毁Spec，长期存在于ASC的技能管理列表中。</li>
-</ul>
-<h3 id="2-Gameplay-Ability-Instance：技能的“执行行为”"><a href="#2-Gameplay-Ability-Instance：技能的“执行行为”" class="headerlink" title="2. Gameplay Ability Instance：技能的“执行行为”"></a>2. Gameplay Ability Instance：技能的“执行行为”</h3><p>Instance是GA的实际运行实例，可类比为“角色放出一个火球的具体行为”：</p>
-<ul>
-<li>核心职责：执行技能的具体逻辑（如施法动画、生成火球等），仅在技能激活时创建，技能结束（施法完成&#x2F;被打断）后销毁；</li>
-<li>生命周期：与“技能激活”绑定——每次激活技能（如点击释放火球术），ASC会基于Spec创建一个Instance，技能执行完毕后Instance随之销毁。</li>
-</ul>
-<h2 id="关键关系与特性"><a href="#关键关系与特性" class="headerlink" title="关键关系与特性"></a>关键关系与特性</h2><ol>
-<li>一对多关联：一个Spec（技能槽）可对应多个Instance（多次释放技能）——比如角色的火球术技能槽（Spec），可反复激活生成多个火球术执行实例（Instance），也可对同一Instance进行激活、禁用等操作；</li>
-<li>分工明确的交互逻辑：<ul>
-<li>Spec直接与ASC交互：所有对技能的“管理操作”（如修改等级、重置冷却、判断释放权限）均通过ASC作用于Spec；</li>
-<li>Instance与游戏世界交互：Instance专注完成技能的世界交互逻辑（如生成特效、检测碰撞、施加伤害），无需感知所属ASC，仅需完成自身的执行任务。</li>
-</ul>
-</li>
-</ol>
-]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>GAS</tag>
-        <tag>GA</tag>
-        <tag>GameplayAbilitySpec</tag>
       </tags>
   </entry>
   <entry>
@@ -768,44 +961,71 @@
       </tags>
   </entry>
   <entry>
-    <title>GameplayCue (GC)</title>
-    <url>/ue5-blog/2025/12/14/SystemDesigns/GAS/GameplayCue/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>GameplayCue（GC）是 GAS 框架中实现技能视听效果的核心组件，专门承接 GA 中非数值逻辑的视听表现（如粒子、音效、镜头震动），核心优势为“解耦视听效果与属性计算逻辑”“自动支持网络同步”，并提供不同类型的 GC 适配瞬间&#x2F;持续等不同视听场景。</p>
+    <title>AbilitySystemComponent (ASC)</title>
+    <url>/ue5-blog/2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>AbilitySystemComponent（ASC）是GAS框架的核心中枢，作为挂载在Actor&#x2F;Character上的“逻辑容器”，承接对象所有GAS相关能力与交互。GAS的核心逻辑（属性变更、效果施加、技能执行）均围绕ASC展开，所有交互遵循“ASC发起→ASC接收”的模式，是连接GE、GA、AttributeSet的核心桥梁。</p>
 <span id="more"></span>
 
-<h1 id="为什么要用-GameplayCue"><a href="#为什么要用-GameplayCue" class="headerlink" title="为什么要用 GameplayCue"></a>为什么要用 GameplayCue</h1><p>GA（GameplayAbility）的核心功能分为两类：一是通过 GE 实现属性数值变化（如伤害、回血）；二是呈现技能配套的视听效果，后者通常由 GameplayCue 实现。</p>
-<p>使用 GameplayCue 的核心优势：</p>
+<h1 id="ASC-是什么"><a href="#ASC-是什么" class="headerlink" title="ASC 是什么"></a>ASC 是什么</h1><p>从GAS的核心逻辑视角，ASC是承载对象GAS能力的“逻辑核心”（Actor&#x2F;Character仅作为宿主，GAS层面无需关注其原生逻辑）——可将GAS需处理的所有对象，抽象为一个个独立的ASC实例。</p>
+<p>每个ASC独立管理如下核心内容，构成GAS交互的基础：</p>
+<h2 id="1-游戏效果（GameplayEffect，GE）：世界对ASC的作用载体"><a href="#1-游戏效果（GameplayEffect，GE）：世界对ASC的作用载体" class="headerlink" title="1. 游戏效果（GameplayEffect，GE）：世界对ASC的作用载体"></a>1. 游戏效果（GameplayEffect，GE）：世界对ASC的作用载体</h2><p>游戏世界中所有事件对当前ASC产生的影响，均通过挂载在该ASC上的GE实现；处理ASC对外部作用的反馈，核心是围绕GE的挂载、移除与响应展开。</p>
+<h2 id="2-游戏技能（GameplayAbility，GA）：ASC对世界的作用载体"><a href="#2-游戏技能（GameplayAbility，GA）：ASC对世界的作用载体" class="headerlink" title="2. 游戏技能（GameplayAbility，GA）：ASC对世界的作用载体"></a>2. 游戏技能（GameplayAbility，GA）：ASC对世界的作用载体</h2><p>ASC对游戏世界产生的所有影响（如播放角色动画、生成带伤害GE的子弹），均依赖其拥有的GA实现。需注意：ASC管理的并非GA实例，而是Gameplay Ability Spec（技能规格）；关于Spec与Instance的区别见<a href="/ue5-blog/2025/12/11/GAS-GA/">此处</a>。</p>
+<h2 id="3-补充：属性（Attribute）的管理"><a href="#3-补充：属性（Attribute）的管理" class="headerlink" title="3. 补充：属性（Attribute）的管理"></a>3. 补充：属性（Attribute）的管理</h2><p>属性用于描述对象的核心状态（如血量、蓝量、力量），虽可直接由ASC管理，但为逻辑解耦，通常单独通过AttributeSet封装；特殊属性（如玩家XP、技能点、属性点）可存储在PlayerState中，由ASC关联访问。</p>
+<h2 id="ASC的核心交互逻辑"><a href="#ASC的核心交互逻辑" class="headerlink" title="ASC的核心交互逻辑"></a>ASC的核心交互逻辑</h2><p>GAS框架下所有交互均遵循“ASC发起→ASC接收”：</p>
 <ol>
-<li>解耦视听表现与核心逻辑计算，便于单独调试、修改视听效果；</li>
-<li>内置网络复制逻辑，无需手动处理多客户端视听同步。</li>
+<li>发起方ASC通过自身拥有的GA触发对外作用；</li>
+<li>GA执行过程中产生的各类影响（如伤害、视觉效果等），最终以GE的形式施加到目标ASC；</li>
+<li>目标ASC接收GE后，修改自身Attribute，并触发配套的世界交互（如血量降低同步更新UI、触发死亡特效）。</li>
 </ol>
-<h1 id="GameplayCue-的常见用法"><a href="#GameplayCue-的常见用法" class="headerlink" title="GameplayCue 的常见用法"></a>GameplayCue 的常见用法</h1><h2 id="1-GCN-Burst"><a href="#1-GCN-Burst" class="headerlink" title="1. GCN Burst"></a>1. GCN Burst</h2><p>GCN Burst 是高集成度的 GC 类型，专为爆炸、冲击等瞬时视听效果设计，可直接在蓝图中配置 Burst Particles（爆炸粒子）、Burst Sounds（爆炸音效）、Burst Camera Shake（镜头震动）等资产，并绑定专属 Tag。</p>
-<h3 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h3><p>在 GA 合适位置调用 <code>Execute GameplayCueWithParams On Owner</code> 函数，传递关键参数（通常仅需位置信息）即可触发：<br><img src="/ue5-blog/2025/12/14/SystemDesigns/GAS/GameplayCue/image.png" alt="alt text"></p>
-<h3 id="关键注意点"><a href="#关键注意点" class="headerlink" title="关键注意点"></a>关键注意点</h3><ul>
-<li>GC 并非通过类型引用匹配，而是通过 Tag 关联，同一 Tag 可绑定多个 GC，一次 Execute 会触发所有绑定该 Tag 的 GC 逻辑；</li>
-<li>Tag 必须以 <code>GameplayCue.</code> 为前缀（如 <code>GameplayCue.FireBall</code>），所有类型 GC 均通过该规则匹配。</li>
+<h1 id="ASC类提供的核心功能"><a href="#ASC类提供的核心功能" class="headerlink" title="ASC类提供的核心功能"></a>ASC类提供的核心功能</h1><h2 id="1-响应GE挂载：处理自身被施加GE后的逻辑"><a href="#1-响应GE挂载：处理自身被施加GE后的逻辑" class="headerlink" title="1. 响应GE挂载：处理自身被施加GE后的逻辑"></a>1. 响应GE挂载：处理自身被施加GE后的逻辑</h2><p>通过绑定ASC内置的<code>OnGameplayEffectAppliedDelegateToSelf</code>委托回调，可监听并处理GE施加到自身的逻辑。需注意：该委托仅在Server端生效（GE的核心生效逻辑均在Server执行），Client端需通过Server广播同步UI等视觉&#x2F;交互变化。</p>
+<p>该委托回调会传入两个核心参数：<code>FGameplayEffectSpec</code>（GE的配置规格）、<code>FActiveGameplayEffectHandle</code>（GE实例的句柄），用于精准识别并处理对应的GE。</p>
+<h2 id="2-管理GA：核心是管理Gameplay-Ability-Spec"><a href="#2-管理GA：核心是管理Gameplay-Ability-Spec" class="headerlink" title="2. 管理GA：核心是管理Gameplay Ability Spec"></a>2. 管理GA：核心是管理Gameplay Ability Spec</h2><p>ASC不直接与GA实例交互，所有GA相关操作均围绕Spec展开，核心能力包括：</p>
+<h3 id="（1）Tag与Spec的关联管理"><a href="#（1）Tag与Spec的关联管理" class="headerlink" title="（1）Tag与Spec的关联管理"></a>（1）Tag与Spec的关联管理</h3><p>提供一系列工具函数，实现GameplayTag（Ability&#x2F;Status&#x2F;Input类标签）与Spec的绑定、查询与校验，例如：</p>
+<ul>
+<li><code>GetInputTagFromSpec</code>：从Spec中提取绑定的输入Tag；</li>
+<li><code>AbilityHasSlot</code>：校验Spec是否绑定了指定技能槽位；</li>
+<li><code>AssignSlotToAbility</code>：为Spec分配技能槽位。</li>
 </ul>
-<h2 id="2-GameplayCue-Notify-Static"><a href="#2-GameplayCue-Notify-Static" class="headerlink" title="2. GameplayCue Notify Static"></a>2. GameplayCue Notify Static</h2><p>该类型 GC 同样用于瞬时视听效果，是更底层的实现类，相比 GCN Burst 自由度更高——GCN Burst 的粒子、音效等资产为硬编码配置，而 Static 可基于传入参数动态选择资产。</p>
-<h3 id="典型场景（动态血液效果）"><a href="#典型场景（动态血液效果）" class="headerlink" title="典型场景（动态血液效果）"></a>典型场景（动态血液效果）</h3><p>需求：击中不同类型敌人时，显示对应颜色的血液粒子，实现步骤：</p>
-<ol>
-<li>将敌人类 Actor 作为参数传入 GC；</li>
-<li>在敌人类&#x2F;相关接口中，实现“根据敌人类型匹配对应血液粒子系统”的函数；</li>
-<li>重写 GC 的 <code>OnExecute</code> 函数，调用上述函数获取粒子系统并生成。</li>
-</ol>
-<h3 id="使用方式-1"><a href="#使用方式-1" class="headerlink" title="使用方式"></a>使用方式</h3><p>与 GCN Burst 一致，在 GA 中调用 <code>Execute GameplayCueWithParams On Owner</code> 并传递自定义参数即可；参数类型无限制，支持在 GC 中实现复杂逻辑。</p>
-<h3 id="网络同步"><a href="#网络同步" class="headerlink" title="网络同步"></a>网络同步</h3><p>瞬时类 GC 的网络同步由框架自动封装，无需手动处理，确保多客户端看到的视听效果一致。</p>
-<h2 id="3-GameplayCue-Notify-Actor"><a href="#3-GameplayCue-Notify-Actor" class="headerlink" title="3. GameplayCue Notify Actor"></a>3. GameplayCue Notify Actor</h2><p>该类型 GC 生成的对象以 Actor 形式存在，拥有独立生命周期，适用于持续型视听效果（如持续灼烧粒子、光环音效）。</p>
-<h3 id="使用方式-2"><a href="#使用方式-2" class="headerlink" title="使用方式"></a>使用方式</h3><ul>
-<li>启用 GC：调用 <code>AddGameplayCueOnActor</code> 函数，通过 Tag 匹配 GC 并传入自定义参数；</li>
-<li>停用 GC：调用 <code>RemoveGameplayCueOnActor</code> 函数，需传入与启用时一致的 Tag 和参数（因此 GA 中需保存传入 GC 的参数）。</li>
+<p>关键注意点：</p>
+<ul>
+<li>Spec的动态标签（如Status、Input Tag）：通过<code>Spec.GetDynamicSourceTags()</code>获取&#x2F;管理；</li>
+<li>Spec的固定标签（如AbilityTag）：通过<code>Spec.Ability.Get()-&gt;GetAssetTags()</code>获取&#x2F;管理；</li>
+<li>遍历已授予（granted）的技能Spec：调用<code>GetActivatableAbilities()</code>，返回值为Spec列表；<strong>遍历激活技能时必须加锁</strong>（如<code>FScopedAbilityListLock</code>），避免多线程冲突。</li>
 </ul>
-<h3 id="核心实现逻辑"><a href="#核心实现逻辑" class="headerlink" title="核心实现逻辑"></a>核心实现逻辑</h3><p>持续型 GC 的多客户端管理由 Server 主导：Server 判断客户端是否与该 GC 相关，仅向相关客户端同步视听效果，无关时停止同步。需重写两个核心函数：</p>
+<h3 id="（2）授予新技能（Spec）"><a href="#（2）授予新技能（Spec）" class="headerlink" title="（2）授予新技能（Spec）"></a>（2）授予新技能（Spec）</h3><p>ASC的“技能槽”不仅包含UI可见技能，还涵盖所有已授予的技能；授予逻辑仅针对Spec，而非GA实例，核心步骤：</p>
 <ol>
-<li><code>OnBecomeRelevant</code>：实现视听效果的生成逻辑（如创建粒子组件、播放循环音效）；</li>
-<li><code>OnCeaseRelevant</code>：实现视听效果的停止逻辑（如销毁粒子组件、停止音效），需将生成的组件保存为变量，以便此处销毁。</li>
+<li>创建新的Gameplay Ability Spec；</li>
+<li>为Spec填充配置（如绑定Tag、设置等级、配置冷却）；</li>
+<li>调用<code>GiveAbility(Spec)</code>完成授予（按需激活：<code>GiveAbilityAndActivateOnce(Spec)</code>会直接实例化并执行GA）；</li>
+<li>向UI广播技能授予事件，同步界面展示，按需进行。</li>
 </ol>
-<h3 id="优化技巧"><a href="#优化技巧" class="headerlink" title="优化技巧"></a>优化技巧</h3><p>销毁音效时直接删除组件会导致效果突兀，可调用 <code>FadeOut</code> 函数让音效渐变消失，提升体验。</p>
-<h3 id="额外配置（多-GC-启用场景）"><a href="#额外配置（多-GC-启用场景）" class="headerlink" title="额外配置（多 GC 启用场景）"></a>额外配置（多 GC 启用场景）</h3><p>若需同时启用大量持续型 GC，需提升项目 RPC 容量，避免同步卡顿：<br>打开 <code>config/DefaultGame.ini</code>，修改如下配置（默认值为 3）：<br>[ConsoleVariables]<br>net.MaxRPCPerNetUpdate&#x3D;10</p>
+<h3 id="（3）处理技能输入响应"><a href="#（3）处理技能输入响应" class="headerlink" title="（3）处理技能输入响应"></a>（3）处理技能输入响应</h3><p>这是GA实例化（激活）的核心逻辑，ASC通过<code>AbilityInputTagPressed/Held/Released</code>等函数响应输入：</p>
+<ul>
+<li>职责边界：ASC仅负责触发GA的实例化&#x2F;激活，GA的结束逻辑由其自身控制；</li>
+<li>输入习惯适配：通常在<code>AbilityInputTagHeld</code>中处理激活逻辑（绑定<code>ETriggerEvent::Triggered</code>，按下期间每帧触发），支持长按连续释放技能（需结合冷却&#x2F;激活状态判断）；</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::AbilityInputTagHeld</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; InputTag)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (!InputTag.<span class="built_in">IsValid</span>()) <span class="keyword">return</span>;</span><br><span class="line">	<span class="function">FScopedAbilityListLock <span class="title">ActiveScopeLock</span><span class="params">(*<span class="keyword">this</span>)</span></span>;</span><br><span class="line">	<span class="keyword">for</span> (FGameplayAbilitySpec&amp; AbilitySpec : <span class="built_in">GetActivatableAbilities</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (AbilitySpec.<span class="built_in">GetDynamicSpecSourceTags</span>().<span class="built_in">HasTagExact</span>(InputTag))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">AbilitySpecInputPressed</span>(AbilitySpec);</span><br><span class="line">			<span class="keyword">if</span> (!AbilitySpec.<span class="built_in">IsActive</span>())</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="built_in">TryActivateAbility</span>(AbilitySpec.Handle);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>网络同步：输入事件发生在Client端，需同步到Server端以保证效果一致：</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (AbilitySpec.<span class="built_in">IsActive</span>())</span><br><span class="line">&#123;</span><br><span class="line">    TArray&lt;UGameplayAbility*&gt; Instances = AbilitySpec.<span class="built_in">GetAbilityInstances</span>();</span><br><span class="line">    <span class="type">const</span> FGameplayAbilityActivationInfo&amp; ActivationInfo = Instances.<span class="built_in">Last</span>()-&gt;<span class="built_in">GetCurrentActivationInfoRef</span>();</span><br><span class="line">    FPredictionKey OriginalPredictionKey = ActivationInfo.<span class="built_in">GetActivationPredictionKey</span>();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">InvokeReplicatedEvent</span>(EAbilityGenericReplicatedEvent::InputPressed , AbilitySpec.Handle , OriginalPredictionKey);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-处理属性变化"><a href="#3-处理属性变化" class="headerlink" title="3. 处理属性变化"></a>3. 处理属性变化</h2><p>属性变化的核心逻辑通常封装在AttributeSet中，ASC仅处理与技能强关联的属性变更场景：</p>
+<ul>
+<li>典型场景：角色等级提升解锁&#x2F;升级技能（需ASC执行技能授予&#x2F;更新Spec配置）；</li>
+<li>实现方式：ASC通过<code>GetAvatarActor()</code>获取宿主对象，关联AttributeSet或PlayerState读取&#x2F;修改属性；</li>
+<li>扩展方案：可通过GameplayEvent转发属性变化事件（详情见<a href="/ue5-blog/2025/12/12/GAS-GameplayEvent/">此处</a>查看）。</li>
+</ul>
+<h1 id="网络复制"><a href="#网络复制" class="headerlink" title="网络复制"></a>网络复制</h1><h2 id="Server与Client的职责"><a href="#Server与Client的职责" class="headerlink" title="Server与Client的职责"></a>Server与Client的职责</h2><p>为适配多人游戏，需明确ASC相关逻辑在Server&#x2F;Client的分工：</p>
+<ul>
+<li>Server端：执行核心逻辑（属性修改、技能授予、GE施加），保证数据权威；</li>
+<li>Client端：仅处理UI同步、视觉反馈等非核心逻辑。</li>
+</ul>
+<p>设计范式：拆分“Server执行+Client广播”两套函数：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::ServerEquipAbility_Implementation</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; AbilityTag,</span></span></span><br><span class="line"><span class="params"><span class="function">                                                                    <span class="type">const</span> FGameplayTag&amp; Slot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (FGameplayAbilitySpec* AbilitySpec = <span class="built_in">GetSpecFromAbilityTag</span>(AbilityTag))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// Server端修改Spec的核心逻辑</span></span><br><span class="line"></span><br><span class="line">		<span class="built_in">ClientEquipAbility</span>(AbilityTag , GameplayTags.Abilities_Status_Equipped , Slot , PrevSlot);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::ClientEquipAbility_Implementation</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; AbilityTag, <span class="type">const</span> FGameplayTag&amp; Status,</span></span></span><br><span class="line"><span class="params"><span class="function">                                                                    <span class="type">const</span> FGameplayTag&amp; Slot, <span class="type">const</span> FGameplayTag&amp; PreviousSlot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	AbilityEquipped.<span class="built_in">Broadcast</span>(AbilityTag , Status , Slot , PreviousSlot);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="代码解析"><a href="#代码解析" class="headerlink" title="代码解析"></a>代码解析</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">AbilitySpec.<span class="built_in">GetDynamicSpecSourceTags</span>().<span class="built_in">AddTag</span>(GameplayTags.Abilities_Status_Eligible);</span><br><span class="line"><span class="built_in">MarkAbilitySpecDirty</span>(AbilitySpec);</span><br><span class="line"><span class="comment">// 同步 “Spec 配置数据”，传递 Spec 的完整状态，用于保证配置一致。</span></span><br></pre></td></tr></table></figure>
+<p>当手动修改了 AbilitySpec 的成员变量后（如设置目标、调整冷却），调用 MarkAbilitySpecDirty 可以立即生效这些更改，避免延迟或不同步状况。</p>
 ]]></content>
       <categories>
         <category>SystemDesigns</category>
@@ -813,128 +1033,7 @@
       </categories>
       <tags>
         <tag>GAS</tag>
-        <tag>GC</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>AbilityTask</title>
-    <url>/ue5-blog/2025/12/14/SystemDesigns/GAS/AbilityTask/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>AbilityTask 是 GAS 框架中解耦 GameplayAbility（GA）可复用异步逻辑的核心组件，主打“异步数据获取+跨端数据传输+网络同步”，可将鼠标击中对象获取、异步动画回调等通用逻辑封装为独立任务，提升 GA 代码复用性与逻辑整洁度。</p>
-<span id="more"></span>
-
-<h1 id="AbilityTask-的作用"><a href="#AbilityTask-的作用" class="headerlink" title="AbilityTask 的作用"></a>AbilityTask 的作用</h1><p>在 GA 开发中，鼠标击中对象获取、异步事件监听等通用数据获取逻辑，需解耦为独立模块以复用，AbilityTask 为此设计，核心流程包含三步：</p>
-<ol>
-<li>执行异步任务，获取目标数据；</li>
-<li>将数据回调传递给调用该任务的 GA；</li>
-<li>完成客户端与服务端的网络同步。</li>
-</ol>
-<p>以下以「获取鼠标指向目标数据（TargetDataUnderMouse）」为例，拆解 AbilityTask 的完整实现流程。</p>
-<h1 id="TargetDataUnderMouse-任务实现"><a href="#TargetDataUnderMouse-任务实现" class="headerlink" title="TargetDataUnderMouse 任务实现"></a>TargetDataUnderMouse 任务实现</h1><h2 id="1-蓝图可调用设计"><a href="#1-蓝图可调用设计" class="headerlink" title="1. 蓝图可调用设计"></a>1. 蓝图可调用设计</h2><p>GA 的核心逻辑通常在蓝图中实现，因此自定义 AbilityTask 需适配蓝图调用，关键是定义动态多播委托与蓝图可调用的创建函数：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam</span>(FMouseTargetDataSignature, <span class="type">const</span> FGameplayAbilityTargetDataHandle&amp;, DataHandle);</span><br><span class="line"></span><br><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAS_Custom_API</span> UTargetDataUnderMouse : <span class="keyword">public</span> UAbilityTask</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="built_in">UFUNCTION</span>(BlueprintCallable , Category = <span class="string">&quot;Ability|Tasks&quot;</span> , meta = (DisplayName = <span class="string">&quot;TargetDataUnderMouse&quot;</span> , HidePin = <span class="string">&quot;OwningAbility&quot;</span> , DefaultToSelf = <span class="string">&quot;OwningAbility&quot;</span> , BlueprintInternalUseOnly = <span class="string">&quot;true&quot;</span>) )</span><br><span class="line">	<span class="function"><span class="type">static</span> UTargetDataUnderMouse* <span class="title">CreateTargetDataUnderMouse</span><span class="params">(UGameplayAbility* OwningAbility)</span></span>;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(BlueprintAssignable)</span><br><span class="line">	FMouseTargetDataSignature ValidData;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>蓝图中可通过「TargetDataUnderMouse」节点创建任务，该节点包含「ValidData」执行线与「DataHandle」数据输出：</p>
-<ul>
-<li>节点右上角的时钟标识表明其为异步任务，后续逻辑需绑定至「ValidData」执行线触发；</li>
-<li>异步特性意味着节点后接的函数不会立即执行，需等待数据获取完成。<br><img src="/ue5-blog/2025/12/14/SystemDesigns/GAS/AbilityTask/image.png" alt="alt text"></li>
-</ul>
-<h2 id="2-任务核心实现"><a href="#2-任务核心实现" class="headerlink" title="2. 任务核心实现"></a>2. 任务核心实现</h2><p>自定义 AbilityTask 需重写 Activate 函数（创建任务后自动调用），核心完成“客户端获取数据、服务端同步数据、回调传递给GA”三大逻辑：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">UTargetDataUnderMouse* <span class="title">UTargetDataUnderMouse::CreateTargetDataUnderMouse</span><span class="params">(UGameplayAbility* OwningAbility)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	UTargetDataUnderMouse* MyObj = <span class="built_in">NewAbilityTask</span>&lt;UTargetDataUnderMouse&gt;(OwningAbility);</span><br><span class="line">	<span class="keyword">return</span> MyObj;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UTargetDataUnderMouse::Activate</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 本地控制：直接获取鼠标数据；非本地控制：等待客户端同步数据</span></span><br><span class="line">	<span class="type">const</span> <span class="type">bool</span> bIsLocallyControlled = Ability-&gt;<span class="built_in">GetCurrentActorInfo</span>()-&gt;<span class="built_in">IsLocallyControlled</span>();</span><br><span class="line">	<span class="keyword">if</span> (bIsLocallyControlled)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">SendMouseCursorData</span>();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="type">const</span> FGameplayAbilitySpecHandle SpecHandle = <span class="built_in">GetAbilitySpecHandle</span>();</span><br><span class="line">		<span class="type">const</span> FPredictionKey PredictionKey = <span class="built_in">GetActivationPredictionKey</span>();</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 绑定客户端数据同步的回调</span></span><br><span class="line">		AbilitySystemComponent.<span class="built_in">Get</span>()-&gt;<span class="built_in">AbilityTargetDataSetDelegate</span>(SpecHandle , PredictionKey).<span class="built_in">AddUObject</span>(<span class="keyword">this</span> , &amp;UTargetDataUnderMouse::OnTargetDataReplicatedCallback);</span><br><span class="line"></span><br><span class="line">		<span class="type">const</span> <span class="type">bool</span> bCalledDelegate = AbilitySystemComponent.<span class="built_in">Get</span>()-&gt;<span class="built_in">CallReplicatedTargetDataDelegatesIfSet</span>(SpecHandle , PredictionKey);</span><br><span class="line">		<span class="keyword">if</span> (!bCalledDelegate)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">SetWaitingOnRemotePlayerData</span>();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UTargetDataUnderMouse::SendMouseCursorData</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="function">FScopedPredictionWindow <span class="title">ScopedPredictionWindow</span><span class="params">(AbilitySystemComponent.Get())</span></span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 1. 获取鼠标指向的命中结果</span></span><br><span class="line">	APlayerController* PC = Ability-&gt;<span class="built_in">GetCurrentActorInfo</span>()-&gt;PlayerController.<span class="built_in">Get</span>();</span><br><span class="line">	FHitResult CursorHitResult;</span><br><span class="line">	PC-&gt;<span class="built_in">GetHitResultUnderCursor</span>(ECC_Target , <span class="literal">false</span> , CursorHitResult);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 2. 封装命中数据并同步至服务端</span></span><br><span class="line">	FGameplayAbilityTargetDataHandle DataHandle;</span><br><span class="line">	FGameplayAbilityTargetData_SingleTargetHit* Data = <span class="keyword">new</span> <span class="built_in">FGameplayAbilityTargetData_SingleTargetHit</span>();</span><br><span class="line">	Data-&gt;HitResult = CursorHitResult;</span><br><span class="line">	DataHandle.<span class="built_in">Add</span>(Data);</span><br><span class="line"></span><br><span class="line">	AbilitySystemComponent-&gt;<span class="built_in">ServerSetReplicatedTargetData</span>(</span><br><span class="line">		<span class="built_in">GetAbilitySpecHandle</span>() ,</span><br><span class="line">		<span class="built_in">GetActivationPredictionKey</span>() ,</span><br><span class="line">		DataHandle ,</span><br><span class="line">		<span class="built_in">FGameplayTag</span>() ,</span><br><span class="line">		AbilitySystemComponent-&gt;ScopedPredictionKey);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 3. 回调传递数据给GA</span></span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">ShouldBroadcastAbilityTaskDelegates</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		ValidData.<span class="built_in">Broadcast</span>(DataHandle);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UTargetDataUnderMouse::OnTargetDataReplicatedCallback</span><span class="params">(<span class="type">const</span> FGameplayAbilityTargetDataHandle&amp; DataHandle, FGameplayTag ActivationTag)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 1. 消费同步数据，避免重复处理</span></span><br><span class="line">	AbilitySystemComponent-&gt;<span class="built_in">ConsumeClientReplicatedTargetData</span>(<span class="built_in">GetAbilitySpecHandle</span>() , <span class="built_in">GetActivationPredictionKey</span>());</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 2. 回调传递同步后的数据给GA</span></span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">ShouldBroadcastAbilityTaskDelegates</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		ValidData.<span class="built_in">Broadcast</span>(DataHandle);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>AbilityTask</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>GameplayEvent</title>
-    <url>/ue5-blog//2025/12/12/GAS-GameplayEvent/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>GameplayEvent 是 GAS 框架中类委托（Delegate）的消息传递机制，核心作用是实现对象间的事件通知与数据传递：通过自定义事件标签发送包含数据的事件，Actor 所拥有的 GameplayAbility（GA）可通过 <code>WaitGameplayEvent</code> 监听并响应事件，相比普通委托，它是定制化的消息管道，专用于 GAS 体系内的事件交互。</p>
-<span id="more"></span>
-
-<h1 id="GameplayEvent-的作用"><a href="#GameplayEvent-的作用" class="headerlink" title="GameplayEvent 的作用"></a>GameplayEvent 的作用</h1><p>GameplayEvent 功能上与委托（Delegate）相似，核心用于<strong>对象间的事件通知与数据传递</strong>：当一个对象需要触发另一个对象执行特定逻辑时，可发送带有自定义标签的 GameplayEvent，并在事件中承载数据供接收方处理。</p>
-<p>其与普通委托的核心区别在于：GameplayEvent 是 GAS 体系下的定制化消息管道，事件会发送至目标 Actor，该 Actor 挂载的 GA 可通过 <code>WaitGameplayEvent</code> 节点&#x2F;函数监听并捕获对应事件，适配 GAS 框架的能力体系设计。</p>
-<h1 id="GameplayEvent-的使用"><a href="#GameplayEvent-的使用" class="headerlink" title="GameplayEvent 的使用"></a>GameplayEvent 的使用</h1><p>以下通过两个典型场景，说明 GameplayEvent 的发送、接收及数据传递方式：</p>
-<h2 id="场景1：来自动画的通知（无数据传递）"><a href="#场景1：来自动画的通知（无数据传递）" class="headerlink" title="场景1：来自动画的通知（无数据传递）"></a>场景1：来自动画的通知（无数据传递）</h2><p>以火球技能（GA_FireBolt）为例，需求是“角色动画播放到指定帧时，生成并释放火球”，核心流程如下：</p>
-<ol>
-<li><strong>插入动画通知</strong>：在火球技能对应的动画蒙太奇（Montage）中，在目标时间点插入 Anim_Notify，绑定事件标签 <code>Event.Montage.FireBolt</code>；</li>
-<li><strong>发送 GameplayEvent</strong>：在该 Anim_Notify 的逻辑中，向角色 Actor 发送带有 <code>Event.Montage.FireBolt</code> 标签的 GameplayEvent（无额外数据）；<br><img src="/ue5-blog/2025/12/12/GAS-GameplayEvent/GameplayEvent_1.png" alt="alt text"></li>
-<li><strong>监听并响应事件</strong>：在 GA_FireBolt 中播放动画蒙太奇的同时，启用 <code>WaitGameplayEvent</code> 监听 <code>Event.Montage.FireBolt</code> 标签；一旦捕获到该事件，即判定动画播放至指定时机，执行火球生成与释放逻辑。<br><img src="/ue5-blog/2025/12/12/GAS-GameplayEvent/GameplayEvent_2.png" alt="alt text"></li>
-</ol>
-<h2 id="场景2：使用属性点增加属性（带数据传递）"><a href="#场景2：使用属性点增加属性（带数据传递）" class="headerlink" title="场景2：使用属性点增加属性（带数据传递）"></a>场景2：使用属性点增加属性（带数据传递）</h2><p>需求是“消耗1个属性点，提升指定属性数值”，需实现<strong>带数据的事件发送</strong>与<strong>持续监听的事件接收</strong>，核心分为发送、接收两步：</p>
-<h3 id="步骤1：发送-GameplayEvent（带Payload数据）"><a href="#步骤1：发送-GameplayEvent（带Payload数据）" class="headerlink" title="步骤1：发送 GameplayEvent（带Payload数据）"></a>步骤1：发送 GameplayEvent（带Payload数据）</h3><p>与无数据传递的场景不同，需将“提升的属性标签”“提升数值”封装到 <code>FGameplayEventData</code>（Payload）中，再发送事件：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::ServerUpgradeAttribute_Implementation</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; AttributeTag)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	FGameplayEventData Payload;</span><br><span class="line">	Payload.EventTag = AttributeTag;</span><br><span class="line">	Payload.EventMagnitude = <span class="number">1.f</span>;</span><br><span class="line"></span><br><span class="line">	UAbilitySystemBlueprintLibrary::<span class="built_in">SendGameplayEventToActor</span>(<span class="built_in">GetAvatarActor</span>() , AttributeTag , Payload);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">GetAvatarActor</span>()-&gt;<span class="built_in">Implements</span>&lt;UPlayerInterface&gt;())</span><br><span class="line">	&#123;</span><br><span class="line">		IPlayerInterface::<span class="built_in">Execute_AddToAttributePoints</span>(<span class="built_in">GetAvatarActor</span>() , <span class="number">-1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="步骤2：接收-GameplayEvent（持续监听）"><a href="#步骤2：接收-GameplayEvent（持续监听）" class="headerlink" title="步骤2：接收 GameplayEvent（持续监听）"></a>步骤2：接收 GameplayEvent（持续监听）</h3><p>GameplayEvent 的接收端固定为 GA，需为玩家角色配置一个全程激活的 GA（如 GA_ListenForEvent），核心逻辑：</p>
-<ol>
-<li>持续通过 <code>WaitGameplayEvent</code> 监听属性提升相关事件，捕获“待修改属性标签”“提升数值”；</li>
-<li>基于通用 GE 模板类（GE_ListenForEvent）制作 GE 实例，修改目标属性数值。</li>
-</ol>
-<h4 id="GE-模板类（GE-ListenForEvent）设计"><a href="#GE-模板类（GE-ListenForEvent）设计" class="headerlink" title="GE 模板类（GE_ListenForEvent）设计"></a>GE 模板类（GE_ListenForEvent）设计</h4><p>为减少 GE 资源开销，仅创建一个通用 GE 模板类，包含所有可提升属性的 Modifier，通过 Set By Caller 传递数值：</p>
-<ul>
-<li>为每个可修改属性创建对应的 Modifier；</li>
-<li>无需修改的属性传入 0 值，仅对目标属性传入有效数值。</li>
-</ul>
-<h4 id="设计说明"><a href="#设计说明" class="headerlink" title="设计说明"></a>设计说明</h4><p>优先在单个 GE 中包含多属性 Modifier，而非创建多个专用 GE：</p>
-<ul>
-<li>优势：GE 是包含 Context 的重量级资源，单个通用 GE 可大幅减少资源开销（本场景中 Context 无实际作用）；</li>
-<li>劣势：每次构建 GE 需遍历所有 Modifier 并填充 Set By Caller 数值，但因可修改属性数量有限，性能损耗可忽略。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>GAS</tag>
-        <tag>GameplayEvent</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>GameplayTag</title>
-    <url>/ue5-blog/2025/12/14/SystemDesigns/GAS/GameplayTag/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>GameplayTag 是 GAS 框架的核心全局标识工具，通过轻量化的标签体系实现“数值映射、信息传递、资产区分、状态&#x2F;类型标记”等核心功能，其核心价值在于全局共识性——当对象间需基于统一标识完成交互时，GameplayTag 是最优选择。</p>
-<span id="more"></span>
-
-<h1 id="Tag-的作用"><a href="#Tag-的作用" class="headerlink" title="Tag 的作用"></a>Tag 的作用</h1><p>GAS 框架中 GameplayTag 应用场景灵活且广泛，核心作用可归纳为：</p>
-<ol>
-<li>数值映射标识：作为变量名标记需修改的属性，如 Set By Caller 机制通过 Tag 关联待修改的属性数值；</li>
-<li>信息传递验证：如 Anim Notify 中通过 GameplayEvent 传递 Tag，标识动画蒙太奇（Montage）的特定播放阶段；</li>
-<li>资产索引区分：为同类资产（如技能动画）打 Tag，通过 Tag 快速索引目标资产；</li>
-<li>状态标记：标记技能&#x2F;角色的状态（如技能锁定、装备中），用于状态校验与逻辑分支判断；</li>
-<li>类型标识：区分不同类别（如主动&#x2F;被动技能、火攻&#x2F;雷攻伤害类型），替代枚举实现更灵活的类型管理。</li>
-</ol>
-<p>GameplayTag 的核心优势是全局通用性，只要两个对象需基于“全局共识的标识”完成交互，即可优先使用 Tag。</p>
-<h1 id="Tag-的创建"><a href="#Tag-的创建" class="headerlink" title="Tag 的创建"></a>Tag 的创建</h1><h2 id="蓝图创建"><a href="#蓝图创建" class="headerlink" title="蓝图创建"></a>蓝图创建</h2><p>进入「Project Settings → GameplayTag」可可视化管理蓝图层面的 Tag：</p>
-<ul>
-<li>操作便捷，适合快速定义蓝图专属 Tag；</li>
-<li>局限性：仅能在蓝图中使用，C++ 代码无法访问。</li>
-</ul>
-<h2 id="C-端-Native-Tag"><a href="#C-端-Native-Tag" class="headerlink" title="C++ 端 Native Tag"></a>C++ 端 Native Tag</h2><p>通过单例模式注册 Native Tag（单例实现详见<a href="/ue5-blog/2025/12/10/ProgrammingSkills/Singleton">这里</a>），需将 Tag 注册到自定义 AssetManager 并配置生效：</p>
-<h3 id="1-自定义-AssetManager-注册-Tag"><a href="#1-自定义-AssetManager-注册-Tag" class="headerlink" title="1. 自定义 AssetManager 注册 Tag"></a>1. 自定义 AssetManager 注册 Tag</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAS_Custom_API</span> UCustomAssetManager : <span class="keyword">public</span> UAssetManager</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="function"><span class="type">static</span> UCustomAssetManager&amp; <span class="title">Get</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">StartInitialLoading</span><span class="params">()</span> <span class="keyword">override</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function">UCustomAssetManager&amp; <span class="title">UCustomAssetManager::Get</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">check</span>(GEngine);</span><br><span class="line"></span><br><span class="line">	UCustomAssetManager* CustomAssetManager = <span class="built_in">Cast</span>&lt;UCustomAssetManager&gt;(GEngine-&gt;AssetManager);</span><br><span class="line">	<span class="keyword">return</span> * CustomAssetManager;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAssetManager::StartInitialLoading</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">StartInitialLoading</span>();</span><br><span class="line"></span><br><span class="line">	FCustomGameplayTags::<span class="built_in">InitializeNativeGameplayTags</span>();</span><br><span class="line">	<span class="comment">// 初始化 GAS 全局数据</span></span><br><span class="line">	UAbilitySystemGlobals::<span class="built_in">Get</span>().<span class="built_in">InitGlobalData</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-修改项目配置文件"><a href="#2-修改项目配置文件" class="headerlink" title="2. 修改项目配置文件"></a>2. 修改项目配置文件</h3><p>打开「Config&#x2F;DefaultEngine.ini」，找到「[&#x2F;Script&#x2F;Engine.Engine]」节点，添加如下配置指定自定义 AssetManager：<br>AssetManagerClassName&#x3D;&#x2F;Script&#x2F;ProjectName.CustomAssetManager</p>
-]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>GAS</category>
-      </categories>
-      <tags>
-        <tag>GAS</tag>
-        <tag>GameplayTag</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Highlight</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>Input</category>
-      </categories>
-      <tags>
-        <tag>Highlight</tag>
+        <tag>ASC</tag>
       </tags>
   </entry>
   <entry>
@@ -947,56 +1046,6 @@
       </categories>
       <tags>
         <tag>EnhancedInput</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>行为树 (BehaviorTree)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/AI/BehaviorTree/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>AI</category>
-      </categories>
-      <tags>
-        <tag>BehavoirTree</tag>
-        <tag>Blackboard</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SpawnVolume and SpawnPoint</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/Levels/SpawnVolume/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>Levels</category>
-      </categories>
-      <tags>
-        <tag>SpawnVolume</tag>
-        <tag>SpawnPoint</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>WorldTransition</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/Levels/WorldTransition/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>Levels</category>
-      </categories>
-      <tags>
-        <tag>WorldTransition</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Head Up Display (HUD)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/HUD/</url>
-    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
-      <categories>
-        <category>SystemDesigns</category>
-        <category>UI</category>
-      </categories>
-      <tags>
-        <tag>HUD</tag>
       </tags>
   </entry>
   <entry>
@@ -1014,40 +1063,39 @@
       </tags>
   </entry>
   <entry>
-    <title>Model View ViewModel (MVVM)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/MVVM/</url>
+    <title>Head Up Display (HUD)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/HUD/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
       <categories>
         <category>SystemDesigns</category>
         <category>UI</category>
       </categories>
       <tags>
-        <tag>MVVM</tag>
-        <tag>FieldNotify</tag>
+        <tag>HUD</tag>
       </tags>
   </entry>
   <entry>
-    <title>GameInstace (GI)</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/GameInstance/</url>
+    <title>GameMode</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/GameMode/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
       <categories>
         <category>SystemDesigns</category>
         <category>SaveAndLoad</category>
       </categories>
       <tags>
-        <tag>GI</tag>
+        <tag>GameMode</tag>
       </tags>
   </entry>
   <entry>
-    <title>Load</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Load/</url>
+    <title>Highlight</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/Input/Highlight/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
       <categories>
         <category>SystemDesigns</category>
-        <category>SaveAndLoad</category>
+        <category>Input</category>
       </categories>
       <tags>
-        <tag>Load</tag>
+        <tag>Highlight</tag>
       </tags>
   </entry>
   <entry>
@@ -1063,15 +1111,40 @@
       </tags>
   </entry>
   <entry>
-    <title>GameMode</title>
-    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/GameMode/</url>
+    <title>Model View ViewModel (MVVM)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/UI/MVVM/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>UI</category>
+      </categories>
+      <tags>
+        <tag>MVVM</tag>
+        <tag>FieldNotify</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Load</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/Load/</url>
     <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
       <categories>
         <category>SystemDesigns</category>
         <category>SaveAndLoad</category>
       </categories>
       <tags>
-        <tag>GameMode</tag>
+        <tag>Load</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GameInstace (GI)</title>
+    <url>/ue5-blog/2025/12/08/SystemDesigns/SaveAndLoad/GameInstance/</url>
+    <content><![CDATA[<h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>]]></content>
+      <categories>
+        <category>SystemDesigns</category>
+        <category>SaveAndLoad</category>
+      </categories>
+      <tags>
+        <tag>GI</tag>
       </tags>
   </entry>
 </search>

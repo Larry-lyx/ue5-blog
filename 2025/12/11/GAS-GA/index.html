@@ -19,15 +19,15 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
 
-    <meta name="description" content="核心总结">
+    <meta name="description" content="核心总结GameplayAbility（GA）是 GAS 框架中封装技能逻辑的核心单元，其运行依赖「GameplayAbilitySpec（技能规格）」与「GameplayAbilityInstance（技能实例）」的分工协作：Spec 负责技能的长期管理与配置（如装配位置、是否锁定等），Instance 负责技能单次激活的实际执行（如施法、伤害、特效）。GA 的实现兼顾蓝图的灵活性（流程可视化、">
 <meta property="og:type" content="article">
 <meta property="og:title" content="GameplayAbility (GA)">
 <meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/11/GAS-GA/index.html">
 <meta property="og:site_name" content="UE5学习笔记博客">
-<meta property="og:description" content="核心总结">
+<meta property="og:description" content="核心总结GameplayAbility（GA）是 GAS 框架中封装技能逻辑的核心单元，其运行依赖「GameplayAbilitySpec（技能规格）」与「GameplayAbilityInstance（技能实例）」的分工协作：Spec 负责技能的长期管理与配置（如装配位置、是否锁定等），Instance 负责技能单次激活的实际执行（如施法、伤害、特效）。GA 的实现兼顾蓝图的灵活性（流程可视化、">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-12-10T16:00:00.000Z">
-<meta property="article:modified_time" content="2025-12-14T02:01:24.700Z">
+<meta property="article:modified_time" content="2025-12-14T08:34:34.341Z">
 <meta property="article:author" content="Larry-lyx">
 <meta property="article:tag" content="GA">
 <meta property="article:tag" content="GAS">
@@ -160,7 +160,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Gameplay-Ability-Spec-%E4%B8%8E-Gameplay-Ability-Instance"><span class="nav-number">2.</span> <span class="nav-text">Gameplay Ability Spec 与 Gameplay Ability Instance</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E5%8C%BA%E5%88%86"><span class="nav-number">2.1.</span> <span class="nav-text">核心概念区分</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Gameplay-Ability-Spec%EF%BC%9A%E6%8A%80%E8%83%BD%E7%9A%84%E2%80%9C%E7%AE%A1%E7%90%86%E6%A7%BD%E4%BD%8D%E2%80%9D"><span class="nav-number">2.1.1.</span> <span class="nav-text">1. Gameplay Ability Spec：技能的“管理槽位”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Gameplay-Ability-Instance%EF%BC%9A%E6%8A%80%E8%83%BD%E7%9A%84%E2%80%9C%E6%89%A7%E8%A1%8C%E8%A1%8C%E4%B8%BA%E2%80%9D"><span class="nav-number">2.1.2.</span> <span class="nav-text">2. Gameplay Ability Instance：技能的“执行行为”</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E5%85%B3%E7%B3%BB%E4%B8%8E%E7%89%B9%E6%80%A7"><span class="nav-number">2.2.</span> <span class="nav-text">关键关系与特性</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Gameplay-Ability-Spec-%E4%B8%8E-Gameplay-Ability-Instance"><span class="nav-number">2.</span> <span class="nav-text">Gameplay Ability Spec 与 Gameplay Ability Instance</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E5%8C%BA%E5%88%86"><span class="nav-number">2.1.</span> <span class="nav-text">核心概念区分</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Gameplay-Ability-Spec%EF%BC%9A%E6%8A%80%E8%83%BD%E7%9A%84%E2%80%9C%E7%AE%A1%E7%90%86%E6%A7%BD%E4%BD%8D%E2%80%9D"><span class="nav-number">2.1.1.</span> <span class="nav-text">1. Gameplay Ability Spec：技能的“管理槽位”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Gameplay-Ability-Instance%EF%BC%9A%E6%8A%80%E8%83%BD%E7%9A%84%E2%80%9C%E6%89%A7%E8%A1%8C%E5%AE%9E%E4%BE%8B%E2%80%9D"><span class="nav-number">2.1.2.</span> <span class="nav-text">2. Gameplay Ability Instance：技能的“执行实例”</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E5%85%B3%E7%B3%BB%E4%B8%8E%E7%89%B9%E6%80%A7"><span class="nav-number">2.2.</span> <span class="nav-text">关键关系与特性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GA-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">GA 的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%93%9D%E5%9B%BE%E5%AE%9E%E7%8E%B0%E7%9A%84%E6%A0%B8%E5%BF%83%E4%BC%98%E5%8A%BF"><span class="nav-number">3.1.</span> <span class="nav-text">1. 蓝图实现的核心优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-GA-%E8%93%9D%E5%9B%BE%E7%9A%84%E6%A0%B8%E5%BF%83%E6%89%A7%E8%A1%8C%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.2.</span> <span class="nav-text">2. GA 蓝图的核心执行步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-C-%E5%B0%81%E8%A3%85%E7%9A%84%E5%9C%BA%E6%99%AF"><span class="nav-number">3.3.</span> <span class="nav-text">3. C++ 封装的场景</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GA-%E7%9A%84%E5%AE%9E%E4%BE%8B%E5%8C%96"><span class="nav-number">4.</span> <span class="nav-text">GA 的实例化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E6%B3%A8%E6%84%8F%E7%82%B9"><span class="nav-number">4.1.</span> <span class="nav-text">关键注意点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cooldown%EF%BC%88%E5%86%B7%E5%8D%B4%EF%BC%89%E5%92%8C-Cost%EF%BC%88%E6%B6%88%E8%80%97%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">Cooldown（冷却）和 Cost（消耗）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%AD%A5%E9%AA%A4"><span class="nav-number">5.1.</span> <span class="nav-text">配置步骤</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tags-%E7%AE%A1%E7%90%86"><span class="nav-number">6.</span> <span class="nav-text">Tags 管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81-Tag-%E7%AE%A1%E7%90%86%EF%BC%88Spec-%E5%B1%82%E9%9D%A2%EF%BC%89"><span class="nav-number">6.1.</span> <span class="nav-text">动态 Tag 管理（Spec 层面）</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -247,7 +247,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-12-14 10:01:24" itemprop="dateModified" datetime="2025-12-14T10:01:24+08:00">2025-12-14</time>
+      <time title="修改时间：2025-12-14 16:34:34" itemprop="dateModified" datetime="2025-12-14T16:34:34+08:00">2025-12-14</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -272,27 +272,100 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>GameplayAbility（GA）是 GAS 框架中封装技能逻辑的核心单元，其运行依赖「GameplayAbilitySpec（技能规格）」与「GameplayAbilityInstance（技能实例）」的分工协作：Spec 负责技能的长期管理与配置（如装配位置、是否锁定等），Instance 负责技能单次激活的实际执行（如施法、伤害、特效）。<br>GA 的实现兼顾蓝图的灵活性（流程可视化、参数快速调整）与 C++ 的性能优势（通用逻辑封装），并通过内置的冷却&#x2F;消耗体系、Tag 状态管理，标准化技能的核心行为。</p>
+<span id="more"></span>
 
-<h1 id="Gameplay-Ability-Spec-与-Gameplay-Ability-Instance"><a href="#Gameplay-Ability-Spec-与-Gameplay-Ability-Instance" class="headerlink" title="Gameplay Ability Spec 与 Gameplay Ability Instance"></a>Gameplay Ability Spec 与 Gameplay Ability Instance</h1><p>在GAS框架中，Gameplay Ability Spec（简称Spec，技能规格）与Gameplay Ability Instance（简称Instance，技能实例）是GA（Gameplay Ability）的两个核心要素，二者分工明确：Spec负责技能的“管理与配置”，Instance负责技能的“实际执行”。</p>
-<h2 id="核心概念区分"><a href="#核心概念区分" class="headerlink" title="核心概念区分"></a>核心概念区分</h2><h3 id="1-Gameplay-Ability-Spec：技能的“管理槽位”"><a href="#1-Gameplay-Ability-Spec：技能的“管理槽位”" class="headerlink" title="1. Gameplay Ability Spec：技能的“管理槽位”"></a>1. Gameplay Ability Spec：技能的“管理槽位”</h3><p>Spec是ASC（AbilitySystemComponent）对技能的管理与配置对象，可类比为角色的“技能槽”：</p>
+<h1 id="Gameplay-Ability-Spec-与-Gameplay-Ability-Instance"><a href="#Gameplay-Ability-Spec-与-Gameplay-Ability-Instance" class="headerlink" title="Gameplay Ability Spec 与 Gameplay Ability Instance"></a>Gameplay Ability Spec 与 Gameplay Ability Instance</h1><p>在 GAS 框架中，Spec 与 Instance 是支撑 GA 运行的两大核心对象，二者分工明确，共同实现技能的“管理”与“执行”分离。</p>
+<h2 id="核心概念区分"><a href="#核心概念区分" class="headerlink" title="核心概念区分"></a>核心概念区分</h2><h3 id="1-Gameplay-Ability-Spec：技能的“管理槽位”"><a href="#1-Gameplay-Ability-Spec：技能的“管理槽位”" class="headerlink" title="1. Gameplay Ability Spec：技能的“管理槽位”"></a>1. Gameplay Ability Spec：技能的“管理槽位”</h3><p>Spec 是 ASC（AbilitySystemComponent）对技能的核心管理对象，可类比为角色的“技能槽位”：</p>
 <ul>
-<li>核心职责：存储并管控该技能的核心配置（等级、冷却时间、资源消耗、释放条件如所需GameplayTag），以及技能的可用状态（是否可释放、是否处于冷却）；</li>
-<li>生命周期：与“技能授予”绑定——ASC授予技能时创建Spec，移除技能时销毁Spec，长期存在于ASC的技能管理列表中。</li>
+<li>核心职责：存储技能的基础配置（等级、冷却时长、资源消耗数值、释放所需 GameplayTag），管控技能的可用状态（是否可释放、是否冷却中、是否满足释放条件）；</li>
+<li>生命周期：与“技能授予”绑定——ASC 授予技能时创建 Spec，移除技能时销毁 Spec，长期存在于 ASC 的技能列表中，不随技能释放&#x2F;结束而变化。</li>
 </ul>
-<h3 id="2-Gameplay-Ability-Instance：技能的“执行行为”"><a href="#2-Gameplay-Ability-Instance：技能的“执行行为”" class="headerlink" title="2. Gameplay Ability Instance：技能的“执行行为”"></a>2. Gameplay Ability Instance：技能的“执行行为”</h3><p>Instance是GA的实际运行实例，可类比为“角色放出一个火球的具体行为”：</p>
+<h3 id="2-Gameplay-Ability-Instance：技能的“执行实例”"><a href="#2-Gameplay-Ability-Instance：技能的“执行实例”" class="headerlink" title="2. Gameplay Ability Instance：技能的“执行实例”"></a>2. Gameplay Ability Instance：技能的“执行实例”</h3><p>Instance 是 GA 的单次运行实例，可类比为“角色释放一次火球术的具体行为”：</p>
 <ul>
-<li>核心职责：执行技能的具体逻辑（如施法动画、生成火球等），仅在技能激活时创建，技能结束（施法完成&#x2F;被打断）后销毁；</li>
-<li>生命周期：与“技能激活”绑定——每次激活技能（如点击释放火球术），ASC会基于Spec创建一个Instance，技能执行完毕后Instance随之销毁。</li>
+<li>核心职责：执行技能的具体逻辑（播放动画、生成目标数据、施加伤害、播放视听特效），仅聚焦单次技能的生命周期；</li>
+<li>生命周期：与“技能激活”绑定——每次激活技能（如点击释放），ASC 基于 Spec 创建 Instance；技能执行完毕（或被打断）后，Instance 立即销毁，多次释放同一技能会生成多个独立 Instance。</li>
 </ul>
 <h2 id="关键关系与特性"><a href="#关键关系与特性" class="headerlink" title="关键关系与特性"></a>关键关系与特性</h2><ol>
-<li>一对多关联：一个Spec（技能槽）可对应多个Instance（多次释放技能）——比如角色的火球术技能槽（Spec），可反复激活生成多个火球术执行实例（Instance），也可对同一Instance进行激活、禁用等操作；</li>
-<li>分工明确的交互逻辑：<ul>
-<li>Spec直接与ASC交互：所有对技能的“管理操作”（如修改等级、重置冷却、判断释放权限）均通过ASC作用于Spec；</li>
-<li>Instance与游戏世界交互：Instance专注完成技能的世界交互逻辑（如生成特效、检测碰撞、施加伤害），无需感知所属ASC，仅需完成自身的执行任务。</li>
+<li>一对多关联：一个 Spec（技能槽）可对应多个 Instance（多次释放）——例如火球术的 Spec 长期存在，每次点击释放都会基于该 Spec 生成新的 Instance，也可对同一 Instance 执行激活、暂停、打断等操作；</li>
+<li>交互逻辑分工：<ul>
+<li>Spec 面向 ASC：所有技能管理操作（修改等级、重置冷却、判断释放权限）均通过 ASC 作用于 Spec；</li>
+<li>Instance 面向游戏世界：仅负责与场景&#x2F;角色的交互逻辑（生成特效、检测碰撞、施加 GE），无需感知 ASC 层面的管理规则。</li>
 </ul>
 </li>
 </ol>
+<h1 id="GA-的实现"><a href="#GA-的实现" class="headerlink" title="GA 的实现"></a>GA 的实现</h1><p>GA 的最终逻辑通常在蓝图中完成，核心原因是蓝图的可视化特性更适配技能开发的迭代需求，同时结合 C++ 封装高性能&#x2F;通用逻辑，形成“蓝图做流程、C++ 做底层”的分工模式：</p>
+<h3 id="1-蓝图实现的核心优势"><a href="#1-蓝图实现的核心优势" class="headerlink" title="1. 蓝图实现的核心优势"></a>1. 蓝图实现的核心优势</h3><ul>
+<li>流程可视化：清晰呈现技能从激活到结束的完整逻辑（如动画播放→目标获取→伤害施加→特效播放），便于调试与迭代；</li>
+<li>参数灵活调整：技能等级、伤害数值、冷却时长等参数可直接在蓝图 ClassDefaults 中修改，无需重新编译代码。</li>
+</ul>
+<h3 id="2-GA-蓝图的核心执行步骤"><a href="#2-GA-蓝图的核心执行步骤" class="headerlink" title="2. GA 蓝图的核心执行步骤"></a>2. GA 蓝图的核心执行步骤</h3><p>技能逻辑通常包含四大核心环节，各环节可复用 GAS 生态组件：</p>
+<ul>
+<li>播放技能动画：绑定并播放角色施法蒙太奇，可通过 GameplayEvent 触发动画关键帧逻辑（如火球生成）；</li>
+<li>获取目标数据：通过 AbilityTask（如 TargetDataUnderMouse）异步获取鼠标指向的目标，解耦通用数据获取逻辑；</li>
+<li>施加伤害&#x2F;属性修改：制作并应用 GameplayEffect（GE），实现伤害、回血等属性数值变化；</li>
+<li>播放视听效果：调用 GameplayCue（GC）实现粒子、音效、镜头震动等技能表现。</li>
+</ul>
+<h3 id="3-C-封装的场景"><a href="#3-C-封装的场景" class="headerlink" title="3. C++ 封装的场景"></a>3. C++ 封装的场景</h3><p>为保证性能和逻辑复用性，以下逻辑建议封装在 C++ 端：</p>
+<ul>
+<li>性能敏感逻辑：如多火球生成位置的批量计算、高频碰撞检测；</li>
+<li>通用工具逻辑：如技能描述文本的格式化、跨技能复用的目标筛选规则；</li>
+<li>底层数据交互：如技能与 UI 数据的绑定、网络同步的核心逻辑。</li>
+</ul>
+<h1 id="GA-的实例化"><a href="#GA-的实例化" class="headerlink" title="GA 的实例化"></a>GA 的实例化</h1><p>在 GA 的 ClassDefaults 中，「Instancing Policy（实例化策略）」决定了 Instance 的创建规则，需根据技能类型选择：</p>
+<ul>
+<li>Instance per Actor（推荐）：每个技能拥有者（Actor）仅创建一个 Instance，复用性高、性能开销低，适配绝大多数技能（如普攻、单体技能）；</li>
+<li>Instance per Execution：每次激活技能都创建新 Instance，适配需同时运行多个实例的技能（如持续施法的范围技能）；</li>
+<li>Non Instanced：不创建 Instance，仅通过 Spec 管理，适配无执行逻辑的被动技能。</li>
+</ul>
+<h3 id="关键注意点"><a href="#关键注意点" class="headerlink" title="关键注意点"></a>关键注意点</h3><p>技能执行完毕后<strong>必须手动调用 <code>EndAbility</code></strong>：若未调用，Instance 不会销毁，会导致技能槽被占用，无法再次激活该技能。需确保所有逻辑分支（如施法完成、被打断、目标丢失）最终都执行 <code>EndAbility</code>。</p>
+<h1 id="Cooldown（冷却）和-Cost（消耗）"><a href="#Cooldown（冷却）和-Cost（消耗）" class="headerlink" title="Cooldown（冷却）和 Cost（消耗）"></a>Cooldown（冷却）和 Cost（消耗）</h1><p>GAS 已封装冷却与资源消耗的核心逻辑，无需手动实现，仅需配置对应的 GE 并关联到 GA 即可：</p>
+<h3 id="配置步骤"><a href="#配置步骤" class="headerlink" title="配置步骤"></a>配置步骤</h3><ol>
+<li>制作 GE_Cost（资源消耗）：<ul>
+<li>类型：Instant（瞬时生效）；</li>
+<li>配置 Modifier：修改资源属性（如法力值、怒气值），设置扣减数值（如每次释放消耗 20 法力）。</li>
+</ul>
+</li>
+<li>制作 GE_Cooldown（冷却）：<ul>
+<li>类型：Duration（持续生效）；</li>
+<li>配置 Modifier：无需修改属性，仅设置持续时长（冷却时间）；</li>
+<li>赋予 GrantedTags：添加冷却标识 Tag（如 GameplayCue.Cooldown.FireBolt），供 UI 识别并显示冷却进度。</li>
+</ul>
+</li>
+<li>关联到 GA：在 GA 的 ClassDefaults 中，将 GE_Cost 和 GE_Cooldown 分别绑定到「Cost Gameplay Effects」和「Cooldown Gameplay Effects」。</li>
+<li>提交消耗与冷却：在 GA 的 <code>EventActivateAbility</code> 后立即调用 <code>CommitAbility</code>——该函数会自动应用 GE_Cost 和 GE_Cooldown，若资源不足（如法力不够）或处于冷却中，会直接阻止技能激活。</li>
+</ol>
+<h1 id="Tags-管理"><a href="#Tags-管理" class="headerlink" title="Tags 管理"></a>Tags 管理</h1><p>GA 提供多维度的 Tag 配置能力，可灵活控制技能的激活、状态与交互逻辑：</p>
+<table>
+<thead>
+<tr>
+<th>Tag 类型</th>
+<th>核心作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AssetTags</td>
+<td>GA 自身的固定标识 Tag，不可动态修改，用于技能分类（如 Skill.Fire、Skill.Passive）；</td>
+</tr>
+<tr>
+<td>Activation Owned Tags</td>
+<td>技能激活时自动添加的 Tag，如添加「Input_Block」Tag 禁用玩家输入，避免同时释放多个技能；</td>
+</tr>
+<tr>
+<td>Activation Blocked Tags</td>
+<td>技能激活的阻断 Tag，如添加「State.Stun」Tag，角色眩晕时无法激活该技能；</td>
+</tr>
+<tr>
+<td>Block Abilities With Tags</td>
+<td>主动阻断其他技能的 Tag，如释放无敌技能时，阻断所有攻击技能的激活；</td>
+</tr>
+</tbody></table>
+<h3 id="动态-Tag-管理（Spec-层面）"><a href="#动态-Tag-管理（Spec-层面）" class="headerlink" title="动态 Tag 管理（Spec 层面）"></a>动态 Tag 管理（Spec 层面）</h3><p>AbilitySpec 也支持动态 Tag 管理，核心用法是通过 <code>AbilitySpec.GetDynamicSpecSourceTags()</code> 获取&#x2F;修改动态 Tag，适配临时状态变化：</p>
+<ul>
+<li>场景1：装备脱落后，移除「Skill.Enabled.Sword」Tag，临时禁用剑术技能；</li>
+<li>场景2：角色进入狂暴状态，添加「Skill.Buff.DamageUp」Tag，提升技能伤害。</li>
+</ul>
+<p>动态 Tag 仅作用于 Spec 生命周期，技能移除后自动失效，无需手动清理。</p>
 
     </div>
 
@@ -316,8 +389,8 @@
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/12/GAS-GameplayEvent/" rel="next" title="GameplayEvent">
-                  GameplayEvent <i class="fa fa-angle-right"></i>
+                <a href="/ue5-blog/2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/" rel="next" title="AbilitySystemComponent (ASC)">
+                  AbilitySystemComponent (ASC) <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
