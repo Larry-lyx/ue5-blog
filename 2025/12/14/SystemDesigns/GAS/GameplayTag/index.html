@@ -19,25 +19,25 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
 
-    <meta name="description" content="核心总结">
+    <meta name="description" content="核心总结GameplayTag 是 GAS 框架的核心全局标识工具，通过轻量化的标签体系实现“数值映射、信息传递、资产区分、状态&#x2F;类型标记”等核心功能，其核心价值在于全局共识性——当对象间需基于统一标识完成交互时，GameplayTag 是最优选择。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="GameplayTag">
-<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayTag/index.html">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/14/SystemDesigns/GAS/GameplayTag/index.html">
 <meta property="og:site_name" content="UE5学习笔记博客">
-<meta property="og:description" content="核心总结">
+<meta property="og:description" content="核心总结GameplayTag 是 GAS 框架的核心全局标识工具，通过轻量化的标签体系实现“数值映射、信息传递、资产区分、状态&#x2F;类型标记”等核心功能，其核心价值在于全局共识性——当对象间需基于统一标识完成交互时，GameplayTag 是最优选择。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2025-12-07T16:00:00.000Z">
-<meta property="article:modified_time" content="2025-12-10T06:24:19.233Z">
+<meta property="article:published_time" content="2025-12-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-14T01:57:47.288Z">
 <meta property="article:author" content="Larry-lyx">
 <meta property="article:tag" content="GAS">
 <meta property="article:tag" content="GameplayTag">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayTag/">
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/14/SystemDesigns/GAS/GameplayTag/">
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayTag/","path":"2025/12/08/SystemDesigns/GAS/GameplayTag/","title":"GameplayTag"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/14/SystemDesigns/GAS/GameplayTag/","path":"2025/12/14/SystemDesigns/GAS/GameplayTag/","title":"GameplayTag"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>GameplayTag | UE5学习笔记博客</title>
@@ -159,7 +159,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tag-%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">Tag 的作用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tag-%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-number">3.</span> <span class="nav-text">Tag 的创建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%93%9D%E5%9B%BE%E5%88%9B%E5%BB%BA"><span class="nav-number">3.1.</span> <span class="nav-text">蓝图创建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C-%E7%AB%AF-Native-Tag"><span class="nav-number">3.2.</span> <span class="nav-text">C++ 端 Native Tag</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%87%AA%E5%AE%9A%E4%B9%89-AssetManager-%E6%B3%A8%E5%86%8C-Tag"><span class="nav-number">3.2.1.</span> <span class="nav-text">1. 自定义 AssetManager 注册 Tag</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BF%AE%E6%94%B9%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">3.2.2.</span> <span class="nav-text">2. 修改项目配置文件</span></a></li></ol></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -210,7 +210,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/GAS/GameplayTag/">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/14/SystemDesigns/GAS/GameplayTag/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
@@ -238,15 +238,9 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2025-12-08 00:00:00" itemprop="dateCreated datePublished" datetime="2025-12-08T00:00:00+08:00">2025-12-08</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-12-10 14:24:19" itemprop="dateModified" datetime="2025-12-10T14:24:19+08:00">2025-12-10</time>
+      <time title="创建时间：2025-12-14 00:00:00 / 修改时间：09:57:47" itemprop="dateCreated datePublished" datetime="2025-12-14T00:00:00+08:00">2025-12-14</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -271,7 +265,28 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>GameplayTag 是 GAS 框架的核心全局标识工具，通过轻量化的标签体系实现“数值映射、信息传递、资产区分、状态&#x2F;类型标记”等核心功能，其核心价值在于全局共识性——当对象间需基于统一标识完成交互时，GameplayTag 是最优选择。</p>
+<span id="more"></span>
+
+<h1 id="Tag-的作用"><a href="#Tag-的作用" class="headerlink" title="Tag 的作用"></a>Tag 的作用</h1><p>GAS 框架中 GameplayTag 应用场景灵活且广泛，核心作用可归纳为：</p>
+<ol>
+<li>数值映射标识：作为变量名标记需修改的属性，如 Set By Caller 机制通过 Tag 关联待修改的属性数值；</li>
+<li>信息传递验证：如 Anim Notify 中通过 GameplayEvent 传递 Tag，标识动画蒙太奇（Montage）的特定播放阶段；</li>
+<li>资产索引区分：为同类资产（如技能动画）打 Tag，通过 Tag 快速索引目标资产；</li>
+<li>状态标记：标记技能&#x2F;角色的状态（如技能锁定、装备中），用于状态校验与逻辑分支判断；</li>
+<li>类型标识：区分不同类别（如主动&#x2F;被动技能、火攻&#x2F;雷攻伤害类型），替代枚举实现更灵活的类型管理。</li>
+</ol>
+<p>GameplayTag 的核心优势是全局通用性，只要两个对象需基于“全局共识的标识”完成交互，即可优先使用 Tag。</p>
+<h1 id="Tag-的创建"><a href="#Tag-的创建" class="headerlink" title="Tag 的创建"></a>Tag 的创建</h1><h2 id="蓝图创建"><a href="#蓝图创建" class="headerlink" title="蓝图创建"></a>蓝图创建</h2><p>进入「Project Settings → GameplayTag」可可视化管理蓝图层面的 Tag：</p>
+<ul>
+<li>操作便捷，适合快速定义蓝图专属 Tag；</li>
+<li>局限性：仅能在蓝图中使用，C++ 代码无法访问。</li>
+</ul>
+<h2 id="C-端-Native-Tag"><a href="#C-端-Native-Tag" class="headerlink" title="C++ 端 Native Tag"></a>C++ 端 Native Tag</h2><p>通过单例模式注册 Native Tag（单例实现详见<a href="/ue5-blog/2025/12/10/ProgrammingSkills/Singleton">这里</a>），需将 Tag 注册到自定义 AssetManager 并配置生效：</p>
+<h3 id="1-自定义-AssetManager-注册-Tag"><a href="#1-自定义-AssetManager-注册-Tag" class="headerlink" title="1. 自定义 AssetManager 注册 Tag"></a>1. 自定义 AssetManager 注册 Tag</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAS_Custom_API</span> UCustomAssetManager : <span class="keyword">public</span> UAssetManager</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="function"><span class="type">static</span> UCustomAssetManager&amp; <span class="title">Get</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">StartInitialLoading</span><span class="params">()</span> <span class="keyword">override</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function">UCustomAssetManager&amp; <span class="title">UCustomAssetManager::Get</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">check</span>(GEngine);</span><br><span class="line"></span><br><span class="line">	UCustomAssetManager* CustomAssetManager = <span class="built_in">Cast</span>&lt;UCustomAssetManager&gt;(GEngine-&gt;AssetManager);</span><br><span class="line">	<span class="keyword">return</span> * CustomAssetManager;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAssetManager::StartInitialLoading</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">StartInitialLoading</span>();</span><br><span class="line"></span><br><span class="line">	FCustomGameplayTags::<span class="built_in">InitializeNativeGameplayTags</span>();</span><br><span class="line">	<span class="comment">// 初始化 GAS 全局数据</span></span><br><span class="line">	UAbilitySystemGlobals::<span class="built_in">Get</span>().<span class="built_in">InitGlobalData</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-修改项目配置文件"><a href="#2-修改项目配置文件" class="headerlink" title="2. 修改项目配置文件"></a>2. 修改项目配置文件</h3><p>打开「Config&#x2F;DefaultEngine.ini」，找到「[&#x2F;Script&#x2F;Engine.Engine]」节点，添加如下配置指定自定义 AssetManager：<br>AssetManagerClassName&#x3D;&#x2F;Script&#x2F;ProjectName.CustomAssetManager</p>
+
     </div>
 
     
@@ -288,14 +303,11 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/08/SystemDesigns/Input/EnhancedInput/" rel="prev" title="EnhancedInput">
-                  <i class="fa fa-angle-left"></i> EnhancedInput
+                <a href="/ue5-blog/2025/12/12/SystemDesigns/GAS/AbilitySystemComponent/" rel="prev" title="AbilitySystemComponent (ASC)">
+                  <i class="fa fa-angle-left"></i> AbilitySystemComponent (ASC)
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/08/SystemDesigns/GAS/AbilityTask/" rel="next" title="AbilityTask">
-                  AbilityTask <i class="fa fa-angle-right"></i>
-                </a>
             </div>
           </div>
     </footer>
