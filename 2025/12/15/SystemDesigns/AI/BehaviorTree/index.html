@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/ue5-blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/ue5-blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/ue5-blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/ue5-blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/ue5-blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
+
+    <meta name="description" content="核心总结行为树（BehaviorTree，简称BT）是UE中构建AI行为逻辑的核心载体，通过Selector（条件选择）、Sequence（顺序执行）两类核心节点实现AI决策，依赖Blackboard（黑板）存储动态数据，结合Task（瞬时行为）、Service（持续数据查询）、Decorator（条件判断）节点分工协作；通过自定义AI Controller完成BT与AI角色的绑定，所有AI控制权">
+<meta property="og:type" content="article">
+<meta property="og:title" content="行为树 (BehaviorTree)">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/15/SystemDesigns/AI/BehaviorTree/index.html">
+<meta property="og:site_name" content="UE5学习笔记博客">
+<meta property="og:description" content="核心总结行为树（BehaviorTree，简称BT）是UE中构建AI行为逻辑的核心载体，通过Selector（条件选择）、Sequence（顺序执行）两类核心节点实现AI决策，依赖Blackboard（黑板）存储动态数据，结合Task（瞬时行为）、Service（持续数据查询）、Decorator（条件判断）节点分工协作；通过自定义AI Controller完成BT与AI角色的绑定，所有AI控制权">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-12-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-15T08:47:32.102Z">
+<meta property="article:author" content="Larry-lyx">
+<meta property="article:tag" content="BehaviorTree">
+<meta property="article:tag" content="Blackboard">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/15/SystemDesigns/AI/BehaviorTree/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/15/SystemDesigns/AI/BehaviorTree/","path":"2025/12/15/SystemDesigns/AI/BehaviorTree/","title":"行为树 (BehaviorTree)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>行为树 (BehaviorTree) | UE5学习笔记博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/utils.js" defer></script><script src="/ue5-blog/js/motion.js" defer></script><script src="/ue5-blog/js/sidebar.js" defer></script><script src="/ue5-blog/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/ue5-blog/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/ue5-blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">UE5学习笔记博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">从入门到精通，持续更新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/ue5-blog/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/ue5-blog/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/ue5-blog/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/ue5-blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BehaviorTree-%E4%B8%8E-Blackboard"><span class="nav-number">2.</span> <span class="nav-text">BehaviorTree 与 Blackboard</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Task"><span class="nav-number">2.1.</span> <span class="nav-text">1. Task</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Service"><span class="nav-number">2.2.</span> <span class="nav-text">2. Service</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Decorator"><span class="nav-number">2.3.</span> <span class="nav-text">3. Decorator</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AI-Controller"><span class="nav-number">3.</span> <span class="nav-text">AI Controller</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE"><span class="nav-number">3.1.</span> <span class="nav-text">1. 核心配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A41%EF%BC%9A%E8%87%AA%E5%AE%9A%E4%B9%89AI-Controller%EF%BC%88%E7%BB%A7%E6%89%BFAAIController%EF%BC%89"><span class="nav-number">3.1.1.</span> <span class="nav-text">步骤1：自定义AI Controller（继承AAIController）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A42%EF%BC%9AAI%E8%A7%92%E8%89%B2%E7%B1%BB%E7%BB%91%E5%AE%9ABT%E4%B8%8EAI-Controller"><span class="nav-number">3.1.2.</span> <span class="nav-text">步骤2：AI角色类绑定BT与AI Controller</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A43%EF%BC%9A%E5%88%9D%E5%A7%8B%E5%8C%96BT%E4%B8%8EBlackboard"><span class="nav-number">3.1.3.</span> <span class="nav-text">步骤3：初始化BT与Blackboard</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%8A%A8%E6%80%81%E4%BF%AE%E6%94%B9Blackboard%E5%80%BC"><span class="nav-number">3.2.</span> <span class="nav-text">2. 动态修改Blackboard值</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A41%EF%BC%9A%E6%B3%A8%E5%86%8CTag%E5%8F%98%E5%8C%96%E5%9B%9E%E8%B0%83"><span class="nav-number">3.2.1.</span> <span class="nav-text">步骤1：注册Tag变化回调</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A42%EF%BC%9A%E5%9B%9E%E8%B0%83%E4%B8%AD%E4%BF%AE%E6%94%B9Blackboard"><span class="nav-number">3.2.2.</span> <span class="nav-text">步骤2：回调中修改Blackboard</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A6%E5%8F%91Tag%E5%8F%98%E5%8C%96%E7%9A%84%E5%BA%95%E5%B1%82%E9%80%BB%E8%BE%91"><span class="nav-number">3.2.3.</span> <span class="nav-text">触发Tag变化的底层逻辑</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Larry-lyx</p>
+  <div class="site-description" itemprop="description">分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/ue5-blog/archives/">
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/ue5-blog/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/ue5-blog/tags/">
+        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/15/SystemDesigns/AI/BehaviorTree/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="行为树 (BehaviorTree) | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          行为树 (BehaviorTree)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-15 00:00:00 / 修改时间：16:47:32" itemprop="dateCreated datePublished" datetime="2025-12-15T00:00:00+08:00">2025-12-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/AI/" itemprop="url" rel="index"><span itemprop="name">AI</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>行为树（BehaviorTree，简称BT）是UE中构建AI行为逻辑的核心载体，通过Selector（条件选择）、Sequence（顺序执行）两类核心节点实现AI决策，依赖Blackboard（黑板）存储动态数据，结合Task（瞬时行为）、Service（持续数据查询）、Decorator（条件判断）节点分工协作；<br>通过自定义AI Controller完成BT与AI角色的绑定，所有AI控制权由服务端掌控，确保逻辑权威且无作弊风险。</p>
+<span id="more"></span>
+
+<h1 id="BehaviorTree-与-Blackboard"><a href="#BehaviorTree-与-Blackboard" class="headerlink" title="BehaviorTree 与 Blackboard"></a>BehaviorTree 与 Blackboard</h1><p>AI行为逻辑的核心可归纳为两类决策模式，由BT的核心节点承载：</p>
+<ol>
+<li>条件选择逻辑：仅当满足特定条件时触发对应行为，对应Selector节点；</li>
+<li>顺序执行逻辑：按固定流程依次触发行为，对应Sequence节点。</li>
+</ol>
+<p>BT的决策依赖Blackboard存储动态数据（如目标位置、AI状态），二者强绑定：</p>
+<ul>
+<li>BT中的所有功能节点（Task&#x2F;Service&#x2F;Decorator）均可读写Blackboard数据；</li>
+<li>Blackboard数据实时更新，保证AI行为根据场景变化动态调整，提升流畅度。</li>
+</ul>
+<h2 id="1-Task"><a href="#1-Task" class="headerlink" title="1. Task"></a>1. Task</h2><p>Task是AI的“瞬时行为单元”，仅在特定时机触发，核心作用是执行具体行为或修改Blackboard数据：</p>
+<ul>
+<li>内置Task：UE提供基础任务（如移动、等待），无需自定义逻辑；</li>
+<li>自定义Task：封装复杂逻辑（如“满足条件时释放指定技能”），适配个性化需求；</li>
+<li>特殊Task：环境查询系统（EQS）也以Task形式存在（RunEQSQuery节点），其核心结果是更新Blackboard中的位置数据，而非执行行为。</li>
+</ul>
+<h2 id="2-Service"><a href="#2-Service" class="headerlink" title="2. Service"></a>2. Service</h2><p>Service是AI的“持续数据查询单元”，核心目的是更新Blackboard动态数据，与Task的核心区别是触发方式：</p>
+<ul>
+<li>触发逻辑：基于Tick触发，可自定义Tick时间间隔（避免高频计算损耗性能）；</li>
+<li>适用场景：处理复杂计算（如查找最近敌人、计算敌我距离），持续刷新Blackboard数据供BT决策使用。</li>
+</ul>
+<h2 id="3-Decorator"><a href="#3-Decorator" class="headerlink" title="3. Decorator"></a>3. Decorator</h2><p>Decorator是AI的“条件判断单元”，每帧触发，用于校验Blackboard数据是否满足行为执行条件，关键配置如下：</p>
+<ul>
+<li><p>Notify Observer（通知时机）：可选On Result Change（结果变化时）、On Value Change（值变化时）；<br>说明一下，二者的区别在于，Blackboard Key为float类型时，是Distance这个数据变化就触发还是Distance &lt; Limit这个判断变化才触发；</p>
+</li>
+<li><p>Observer aborts（中断规则）：可选self（中断自身）、both（双向中断）、None（不中断）、Lower Priority（中断低优先级节点）；<br>self : 仅中断 Decorator 所在的当前节点（自身），不影响其他节点。<br>Lower Priority : 中断当前节点<strong>更低优先级</strong>的所有节点；仅影响“同层级且优先级更低”的节点，不中断自身。<br>both : 同时包含「Self」和「Lower Priority」的逻辑。</p>
+</li>
+<li><p>数据匹配：根据Blackboard Key类型（float&#x2F;bool&#x2F;Object等），选择对应的Key Query规则完成条件判断。</p>
+</li>
+</ul>
+<h1 id="AI-Controller"><a href="#AI-Controller" class="headerlink" title="AI Controller"></a>AI Controller</h1><p>AI Controller是BT与AI角色的核心桥梁，负责加载BT、初始化Blackboard，并掌控AI行为的执行权限（仅服务端可操作）。</p>
+<h2 id="1-核心配置"><a href="#1-核心配置" class="headerlink" title="1. 核心配置"></a>1. 核心配置</h2><h3 id="步骤1：自定义AI-Controller（继承AAIController）"><a href="#步骤1：自定义AI-Controller（继承AAIController）" class="headerlink" title="步骤1：自定义AI Controller（继承AAIController）"></a>步骤1：自定义AI Controller（继承AAIController）</h3><p>需在构造函数中创建Blackboard和BehaviorTree组件，作为BT与Blackboard的载体：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ACustomAIController::<span class="built_in">ACustomAIController</span>()</span><br><span class="line">&#123;</span><br><span class="line">	Blackboard = <span class="built_in">CreateDefaultSubobject</span>&lt;UBlackboardComponent&gt;(<span class="string">&quot;BlackboardComponent&quot;</span>);</span><br><span class="line">	<span class="built_in">check</span>(Blackboard);</span><br><span class="line">	BehaviorTreeComponent = <span class="built_in">CreateDefaultSubobject</span>&lt;UBehaviorTreeComponent&gt;(<span class="string">&quot;BehaviorTreeComponent&quot;</span>);</span><br><span class="line">	<span class="built_in">check</span>(BehaviorTreeComponent);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="步骤2：AI角色类绑定BT与AI-Controller"><a href="#步骤2：AI角色类绑定BT与AI-Controller" class="headerlink" title="步骤2：AI角色类绑定BT与AI Controller"></a>步骤2：AI角色类绑定BT与AI Controller</h3><p>在受AI控制的角色类（如敌人）中，声明BT和自定义AI Controller的引用：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UPROPERTY</span>(EditDefaultsOnly , Category = <span class="string">&quot;AI&quot;</span>)</span><br><span class="line">TObjectPtr&lt;UBehaviorTree&gt; BehaviorTree;</span><br><span class="line"></span><br><span class="line"><span class="built_in">UPROPERTY</span>()</span><br><span class="line">TObjectPtr&lt;ACustomAIController&gt; CustomAIController;</span><br></pre></td></tr></table></figure>
+
+<h3 id="步骤3：初始化BT与Blackboard"><a href="#步骤3：初始化BT与Blackboard" class="headerlink" title="步骤3：初始化BT与Blackboard"></a>步骤3：初始化BT与Blackboard</h3><p>重写<code>PossessedBy</code>函数（角色被Controller接管时触发），完成BT加载与Blackboard初始化，且仅在服务端执行（AI控制权专属服务端）：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">PossessedBy</span><span class="params">(AController* NewController)</span> <span class="keyword">override</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomEnemy::PossessedBy</span><span class="params">(AController* NewController)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">PossessedBy</span>(NewController);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!<span class="built_in">HasAuthority</span>()) <span class="keyword">return</span>; <span class="comment">// 仅服务端处理AI逻辑，避免客户端作弊</span></span><br><span class="line">	CustomAIController = <span class="built_in">Cast</span>&lt;ACustomAIController&gt;(NewController);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 初始化Blackboard并运行行为树</span></span><br><span class="line">	CustomAIController-&gt;<span class="built_in">GetBlackboardComponent</span>()-&gt;<span class="built_in">InitializeBlackboard</span>(*BehaviorTree-&gt;BlackboardAsset);</span><br><span class="line">	CustomAIController-&gt;<span class="built_in">RunBehaviorTree</span>(BehaviorTree);</span><br><span class="line">	<span class="comment">// 初始化Blackboard默认值</span></span><br><span class="line">	CustomAIController-&gt;<span class="built_in">GetBlackboardComponent</span>()-&gt;<span class="built_in">SetValueAsBool</span>(<span class="built_in">FName</span>(<span class="string">&quot;HitReacting&quot;</span>) , <span class="literal">false</span>);</span><br><span class="line">	CustomAIController-&gt;<span class="built_in">GetBlackboardComponent</span>()-&gt;<span class="built_in">SetValueAsBool</span>(<span class="built_in">FName</span>(<span class="string">&quot;RangedAttacker&quot;</span>) , CharacterClass != ECharacterClass::Warrior);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-动态修改Blackboard值"><a href="#2-动态修改Blackboard值" class="headerlink" title="2. 动态修改Blackboard值"></a>2. 动态修改Blackboard值</h2><p>AI状态变化时，需实时更新Blackboard数据;<br>检测行为变化的一种常见式是监听GameplayTag变化并回调修改，下面的例子以Debuff_Stun为例展开：</p>
+<h3 id="步骤1：注册Tag变化回调"><a href="#步骤1：注册Tag变化回调" class="headerlink" title="步骤1：注册Tag变化回调"></a>步骤1：注册Tag变化回调</h3><p>在AI角色初始化时，监听ASC上特定Tag的新增&#x2F;移除事件：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomEnemy::InitAbilityActorInfo</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	AbilitySystemComponent-&gt;<span class="built_in">InitAbilityActorInfo</span>(<span class="keyword">this</span> , <span class="keyword">this</span>);</span><br><span class="line">	<span class="built_in">Cast</span>&lt;UCustomAbilitySystemComponent&gt;(AbilitySystemComponent)-&gt;<span class="built_in">AbilityActorInfoSet</span>();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 监听眩晕Tag的变化，触发回调修改Blackboard</span></span><br><span class="line">	AbilitySystemComponent-&gt;<span class="built_in">RegisterGameplayTagEvent</span>(FCustomGameplayTags::<span class="built_in">Get</span>().Debuff_Stun , EGameplayTagEventType::NewOrRemoved).<span class="built_in">AddUObject</span>(<span class="keyword">this</span> , &amp;ACustomEnemy::StunTagChanged);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">HasAuthority</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">InitializeDefaultAttributes</span>();</span><br><span class="line">	&#125;</span><br><span class="line">	OnASCRegistered.<span class="built_in">Broadcast</span>(AbilitySystemComponent);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="步骤2：回调中修改Blackboard"><a href="#步骤2：回调中修改Blackboard" class="headerlink" title="步骤2：回调中修改Blackboard"></a>步骤2：回调中修改Blackboard</h3><p>根据Tag变化更新Blackboard的眩晕状态：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomEnemy::StunTagChanged</span><span class="params">(<span class="type">const</span> FGameplayTag CallbackTag, int32 NewCount)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">StunTagChanged</span>(CallbackTag, NewCount);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (CustomAIController &amp;&amp; CustomAIController-&gt;<span class="built_in">GetBlackboardComponent</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		CustomAIController-&gt;<span class="built_in">GetBlackboardComponent</span>()-&gt;<span class="built_in">SetValueAsBool</span>(<span class="built_in">FName</span>(<span class="string">&quot;Stunned&quot;</span>) , bIsStunned);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>敌人（AI）：修改Blackboard让BT感知眩晕状态，调整行为（如停止攻击）；</li>
+<li>玩家：无需修改Blackboard，仅停止移动即可，输入阻断通过AttributeSet（AS）添加BlockTag实现：</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomBaseCharacter::StunTagChanged</span><span class="params">(<span class="type">const</span> FGameplayTag CallbackTag, int32 NewCount)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	bIsStunned = NewCount &gt; <span class="number">0</span>;</span><br><span class="line">	<span class="built_in">GetCharacterMovement</span>()-&gt;MaxWalkSpeed = bIsStunned ? <span class="number">0.f</span> : BaseWalkSpeed;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="触发Tag变化的底层逻辑"><a href="#触发Tag变化的底层逻辑" class="headerlink" title="触发Tag变化的底层逻辑"></a>触发Tag变化的底层逻辑</h3><p>Debuff施加时，在AttributeSet中为目标ASC添加对应Tag，触发上述回调：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAttributeSet::HandleDebuff</span><span class="params">(<span class="type">const</span> FEffectProperties&amp; Props)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">const</span> FCustomGameplayTags GameplayTags = FCustomGameplayTags::<span class="built_in">Get</span>();</span><br><span class="line"></span><br><span class="line">    FGameplayEffectContextHandle EffectContext = Props.SourceASC-&gt;<span class="built_in">MakeEffectContext</span>();</span><br><span class="line">    UGameplayEffect* Effect = <span class="built_in">NewObject</span>&lt;UGameplayEffect&gt;(<span class="built_in">GetTransientPackage</span>() , <span class="built_in">FName</span>(DebuffName));</span><br><span class="line">	</span><br><span class="line">	<span class="type">const</span> FGameplayTag DebuffTag = GameplayTags.DamageTypesToDebuffs[DamageType];</span><br><span class="line">	FInheritedTagContainer TagContainer = <span class="built_in">FInheritedTagContainer</span>();</span><br><span class="line">	UTargetTagsGameplayEffectComponent&amp; Component = Effect-&gt;<span class="built_in">FindOrAddComponent</span>&lt;UTargetTagsGameplayEffectComponent&gt;();</span><br><span class="line">	TagContainer.Added.<span class="built_in">AddTag</span>(DebuffTag);</span><br><span class="line">	Component.<span class="built_in">SetAndApplyTargetTagChanges</span>(TagContainer);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (FGameplayEffectSpec* MutableSpec = <span class="keyword">new</span> <span class="built_in">FGameplayEffectSpec</span>(Effect , EffectContext , <span class="number">1.f</span>))</span><br><span class="line">	&#123;</span><br><span class="line">		Props.TargetASC-&gt;<span class="built_in">ApplyGameplayEffectSpecToSelf</span>(*MutableSpec);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/ue5-blog/tags/BehaviorTree/" rel="tag"># BehaviorTree</a>
+              <a href="/ue5-blog/tags/Blackboard/" rel="tag"># Blackboard</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/15/SystemDesigns/AI/BTTask/" rel="prev" title="BehaviorTree Task">
+                  <i class="fa fa-angle-left"></i> BehaviorTree Task
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/15/SystemDesigns/AI/BTService/" rel="next" title="BehaviorTree Service">
+                  BehaviorTree Service <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Larry-lyx</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
