@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/ue5-blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/ue5-blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/ue5-blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/ue5-blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/ue5-blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
+
+    <meta name="description" content="核心总结EnhancedInput是UE官方的新一代输入框架，核心优势是解耦设备输入、输入行为、游戏逻辑，通过Input Mapping Context（IMC，输入映射上下文）、Input Action（IA，输入行为）、自定义回调函数三层结构，实现灵活的输入绑定与管理，适配多设备、多场景的输入需求。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="EnhancedInput">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/16/SystemDesigns/Input/EnhancedInput/index.html">
+<meta property="og:site_name" content="UE5学习笔记博客">
+<meta property="og:description" content="核心总结EnhancedInput是UE官方的新一代输入框架，核心优势是解耦设备输入、输入行为、游戏逻辑，通过Input Mapping Context（IMC，输入映射上下文）、Input Action（IA，输入行为）、自定义回调函数三层结构，实现灵活的输入绑定与管理，适配多设备、多场景的输入需求。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-12-15T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-16T01:55:03.670Z">
+<meta property="article:author" content="Larry-lyx">
+<meta property="article:tag" content="EnhancedInput">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/16/SystemDesigns/Input/EnhancedInput/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/16/SystemDesigns/Input/EnhancedInput/","path":"2025/12/16/SystemDesigns/Input/EnhancedInput/","title":"EnhancedInput"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>EnhancedInput | UE5学习笔记博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/utils.js" defer></script><script src="/ue5-blog/js/motion.js" defer></script><script src="/ue5-blog/js/sidebar.js" defer></script><script src="/ue5-blog/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/ue5-blog/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/ue5-blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">UE5学习笔记博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">从入门到精通，持续更新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/ue5-blog/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/ue5-blog/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/ue5-blog/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/ue5-blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E5%87%86%E5%A4%87%EF%BC%9A%E5%BC%80%E5%90%AFEnhancedInput"><span class="nav-number">2.</span> <span class="nav-text">前置准备：开启EnhancedInput</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%BE%93%E5%85%A5%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.</span> <span class="nav-text">输入系统的设计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Input-Action-IA-%EF%BC%9A%E6%8A%BD%E8%B1%A1%E8%BE%93%E5%85%A5%E8%A1%8C%E4%B8%BA%E8%BD%BD%E4%BD%93"><span class="nav-number">3.1.</span> <span class="nav-text">1. Input Action (IA)：抽象输入行为载体</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Input-Mapping-Context-IMC-%EF%BC%9A%E8%AE%BE%E5%A4%87%E8%BE%93%E5%85%A5%E4%B8%8EIA%E7%9A%84%E7%BB%91%E5%AE%9A%E5%B1%82"><span class="nav-number">3.2.</span> <span class="nav-text">2. Input Mapping Context (IMC)：设备输入与IA的绑定层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-InputConfig%EF%BC%9A%E8%BE%93%E5%85%A5%E9%85%8D%E7%BD%AE%E7%9A%84%E9%9B%86%E4%B8%AD%E7%AE%A1%E7%90%86%EF%BC%88%E8%87%AA%E5%AE%9A%E4%B9%89DataAsset%EF%BC%89"><span class="nav-number">3.3.</span> <span class="nav-text">3. InputConfig：输入配置的集中管理（自定义DataAsset）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%BE%93%E5%85%A5%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%85%B7%E4%BD%93%E8%AE%BE%E7%BD%AE"><span class="nav-number">4.</span> <span class="nav-text">输入系统的具体设置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%9F%BA%E7%A1%80%E7%BB%91%E5%AE%9A%EF%BC%9A%E9%80%9A%E8%BF%87UEnhancedInputComponent%E7%BB%91%E5%AE%9A%E7%AE%80%E5%8D%95%E8%BE%93%E5%85%A5"><span class="nav-number">4.1.</span> <span class="nav-text">1. 基础绑定：通过UEnhancedInputComponent绑定简单输入</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9E%E8%B0%83%E5%87%BD%E6%95%B0%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.1.1.</span> <span class="nav-text">回调函数示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E6%B3%A8%E6%84%8F%E7%82%B9"><span class="nav-number">4.1.2.</span> <span class="nav-text">关键注意点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%A4%8D%E6%9D%82%E7%BB%91%E5%AE%9A%EF%BC%9A%E8%87%AA%E5%AE%9A%E4%B9%89EnhancedInputComponent%E5%B0%81%E8%A3%85%E6%89%B9%E9%87%8F%E7%BB%91%E5%AE%9A"><span class="nav-number">4.2.</span> <span class="nav-text">2. 复杂绑定：自定义EnhancedInputComponent封装批量绑定</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PlayerController%E4%B8%AD%E8%B0%83%E7%94%A8%E6%89%B9%E9%87%8F%E7%BB%91%E5%AE%9A"><span class="nav-number">4.2.1.</span> <span class="nav-text">PlayerController中调用批量绑定</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%8A%80%E5%B7%A7"><span class="nav-number">4.2.2.</span> <span class="nav-text">核心技巧</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E6%9C%80%E7%BB%88%E6%AD%A5%E9%AA%A4%EF%BC%9A%E6%BF%80%E6%B4%BBIMC%EF%BC%88%E7%BB%91%E5%AE%9A%E8%AE%BE%E5%A4%87%E8%BE%93%E5%85%A5%E4%B8%8EPlayerController%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">3. 最终步骤：激活IMC（绑定设备输入与PlayerController）</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Larry-lyx</p>
+  <div class="site-description" itemprop="description">分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/ue5-blog/archives/">
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/ue5-blog/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/ue5-blog/tags/">
+        <span class="site-state-item-count">44</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/16/SystemDesigns/Input/EnhancedInput/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="EnhancedInput | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          EnhancedInput
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-16 00:00:00 / 修改时间：09:55:03" itemprop="dateCreated datePublished" datetime="2025-12-16T00:00:00+08:00">2025-12-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/Input/" itemprop="url" rel="index"><span itemprop="name">Input</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>EnhancedInput是UE官方的新一代输入框架，核心优势是<strong>解耦设备输入、输入行为、游戏逻辑</strong>，通过Input Mapping Context（IMC，输入映射上下文）、Input Action（IA，输入行为）、自定义回调函数三层结构，实现灵活的输入绑定与管理，适配多设备、多场景的输入需求。</p>
+<span id="more"></span>
+
+<h1 id="前置准备：开启EnhancedInput"><a href="#前置准备：开启EnhancedInput" class="headerlink" title="前置准备：开启EnhancedInput"></a>前置准备：开启EnhancedInput</h1><p>使用EnhancedInput需先在项目中启用并配置核心模块：</p>
+<ol>
+<li>在项目<code>Build.cs</code>中添加<code>EnhancedInput</code>模块依赖：<code>PublicDependencyModuleNames.Add(&quot;EnhancedInput&quot;);</code>；</li>
+<li>在Project Settings → Input中，最下方将「Default Input Component Class」切换为「EnhancedInputCmponent」或者自定义增强输入组件，确保框架生效。</li>
+</ol>
+<h1 id="输入系统的设计"><a href="#输入系统的设计" class="headerlink" title="输入系统的设计"></a>输入系统的设计</h1><p>EnhancedInput的核心是将“设备物理输入”“抽象输入行为”“游戏逻辑回调”三者解耦，关键核心要素为IA、IMC，以及自定义的InputConfig（输入配置）：</p>
+<h2 id="1-Input-Action-IA-：抽象输入行为载体"><a href="#1-Input-Action-IA-：抽象输入行为载体" class="headerlink" title="1. Input Action (IA)：抽象输入行为载体"></a>1. Input Action (IA)：抽象输入行为载体</h2><p>IA是EnhancedInput的核心抽象层，<strong>仅定义输入行为的类型，不绑定设备输入或游戏逻辑</strong>，可理解为“输入操作的标准化标识”：</p>
+<ul>
+<li>核心配置：仅需设置<code>Value Type</code>（输入值类型），决定输入行为的数值表达形式（即输入自由度）：<ul>
+<li>Axis1D（默认）：映射为float值，常用于按键按下&#x2F;松开（当作bool使用）、单轴移动等；</li>
+<li>Axis2D：映射为FVector2D，适配平面移动（如WSAD）、鼠标摇杆等二维输入；</li>
+</ul>
+</li>
+<li>核心特性：IA是设备输入与游戏逻辑的“中间桥梁”，后续需分别与IMC（设备绑定）、InputComponent（逻辑绑定）关联。</li>
+</ul>
+<h2 id="2-Input-Mapping-Context-IMC-：设备输入与IA的绑定层"><a href="#2-Input-Mapping-Context-IMC-：设备输入与IA的绑定层" class="headerlink" title="2. Input Mapping Context (IMC)：设备输入与IA的绑定层"></a>2. Input Mapping Context (IMC)：设备输入与IA的绑定层</h2><p>IMC是EnhancedInput中<strong>绑定物理设备输入与IA</strong>的核心载体（专属EnhancedInput的核心配置），可灵活配置单&#x2F;多设备输入映射：</p>
+<ul>
+<li>基础绑定：普通输入（如技能释放、跳跃）可直接将设备按键（如鼠标左键、键盘E）绑定到对应IA；</li>
+<li>复杂输入（二维移动）：需通过<code>Modifier</code>（修饰符）调整输入值，以WSAD绑定Axis2D类型IA为例：<ul>
+<li>D键：无Modifier，映射为X轴正方向；</li>
+<li>A键：添加Modifier「Negate」，映射为X轴负方向；</li>
+<li>W键：添加Modifier「Swizzle Input Axis Value」，将X轴映射为Y轴正方向；</li>
+<li>S键：添加Modifier「Negate + Swizzle Input Axis Value」，将X轴映射为Y轴负方向。</li>
+</ul>
+</li>
+</ul>
+<h2 id="3-InputConfig：输入配置的集中管理（自定义DataAsset）"><a href="#3-InputConfig：输入配置的集中管理（自定义DataAsset）" class="headerlink" title="3. InputConfig：输入配置的集中管理（自定义DataAsset）"></a>3. InputConfig：输入配置的集中管理（自定义DataAsset）</h2><p>InputConfig是基于<code>DataAsset</code>的自定义配置类，用于集中管理“IA与游戏内标识（GameplayTag）”的映射关系（适配GAS等系统的Tag化管理）：</p>
+<ul>
+<li>核心结构体定义（C++）：</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">USTRUCT</span>(BlueprintType)</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">FCustomInputAction</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(EditDefaultsOnly)</span><br><span class="line">	<span class="type">const</span> <span class="keyword">class</span> <span class="title class_">UInputAction</span>* InputAction = <span class="literal">nullptr</span>;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(EditDefaultsOnly)</span><br><span class="line">	FGameplayTag InputTag = <span class="built_in">FGameplayTag</span>();</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>核心作用：将IA与技能槽位、输入状态等GameplayTag绑定，让游戏逻辑通过Tag识别输入行为（而非直接依赖IA），提升扩展性。</li>
+</ul>
+<h1 id="输入系统的具体设置"><a href="#输入系统的具体设置" class="headerlink" title="输入系统的具体设置"></a>输入系统的具体设置</h1><p>完成IA、IMC、InputConfig的定义后，需通过<code>UEnhancedInputComponent</code>（EnhancedInput专属输入组件）完成IA与游戏逻辑的绑定，核心管理载体为PlayerController（输入逻辑的核心入口）。</p>
+<h2 id="1-基础绑定：通过UEnhancedInputComponent绑定简单输入"><a href="#1-基础绑定：通过UEnhancedInputComponent绑定简单输入" class="headerlink" title="1. 基础绑定：通过UEnhancedInputComponent绑定简单输入"></a>1. 基础绑定：通过UEnhancedInputComponent绑定简单输入</h2><p>PlayerController的<code>SetupInputComponent</code>是输入绑定的核心入口，需将IA与回调函数绑定（依赖EnhancedInput的<code>BindAction</code>方法）：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomPlayerController::SetupInputComponent</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">SetupInputComponent</span>();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 强转为EnhancedInput专属组件（开启EnhancedInput后默认生成）</span></span><br><span class="line">	UEnhancedInputComponent* EnhancedInputComp = <span class="built_in">Cast</span>&lt;UEnhancedInputComponent&gt;(InputComponent);</span><br><span class="line">	<span class="built_in">check</span>(EnhancedInputComp);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 绑定移动输入（Triggered：按住持续触发）</span></span><br><span class="line">	EnhancedInputComp-&gt;<span class="built_in">BindAction</span>(MoveAction , ETriggerEvent::Triggered , <span class="keyword">this</span>, &amp;ACustomPlayerController::Move);</span><br><span class="line">	<span class="comment">// 绑定Shift按键（Started：按下触发；Completed：松开触发）</span></span><br><span class="line">	EnhancedInputComp-&gt;<span class="built_in">BindAction</span>(ShiftAction , ETriggerEvent::Started , <span class="keyword">this</span> , &amp;ACustomPlayerController::ShiftPressed);</span><br><span class="line">	EnhancedInputComp-&gt;<span class="built_in">BindAction</span>(ShiftAction , ETriggerEvent::Completed , <span class="keyword">this</span> , &amp;ACustomPlayerController::ShiftReleased);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="回调函数示例"><a href="#回调函数示例" class="headerlink" title="回调函数示例"></a>回调函数示例</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomPlayerController::ShiftPressed</span><span class="params">()</span></span>&#123;bShiftKeyDown = <span class="literal">true</span>;&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomPlayerController::ShiftReleased</span><span class="params">()</span></span>&#123;bShiftKeyDown = <span class="literal">false</span>;&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomPlayerController::Move</span><span class="params">(<span class="type">const</span> FInputActionValue&amp; InputActionValue)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 输入阻断：若ASC带有输入锁定Tag，直接返回</span></span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">GetASC</span>() &amp;&amp; <span class="built_in">GetASC</span>()-&gt;<span class="built_in">HasMatchingGameplayTag</span>(FCustomGameplayTags::<span class="built_in">Get</span>().Player_Block_InputPressed))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 获取Axis2D类型的输入值（WSAD映射的FVector2D）</span></span><br><span class="line">	<span class="type">const</span> FVector2D InputAxisVector = InputActionValue.<span class="built_in">Get</span>&lt;FVector2D&gt;();</span><br><span class="line">	<span class="comment">// 基于控制器旋转计算移动方向</span></span><br><span class="line">	<span class="type">const</span> FRotator Rotation = <span class="built_in">GetControlRotation</span>();</span><br><span class="line">	<span class="function"><span class="type">const</span> FRotator <span class="title">YawRotation</span><span class="params">(<span class="number">0.f</span> , Rotation.Yaw , <span class="number">0.f</span>)</span></span>;</span><br><span class="line">	</span><br><span class="line">	<span class="type">const</span> FVector ForwardDirection = <span class="built_in">FRotationMatrix</span>(YawRotation).<span class="built_in">GetUnitAxis</span>(EAxis::X);</span><br><span class="line">	<span class="type">const</span> FVector RightDirection = <span class="built_in">FRotationMatrix</span>(YawRotation).<span class="built_in">GetUnitAxis</span>(EAxis::Y);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 向受控Pawn添加移动输入</span></span><br><span class="line">	<span class="keyword">if</span> (APawn* ControllerPawn = <span class="built_in">GetPawn</span>&lt;APawn&gt;())</span><br><span class="line">	&#123;</span><br><span class="line">		ControllerPawn-&gt;<span class="built_in">AddMovementInput</span>(ForwardDirection , InputAxisVector.Y); <span class="comment">// W/S对应Y轴</span></span><br><span class="line">		ControllerPawn-&gt;<span class="built_in">AddMovementInput</span>(RightDirection , InputAxisVector.X);  <span class="comment">// A/D对应X轴</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="关键注意点"><a href="#关键注意点" class="headerlink" title="关键注意点"></a>关键注意点</h3><ul>
+<li><code>ETriggerEvent</code>触发类型：<ul>
+<li>Triggered：按住输入时持续触发（适配移动、持续施法等）；</li>
+<li>Started：输入按下瞬间触发（适配按键按下响应）；</li>
+<li>Completed：输入松开瞬间触发（适配按键松开响应）；</li>
+</ul>
+</li>
+<li>输入值传递：<code>BindAction</code>会根据IA的<code>Value Type</code>自动向回调函数传递<code>FInputActionValue</code>参数，可通过<code>Get&lt;T&gt;()</code>解析为对应类型。</li>
+</ul>
+<h2 id="2-复杂绑定：自定义EnhancedInputComponent封装批量绑定"><a href="#2-复杂绑定：自定义EnhancedInputComponent封装批量绑定" class="headerlink" title="2. 复杂绑定：自定义EnhancedInputComponent封装批量绑定"></a>2. 复杂绑定：自定义EnhancedInputComponent封装批量绑定</h2><p>对于技能输入等需批量绑定的场景，可自定义<code>UCustomInputComponent</code>（继承<code>UEnhancedInputComponent</code>），通过模板封装批量绑定逻辑（适配IA与GameplayTag的映射）：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAS_Custom_API</span> UCustomInputComponent : <span class="keyword">public</span> UEnhancedInputComponent</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="comment">// 模板函数：批量绑定技能输入（按下/松开/按住）</span></span><br><span class="line">	<span class="function"><span class="keyword">template</span>&lt;<span class="keyword">class</span> UserClass , <span class="keyword">typename</span> PressedFuncType , <span class="keyword">typename</span> ReleasedFuncType , <span class="keyword">typename</span> HeldFuncType&gt;</span></span><br><span class="line"><span class="function">	<span class="type">void</span> <span class="title">BindAbilityActions</span><span class="params">(<span class="type">const</span> UCustomConfigInput* InputConfig , UserClass* Object , PressedFuncType PressedFunc , ReleasedFuncType ReleasedFunc , HeldFuncType HeldFunc)</span></span>;</span><br><span class="line">	</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">UserClass</span>, <span class="keyword">typename</span> PressedFuncType, <span class="keyword">typename</span> ReleasedFuncType, <span class="keyword">typename</span> HeldFuncType&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomInputComponent::BindAbilityActions</span><span class="params">(<span class="type">const</span> UCustomConfigInput* InputConfig, UserClass* Object,</span></span></span><br><span class="line"><span class="params"><span class="function">	PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, HeldFuncType HeldFunc)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">check</span>(InputConfig);</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 遍历InputConfig中的IA-Tag映射，批量绑定</span></span><br><span class="line">	<span class="keyword">for</span> (<span class="type">const</span> FCustomInputAction&amp; Action : InputConfig-&gt;AbilityInputActions)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (Action.InputAction &amp;&amp; Action.InputTag.<span class="built_in">IsValid</span>())</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="comment">// 按下触发：传递GameplayTag给回调函数</span></span><br><span class="line">			<span class="keyword">if</span> (PressedFunc)</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="built_in">BindAction</span>(Action.InputAction , ETriggerEvent::Started , Object , PressedFunc , Action.InputTag);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 松开触发</span></span><br><span class="line">			<span class="keyword">if</span> (ReleasedFunc)</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="built_in">BindAction</span>(Action.InputAction , ETriggerEvent::Completed , Object , ReleasedFunc , Action.InputTag);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 按住触发</span></span><br><span class="line">			<span class="keyword">if</span> (HeldFunc)</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="built_in">BindAction</span>(Action.InputAction , ETriggerEvent::Triggered , Object , HeldFunc , Action.InputTag);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="PlayerController中调用批量绑定"><a href="#PlayerController中调用批量绑定" class="headerlink" title="PlayerController中调用批量绑定"></a>PlayerController中调用批量绑定</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomPlayerController::SetupInputComponent</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">SetupInputComponent</span>();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 强转为自定义输入组件</span></span><br><span class="line">	UCustomInputComponent* CustomInputComponent = <span class="built_in">CastChecked</span>&lt;UCustomInputComponent&gt;(InputComponent);</span><br><span class="line">	<span class="comment">// 批量绑定技能输入（回调函数接收GameplayTag参数）</span></span><br><span class="line">	CustomInputComponent-&gt;<span class="built_in">BindAbilityActions</span>(InputConfig , <span class="keyword">this</span> , &amp;ThisClass::AbilityInputTagPressed , &amp;ThisClass::AbilityInputTagReleased , &amp;ThisClass::AbilityInputTagHeld);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 技能输入按下回调（传递Tag给ASC处理）</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomPlayerController::AbilityInputTagPressed</span><span class="params">(FGameplayTag InputTag)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">GetASC</span>()) <span class="built_in">GetASC</span>()-&gt;<span class="built_in">AbilityInputTagPressed</span>(InputTag);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="核心技巧"><a href="#核心技巧" class="headerlink" title="核心技巧"></a>核心技巧</h3><ul>
+<li>模板函数：适配任意类型的回调函数，提升绑定逻辑的通用性；</li>
+<li>委托参数传递：<code>BindAction</code>支持在回调函数后追加自定义参数（如GameplayTag），底层通过委托封装实现，可在UE源码的<code>BindAction</code>模板定义中验证：</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt; <span class="keyword">class</span> DelegateType, <span class="keyword">class</span> UserClass, <span class="keyword">typename</span>... VarTypes &gt;</span></span><br><span class="line"><span class="function">FInputActionBinding&amp; <span class="title">BindAction</span><span class="params">(<span class="type">const</span> FName ActionName, <span class="type">const</span> EInputEvent KeyEvent, UserClass* Object, <span class="keyword">typename</span> DelegateType::<span class="keyword">template</span> TMethodPtr&lt; UserClass &gt; Func, VarTypes... Vars)</span> </span>= <span class="keyword">delete</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-最终步骤：激活IMC（绑定设备输入与PlayerController）"><a href="#3-最终步骤：激活IMC（绑定设备输入与PlayerController）" class="headerlink" title="3. 最终步骤：激活IMC（绑定设备输入与PlayerController）"></a>3. 最终步骤：激活IMC（绑定设备输入与PlayerController）</h2><p>IMC需通过<code>UEnhancedInputLocalPlayerSubsystem</code>添加到LocalPlayer中，才能让PlayerController识别设备输入与IA的绑定关系，核心逻辑在<code>BeginPlay</code>中：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomPlayerController::BeginPlay</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">BeginPlay</span>();</span><br><span class="line">	<span class="built_in">check</span>(CustomContext); <span class="comment">// CustomContext为编辑器配置的IMC引用</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 获取EnhancedInput本地玩家子系统（专属EnhancedInput的管理类）</span></span><br><span class="line">	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::<span class="built_in">GetSubsystem</span>&lt;UEnhancedInputLocalPlayerSubsystem&gt;(<span class="built_in">GetLocalPlayer</span>());</span><br><span class="line">	<span class="keyword">if</span> (Subsystem)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// 添加IMC，优先级为0（可叠加多个IMC，优先级高的覆盖低的）</span></span><br><span class="line">		Subsystem-&gt;<span class="built_in">AddMappingContext</span>(CustomContext , <span class="number">0</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 鼠标配置（可选）</span></span><br><span class="line">	bShowMouseCursor = <span class="literal">true</span>;</span><br><span class="line">	DefaultMouseCursor = EMouseCursor::Default;</span><br><span class="line"></span><br><span class="line">	FInputModeGameAndUI InputModeData;</span><br><span class="line">	InputModeData.<span class="built_in">SetLockMouseToViewportBehavior</span>(EMouseLockMode::DoNotLock);</span><br><span class="line">	InputModeData.<span class="built_in">SetHideCursorDuringCapture</span>(<span class="literal">false</span>);</span><br><span class="line">	<span class="built_in">SetInputMode</span>(InputModeData);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/ue5-blog/tags/EnhancedInput/" rel="tag"># EnhancedInput</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/15/SystemDesigns/AI/BTService/" rel="prev" title="BehaviorTree Service">
+                  <i class="fa fa-angle-left"></i> BehaviorTree Service
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/16/SystemDesigns/Input/AutoRun/" rel="next" title="">
+                   <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Larry-lyx</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
