@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/ue5-blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/ue5-blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/ue5-blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/ue5-blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/ue5-blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
+
+    <meta name="description" content="核心总结Highlight（高亮）是游戏中突出玩家选中对象的核心视觉交互功能，通过三层逻辑实现：  PlayerController控制高亮的触发&#x2F;关闭时机， 基于UE后处理渲染管线实现高亮视觉效果， Actor通过自定义接口和渲染配置决定自身高亮表现形式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Highlight">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/16/SystemDesigns/VisualEffects/Highlight/index.html">
+<meta property="og:site_name" content="UE5学习笔记博客">
+<meta property="og:description" content="核心总结Highlight（高亮）是游戏中突出玩家选中对象的核心视觉交互功能，通过三层逻辑实现：  PlayerController控制高亮的触发&#x2F;关闭时机， 基于UE后处理渲染管线实现高亮视觉效果， Actor通过自定义接口和渲染配置决定自身高亮表现形式。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-12-15T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-16T07:43:39.771Z">
+<meta property="article:author" content="Larry-lyx">
+<meta property="article:tag" content="Highlight">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/16/SystemDesigns/VisualEffects/Highlight/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/16/SystemDesigns/VisualEffects/Highlight/","path":"2025/12/16/SystemDesigns/VisualEffects/Highlight/","title":"Highlight"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Highlight | UE5学习笔记博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/utils.js" defer></script><script src="/ue5-blog/js/motion.js" defer></script><script src="/ue5-blog/js/sidebar.js" defer></script><script src="/ue5-blog/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/ue5-blog/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/ue5-blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">UE5学习笔记博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">从入门到精通，持续更新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/ue5-blog/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/ue5-blog/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/ue5-blog/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/ue5-blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%AB%98%E4%BA%AE%E6%98%BE%E7%A4%BA"><span class="nav-number">2.</span> <span class="nav-text">高亮显示</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-PlayerController%EF%BC%9A%E6%8E%A7%E5%88%B6%E9%AB%98%E4%BA%AE%E7%9A%84%E8%A7%A6%E5%8F%91%E4%B8%8E%E5%85%B3%E9%97%AD%E6%97%B6%E6%9C%BA"><span class="nav-number">2.1.</span> <span class="nav-text">1. PlayerController：控制高亮的触发与关闭时机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%A0%81"><span class="nav-number">2.1.1.</span> <span class="nav-text">核心代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%B8%B2%E6%9F%93%E5%B1%82%E9%9D%A2%EF%BC%9A%E5%AE%9E%E7%8E%B0%E9%AB%98%E4%BA%AE%E7%9A%84%E8%A7%86%E8%A7%89%E6%95%88%E6%9E%9C"><span class="nav-number">2.2.</span> <span class="nav-text">2. 渲染层面：实现高亮的视觉效果</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.2.1.</span> <span class="nav-text">配置步骤</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Character-%E6%8E%A5%E5%8F%A3%EF%BC%9A%E5%AE%9A%E4%B9%89Actor%E7%9A%84%E9%AB%98%E4%BA%AE%E8%A1%A8%E7%8E%B0%E5%BD%A2%E5%BC%8F"><span class="nav-number">2.3.</span> <span class="nav-text">3. Character&#x2F;接口：定义Actor的高亮表现形式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.3.1.</span> <span class="nav-text">核心实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%A0%81-1"><span class="nav-number">2.3.2.</span> <span class="nav-text">核心代码</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Larry-lyx</p>
+  <div class="site-description" itemprop="description">分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/ue5-blog/archives/">
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/ue5-blog/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/ue5-blog/tags/">
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/16/SystemDesigns/VisualEffects/Highlight/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Highlight | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Highlight
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-16 00:00:00 / 修改时间：15:43:39" itemprop="dateCreated datePublished" datetime="2025-12-16T00:00:00+08:00">2025-12-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/VisualEffects/" itemprop="url" rel="index"><span itemprop="name">VisualEffects</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>Highlight（高亮）是游戏中突出玩家选中对象的核心视觉交互功能，通过三层逻辑实现：</p>
+<ol>
+<li>PlayerController控制高亮的触发&#x2F;关闭时机，</li>
+<li>基于UE后处理渲染管线实现高亮视觉效果，</li>
+<li>Actor通过自定义接口和渲染配置决定自身高亮表现形式。</li>
+</ol>
+<span id="more"></span>
+
+<h1 id="高亮显示"><a href="#高亮显示" class="headerlink" title="高亮显示"></a>高亮显示</h1><p>实现对象高亮需解决三个核心问题：触发时机控制、渲染层面的视觉实现、Actor侧的高亮配置，以下是具体实现逻辑：</p>
+<h2 id="1-PlayerController：控制高亮的触发与关闭时机"><a href="#1-PlayerController：控制高亮的触发与关闭时机" class="headerlink" title="1. PlayerController：控制高亮的触发与关闭时机"></a>1. PlayerController：控制高亮的触发与关闭时机</h2><p>核心逻辑是通过逐帧追踪鼠标指向的Actor，对比“上一帧选中对象（LastActor）”和“当前帧选中对象（ThisActor）”，实现高亮的切换：</p>
+<ul>
+<li>若两帧选中对象不同，关闭上一帧对象的高亮，开启当前帧对象的高亮；</li>
+<li>仅对实现了<code>UHighlightInterface</code>接口的Actor生效，确保非高亮对象不触发逻辑。<br>可以验证对于所有情形以上逻辑均是正确的，注意高亮仅当选取对象实现了相关接口时才有效；</li>
+</ul>
+<h3 id="核心代码"><a href="#核心代码" class="headerlink" title="核心代码"></a>核心代码</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">AAuraPlayerController::CursorTrace</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">const</span> ECollisionChannel TraceChannel = ECC_Visibility;</span><br><span class="line">	<span class="built_in">GetHitResultUnderCursor</span>(TraceChannel , <span class="literal">false</span> , CursorHitResult);</span><br><span class="line">	<span class="keyword">if</span> (!CursorHitResult.bBlockingHit) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 缓存上一帧选中对象，更新当前帧对象</span></span><br><span class="line">	LastActor = ThisActor;</span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">IsValid</span>(CursorHitResult.<span class="built_in">GetActor</span>()) &amp;&amp; CursorHitResult.<span class="built_in">GetActor</span>()-&gt;<span class="built_in">Implements</span>&lt;UHighlightInterface&gt;())</span><br><span class="line">	&#123;</span><br><span class="line">		ThisActor = CursorHitResult.<span class="built_in">GetActor</span>();	</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">	&#123;</span><br><span class="line">		ThisActor = <span class="literal">nullptr</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 对象变化时切换高亮状态</span></span><br><span class="line">	<span class="keyword">if</span> (LastActor != ThisActor)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">UnHighlightActor</span>(LastActor);</span><br><span class="line">		<span class="built_in">HighlightActor</span>(ThisActor);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AAuraPlayerController::HighlightActor</span><span class="params">(AActor* InActor)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 仅对有效且实现高亮接口的Actor开启高亮</span></span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">IsValid</span>(InActor) &amp;&amp; InActor-&gt;<span class="built_in">Implements</span>&lt;UHighlightInterface&gt;())</span><br><span class="line">	&#123;</span><br><span class="line">		IHighlightInterface::<span class="built_in">Execute_HighlightActor</span>(InActor);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AAuraPlayerController::UnHighlightActor</span><span class="params">(AActor* InActor)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 仅对有效且实现高亮接口的Actor关闭高亮</span></span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">IsValid</span>(InActor) &amp;&amp; InActor-&gt;<span class="built_in">Implements</span>&lt;UHighlightInterface&gt;())</span><br><span class="line">	&#123;</span><br><span class="line">		IHighlightInterface::<span class="built_in">Execute_UnHighlightActor</span>(InActor);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-渲染层面：实现高亮的视觉效果"><a href="#2-渲染层面：实现高亮的视觉效果" class="headerlink" title="2. 渲染层面：实现高亮的视觉效果"></a>2. 渲染层面：实现高亮的视觉效果</h2><p>UE中高亮效果基于后处理管线实现，核心利用自定义深度（Custom Depth）和模板测试（Stencil）标记目标对象，通过后处理材质渲染边缘高亮：</p>
+<h3 id="配置步骤"><a href="#配置步骤" class="headerlink" title="配置步骤"></a>配置步骤</h3><ol>
+<li>关卡中添加<code>PostProcessVolume</code>（后处理体积），勾选「Infinite Extent (Unbound)」，使其作用于全局场景；</li>
+<li>为PostProcessVolume绑定自定义后处理材质：该材质通过关联“自定义深度值”与高亮颜色，识别目标Mesh并渲染边缘高亮效果,</li>
+</ol>
+<p><a href="/ue5-blog/2025/12/16/SystemDesigns/VisualEffects/Highlight/PP_Highlight.uasset" download="PP_Highlight.uasset">点击下载高亮后处理示例材料</a>;</p>
+<ol start="3">
+<li>项目设置配置：在Project Settings 中搜索 Custom Depth-Stencil Pass中，选择「Enabled With Stencil」，确保引擎能识别Actor设置的自定义深度值。</li>
+</ol>
+<h2 id="3-Character-接口：定义Actor的高亮表现形式"><a href="#3-Character-接口：定义Actor的高亮表现形式" class="headerlink" title="3. Character&#x2F;接口：定义Actor的高亮表现形式"></a>3. Character&#x2F;接口：定义Actor的高亮表现形式</h2><p>Actor需实现<code>UHighlightInterface</code>接口，并配置自定义深度渲染参数，通过开关“自定义深度渲染”实现高亮&#x2F;取消高亮：</p>
+<h3 id="核心实现"><a href="#核心实现" class="headerlink" title="核心实现"></a>核心实现</h3><ol>
+<li>构造时配置自定义深度值：为Mesh&#x2F;武器设置专属自定义深度值（标记为高亮目标），并刷新渲染状态；</li>
+<li>重写接口函数：通过开关<code>SetRenderCustomDepth</code>控制自定义深度渲染，进而触发后处理高亮效果。</li>
+</ol>
+<h3 id="核心代码-1"><a href="#核心代码-1" class="headerlink" title="核心代码"></a>核心代码</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">AAuraEnemy::<span class="built_in">AAuraEnemy</span>()</span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">// 为Mesh和武器设置自定义深度值（标记高亮目标）</span></span><br><span class="line">	<span class="built_in">GetMesh</span>()-&gt;<span class="built_in">SetCustomDepthStencilValue</span>(CUSTOM_DEPTH_RED);</span><br><span class="line">	<span class="built_in">GetMesh</span>()-&gt;<span class="built_in">MarkRenderStateDirty</span>();</span><br><span class="line">	Weapon-&gt;<span class="built_in">SetCustomDepthStencilValue</span>(CUSTOM_DEPTH_RED);</span><br><span class="line">	Weapon-&gt;<span class="built_in">MarkRenderStateDirty</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AAuraEnemy::HighlightActor_Implementation</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 开启自定义深度渲染，触发高亮</span></span><br><span class="line">	<span class="built_in">GetMesh</span>()-&gt;<span class="built_in">SetRenderCustomDepth</span>(<span class="literal">true</span>);</span><br><span class="line">	Weapon-&gt;<span class="built_in">SetRenderCustomDepth</span>(<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AAuraEnemy::UnHighlightActor_Implementation</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 关闭自定义深度渲染，取消高亮</span></span><br><span class="line">	<span class="built_in">GetMesh</span>()-&gt;<span class="built_in">SetRenderCustomDepth</span>(<span class="literal">false</span>);</span><br><span class="line">	Weapon-&gt;<span class="built_in">SetRenderCustomDepth</span>(<span class="literal">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/ue5-blog/tags/Highlight/" rel="tag"># Highlight</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/15/SystemDesigns/AI/BTService/" rel="prev" title="BehaviorTree Service">
+                  <i class="fa fa-angle-left"></i> BehaviorTree Service
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/16/SystemDesigns/Input/AutoRun/" rel="next" title="Auto Run">
+                  Auto Run <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Larry-lyx</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
