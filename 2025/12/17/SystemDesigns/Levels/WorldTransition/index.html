@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/ue5-blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/ue5-blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/ue5-blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/ue5-blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/ue5-blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
+
+    <meta name="description" content="核心总结WorldTransition（关卡转换）是实现多关卡无缝切换的核心逻辑，主要包含UI触发、地图入口触发两种方式，核心依赖UGameplayStatics::OpenLevelBySoftObjectPtr实现关卡跳转；同时通过重写GameMode的ChoosePlayerStart函数指定玩家新关卡初始位置，结合存档保存关卡状态、进度和玩家起点标签，保证关卡切换的连贯性。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WorldTransition">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/17/SystemDesigns/Levels/WorldTransition/index.html">
+<meta property="og:site_name" content="UE5学习笔记博客">
+<meta property="og:description" content="核心总结WorldTransition（关卡转换）是实现多关卡无缝切换的核心逻辑，主要包含UI触发、地图入口触发两种方式，核心依赖UGameplayStatics::OpenLevelBySoftObjectPtr实现关卡跳转；同时通过重写GameMode的ChoosePlayerStart函数指定玩家新关卡初始位置，结合存档保存关卡状态、进度和玩家起点标签，保证关卡切换的连贯性。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-12-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-17T08:03:30.915Z">
+<meta property="article:author" content="Larry-lyx">
+<meta property="article:tag" content="WorldTransition">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/17/SystemDesigns/Levels/WorldTransition/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/17/SystemDesigns/Levels/WorldTransition/","path":"2025/12/17/SystemDesigns/Levels/WorldTransition/","title":"WorldTransition"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>WorldTransition | UE5学习笔记博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/utils.js" defer></script><script src="/ue5-blog/js/motion.js" defer></script><script src="/ue5-blog/js/sidebar.js" defer></script><script src="/ue5-blog/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/ue5-blog/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/ue5-blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">UE5学习笔记博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">从入门到精通，持续更新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/ue5-blog/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/ue5-blog/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/ue5-blog/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/ue5-blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B3%E5%8D%A1%E8%BD%AC%E6%8D%A2%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">关卡转换实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-UI%E8%A7%A6%E5%8F%91%E5%85%B3%E5%8D%A1%E8%BD%AC%E6%8D%A2"><span class="nav-number">2.1.</span> <span class="nav-text">1. UI触发关卡转换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.1.1.</span> <span class="nav-text">核心代码实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%9C%B0%E5%9B%BE%E5%85%A5%E5%8F%A3%EF%BC%88Map-Entrance%EF%BC%89%E8%A7%A6%E5%8F%91%E8%BD%AC%E6%8D%A2"><span class="nav-number">2.2.</span> <span class="nav-text">2. 地图入口（Map Entrance）触发转换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E9%80%BB%E8%BE%91"><span class="nav-number">2.2.1.</span> <span class="nav-text">核心逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0-1"><span class="nav-number">2.2.2.</span> <span class="nav-text">核心代码实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E8%87%AA%E5%AE%9A%E4%B9%89%E7%8E%A9%E5%AE%B6%E6%96%B0%E5%85%B3%E5%8D%A1%E5%88%9D%E5%A7%8B%E4%BD%8D%E7%BD%AE"><span class="nav-number">2.3.</span> <span class="nav-text">3. 自定义玩家新关卡初始位置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E9%80%BB%E8%BE%91-1"><span class="nav-number">2.3.1.</span> <span class="nav-text">核心逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0-2"><span class="nav-number">2.3.2.</span> <span class="nav-text">核心代码实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E8%AF%B4%E6%98%8E"><span class="nav-number">2.3.3.</span> <span class="nav-text">关键说明</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Larry-lyx</p>
+  <div class="site-description" itemprop="description">分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/ue5-blog/archives/">
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/ue5-blog/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/ue5-blog/tags/">
+        <span class="site-state-item-count">48</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/17/SystemDesigns/Levels/WorldTransition/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="WorldTransition | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          WorldTransition
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-17 00:00:00 / 修改时间：16:03:30" itemprop="dateCreated datePublished" datetime="2025-12-17T00:00:00+08:00">2025-12-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/Levels/" itemprop="url" rel="index"><span itemprop="name">Levels</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>WorldTransition（关卡转换）是实现多关卡无缝切换的核心逻辑，主要包含UI触发、地图入口触发两种方式，核心依赖<code>UGameplayStatics::OpenLevelBySoftObjectPtr</code>实现关卡跳转；同时通过重写GameMode的<code>ChoosePlayerStart</code>函数指定玩家新关卡初始位置，结合存档保存关卡状态、进度和玩家起点标签，保证关卡切换的连贯性。</p>
+<span id="more"></span>
+
+<h1 id="关卡转换实现"><a href="#关卡转换实现" class="headerlink" title="关卡转换实现"></a>关卡转换实现</h1><p>这里我们考虑“直接跳转”场景（无加载页面），主要分为UI触发和地图入口触发两种形式，同时需自定义玩家在新关卡的初始生成位置。</p>
+<h2 id="1-UI触发关卡转换"><a href="#1-UI触发关卡转换" class="headerlink" title="1. UI触发关卡转换"></a>1. UI触发关卡转换</h2><p>通过UI界面选择地图触发跳转，核心是为UI按钮绑定关卡跳转逻辑，目标关卡需以<code>TSoftObjectPtr&lt;UWorld&gt;</code>类型保存，确保异步加载兼容性：</p>
+<h3 id="核心代码实现"><a href="#核心代码实现" class="headerlink" title="核心代码实现"></a>核心代码实现</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomGameModeBase::TravelToMap</span><span class="params">(UMVVM_LoadSlot* Slot)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="type">const</span> FString SlotName = Slot-&gt;<span class="built_in">GetLoadSlotName</span>();</span><br><span class="line">	<span class="type">const</span> int32 SlotIndex = Slot-&gt;SlotIndex;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 按软对象指针打开目标关卡</span></span><br><span class="line">	UGameplayStatics::<span class="built_in">OpenLevelBySoftObjectPtr</span>(Slot , Maps.<span class="built_in">FindChecked</span>(Slot-&gt;<span class="built_in">GetMapName</span>()));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-地图入口（Map-Entrance）触发转换"><a href="#2-地图入口（Map-Entrance）触发转换" class="headerlink" title="2. 地图入口（Map Entrance）触发转换"></a>2. 地图入口（Map Entrance）触发转换</h2><p>玩家进入关卡内指定入口区域（Sphere碰撞体）时触发跳转，核心函数与UI触发一致，需额外保存关卡状态和玩家进度，保证跨关卡数据连贯：</p>
+<h3 id="核心逻辑"><a href="#核心逻辑" class="headerlink" title="核心逻辑"></a>核心逻辑</h3><ul>
+<li>触发方式：通过Sphere组件的重叠事件检测玩家进入入口；</li>
+<li>数据保存：跳转前保存关卡状态（WorldState）、进度（Progress）及目标起点标签；</li>
+<li>视觉提示：为入口添加点光源，玩家靠近时通过<code>Set Visibility</code>点亮，提示传送功能。</li>
+</ul>
+<h3 id="核心代码实现-1"><a href="#核心代码实现-1" class="headerlink" title="核心代码实现"></a>核心代码实现</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">AMapEntrance::OnSphereOverlap</span><span class="params">(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,</span></span></span><br><span class="line"><span class="params"><span class="function">                                   UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, <span class="type">bool</span> bFromSweep, <span class="type">const</span> FHitResult&amp; SweepResult)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 仅对玩家触发跳转逻辑</span></span><br><span class="line">	<span class="keyword">if</span> (OtherActor-&gt;<span class="built_in">Implements</span>&lt;UPlayerInterface&gt;())</span><br><span class="line">	&#123;</span><br><span class="line">		bReached = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 保存当前关卡状态，记录目标地图名称</span></span><br><span class="line">		<span class="keyword">if</span> (ACustomGameModeBase* CustomGM = <span class="built_in">Cast</span>&lt;ACustomGameModeBase&gt;(UGameplayStatics::<span class="built_in">GetGameMode</span>(<span class="keyword">this</span>)))</span><br><span class="line">		&#123;</span><br><span class="line">			CustomGM-&gt;<span class="built_in">SaveWorldState</span>(<span class="built_in">GetWorld</span>() , DestinationMap.<span class="built_in">ToSoftObjectPath</span>().<span class="built_in">GetAssetName</span>());</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// 保存玩家进度，记录目标关卡的起点标签</span></span><br><span class="line">		IPlayerInterface::<span class="built_in">Execute_SaveProgress</span>(OtherActor , DestinationPlayerStartTag);</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 跳转至目标关卡</span></span><br><span class="line">		UGameplayStatics::<span class="built_in">OpenLevelBySoftObjectPtr</span>(<span class="keyword">this</span> , DestinationMap);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-自定义玩家新关卡初始位置"><a href="#3-自定义玩家新关卡初始位置" class="headerlink" title="3. 自定义玩家新关卡初始位置"></a>3. 自定义玩家新关卡初始位置</h2><p>默认情况下玩家会随机生成在关卡的PlayerStart位置，需重写GameMode的<code>ChoosePlayerStart</code>函数，根据存档的起点标签指定精准生成位置：</p>
+<h3 id="核心逻辑-1"><a href="#核心逻辑-1" class="headerlink" title="核心逻辑"></a>核心逻辑</h3><ul>
+<li>遍历关卡内所有PlayerStart Actor（含检查点）；</li>
+<li>匹配存档的<code>PlayerStartTag</code>，优先选择对应位置生成；</li>
+<li>无匹配时默认选择第一个PlayerStart位置。</li>
+</ul>
+<h3 id="核心代码实现-2"><a href="#核心代码实现-2" class="headerlink" title="核心代码实现"></a>核心代码实现</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">AActor* <span class="title">ACustomGameModeBase::ChoosePlayerStart_Implementation</span><span class="params">(AController* Player)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	UCustomGameInstance* CustomGameInstance = <span class="built_in">Cast</span>&lt;UCustomGameInstance&gt;(<span class="built_in">GetGameInstance</span>());</span><br><span class="line">	</span><br><span class="line">	TArray&lt;AActor*&gt; Actors;</span><br><span class="line">	UGameplayStatics::<span class="built_in">GetAllActorsOfClass</span>(<span class="built_in">GetWorld</span>() , APlayerStart::<span class="built_in">StaticClass</span>() , Actors);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (Actors.<span class="built_in">Num</span>() &gt; <span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		AActor* SelectedActor = Actors[<span class="number">0</span>];</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 查找与存档标签匹配的PlayerStart</span></span><br><span class="line">		<span class="keyword">for</span> (AActor* Actor : Actors)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (APlayerStart* PlayerStart = <span class="built_in">Cast</span>&lt;APlayerStart&gt;(Actor))</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="keyword">if</span> (PlayerStart-&gt;PlayerStartTag == CustomGameInstance-&gt;PlayerStartTag)</span><br><span class="line">				&#123;</span><br><span class="line">					SelectedActor = Actor;</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> SelectedActor;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="关键说明"><a href="#关键说明" class="headerlink" title="关键说明"></a>关键说明</h3><ul>
+<li>该函数无需手动调用，打开新关卡时引擎会自动执行；</li>
+<li>需在目标关卡的「World Settings」中选择自定义GameMode，确保函数生效；</li>
+<li>仅需保存一个<code>PlayerStartTag</code>，也就是玩家上一次保存时的位置。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/ue5-blog/tags/WorldTransition/" rel="tag"># WorldTransition</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/17/SystemDesigns/Levels/SpawnVolume/" rel="prev" title="SpawnVolume and SpawnPoint">
+                  <i class="fa fa-angle-left"></i> SpawnVolume and SpawnPoint
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Larry-lyx</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
