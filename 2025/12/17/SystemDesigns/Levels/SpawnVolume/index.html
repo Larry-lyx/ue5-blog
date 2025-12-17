@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/ue5-blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/ue5-blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/ue5-blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/ue5-blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/ue5-blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
+
+    <meta name="description" content="核心总结SpawnVolume（生成体积）与SpawnPoint（生成点）是关卡中动态生成敌人的核心组件：SpawnVolume通过盒体重叠检测触发敌人生成逻辑，结合存档功能避免已探索区域重复生成敌人；SpawnPoint精准定义敌人的生成位置、类型、等级等信息，二者配合实现关卡内敌人群体的可控生成。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpawnVolume and SpawnPoint">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/17/SystemDesigns/Levels/SpawnVolume/index.html">
+<meta property="og:site_name" content="UE5学习笔记博客">
+<meta property="og:description" content="核心总结SpawnVolume（生成体积）与SpawnPoint（生成点）是关卡中动态生成敌人的核心组件：SpawnVolume通过盒体重叠检测触发敌人生成逻辑，结合存档功能避免已探索区域重复生成敌人；SpawnPoint精准定义敌人的生成位置、类型、等级等信息，二者配合实现关卡内敌人群体的可控生成。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-12-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-17T04:45:12.082Z">
+<meta property="article:author" content="Larry-lyx">
+<meta property="article:tag" content="SpawnPoint">
+<meta property="article:tag" content="SpawnVolume">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/17/SystemDesigns/Levels/SpawnVolume/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/17/SystemDesigns/Levels/SpawnVolume/","path":"2025/12/17/SystemDesigns/Levels/SpawnVolume/","title":"SpawnVolume and SpawnPoint"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>SpawnVolume and SpawnPoint | UE5学习笔记博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/utils.js" defer></script><script src="/ue5-blog/js/motion.js" defer></script><script src="/ue5-blog/js/sidebar.js" defer></script><script src="/ue5-blog/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/ue5-blog/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/ue5-blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">UE5学习笔记博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">从入门到精通，持续更新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/ue5-blog/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/ue5-blog/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/ue5-blog/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/ue5-blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E7%94%9F%E6%88%90%E6%95%8C%E4%BA%BA%EF%BC%88SpawnVolume-SpawnPoint%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">动态生成敌人（SpawnVolume + SpawnPoint）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-SpawnVolume%EF%BC%88%E7%94%9F%E6%88%90%E8%A7%A6%E5%8F%91%E4%BD%93%E7%A7%AF%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">1. SpawnVolume（生成触发体积）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.1.1.</span> <span class="nav-text">核心代码实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-SpawnPoint%EF%BC%88%E7%94%9F%E6%88%90%E7%82%B9%E4%BD%8D%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">2. SpawnPoint（生成点位）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0-1"><span class="nav-number">2.2.1.</span> <span class="nav-text">核心代码实现</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Larry-lyx</p>
+  <div class="site-description" itemprop="description">分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/ue5-blog/archives/">
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/ue5-blog/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/ue5-blog/tags/">
+        <span class="site-state-item-count">47</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/17/SystemDesigns/Levels/SpawnVolume/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="SpawnVolume and SpawnPoint | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpawnVolume and SpawnPoint
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-17 00:00:00 / 修改时间：12:45:12" itemprop="dateCreated datePublished" datetime="2025-12-17T00:00:00+08:00">2025-12-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/Levels/" itemprop="url" rel="index"><span itemprop="name">Levels</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>SpawnVolume（生成体积）与SpawnPoint（生成点）是关卡中动态生成敌人的核心组件：SpawnVolume通过盒体重叠检测触发敌人生成逻辑，结合存档功能避免已探索区域重复生成敌人；SpawnPoint精准定义敌人的生成位置、类型、等级等信息，二者配合实现关卡内敌人群体的可控生成。</p>
+<span id="more"></span>
+
+<h1 id="动态生成敌人（SpawnVolume-SpawnPoint）"><a href="#动态生成敌人（SpawnVolume-SpawnPoint）" class="headerlink" title="动态生成敌人（SpawnVolume + SpawnPoint）"></a>动态生成敌人（SpawnVolume + SpawnPoint）</h1><p>关卡设计中需实现“玩家进入指定区域触发敌人生成”的逻辑，核心依赖SpawnVolume（触发区域）和SpawnPoint（生成点位）两个组件分工协作：</p>
+<h2 id="1-SpawnVolume（生成触发体积）"><a href="#1-SpawnVolume（生成触发体积）" class="headerlink" title="1. SpawnVolume（生成触发体积）"></a>1. SpawnVolume（生成触发体积）</h2><p>SpawnVolume是触发敌人生成的核心载体，核心功能包括：</p>
+<ul>
+<li>盒体碰撞检测：玩家与盒体重叠时，按关联SpawnPoint的配置生成敌人；</li>
+<li>存档标记：记录区域是否已探索，加载关卡时避免重复生成敌人。</li>
+</ul>
+<h3 id="核心代码实现"><a href="#核心代码实现" class="headerlink" title="核心代码实现"></a>核心代码实现</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAS_Custom_API</span> ACustomEnemySpawnVolume : <span class="keyword">public</span> AActor , <span class="keyword">public</span> ISaveInterface</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line">	</span><br><span class="line"><span class="keyword">public</span>:	</span><br><span class="line">	<span class="built_in">ACustomEnemySpawnVolume</span>();</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">LoadActor_Implementation</span><span class="params">()</span> <span class="keyword">override</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// SaveGame标记：该变量会被存档系统保存</span></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(BlueprintReadOnly , SaveGame)</span><br><span class="line">	<span class="type">bool</span> bReached = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">BeginPlay</span><span class="params">()</span> <span class="keyword">override</span></span>;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UFUNCTION</span>()</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">OnBoxOverlap</span><span class="params">(UPrimitiveComponent* OverlappedComponent , AActor* OtherActor , UPrimitiveComponent* OtherComp , int32 OtherBodyIndex , <span class="type">bool</span> bFromSweep ,<span class="type">const</span> FHitResult&amp; SweepResult)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// EditAnywhere：允许在关卡编辑器中编辑，关联生成点列表</span></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(EditAnywhere)</span><br><span class="line">	TArray&lt;ACustomEnemySpawnPoint*&gt; SpawnPoints;</span><br><span class="line">	</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">	<span class="built_in">UPROPERTY</span>(VisibleAnywhere)</span><br><span class="line">	TObjectPtr&lt;UBoxComponent&gt; Box;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">ACustomEnemySpawnVolume::<span class="built_in">ACustomEnemySpawnVolume</span>()</span><br><span class="line">&#123;</span><br><span class="line">	PrimaryActorTick.bCanEverTick = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">	Box = <span class="built_in">CreateDefaultSubobject</span>&lt;UBoxComponent&gt;(<span class="string">&quot;Box&quot;</span>);</span><br><span class="line">	<span class="built_in">SetRootComponent</span>(Box);</span><br><span class="line">	<span class="comment">// 配置盒体碰撞：仅检测重叠，忽略其他碰撞响应</span></span><br><span class="line">	Box-&gt;<span class="built_in">SetCollisionEnabled</span>(ECollisionEnabled::QueryOnly);</span><br><span class="line">	Box-&gt;<span class="built_in">SetCollisionObjectType</span>(ECC_WorldStatic);</span><br><span class="line">	Box-&gt;<span class="built_in">SetCollisionResponseToAllChannels</span>(ECR_Ignore);</span><br><span class="line">	Box-&gt;<span class="built_in">SetCollisionResponseToChannel</span>(ECC_Pawn , ECR_Overlap);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomEnemySpawnVolume::LoadActor_Implementation</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 已探索区域加载时直接销毁，避免重复生成</span></span><br><span class="line">	<span class="keyword">if</span> (bReached)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">Destroy</span>();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomEnemySpawnVolume::BeginPlay</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">BeginPlay</span>();</span><br><span class="line">	<span class="comment">// 绑定盒体重叠事件</span></span><br><span class="line">	Box-&gt;OnComponentBeginOverlap.<span class="built_in">AddDynamic</span>(<span class="keyword">this</span> , &amp;ACustomEnemySpawnVolume::OnBoxOverlap);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomEnemySpawnVolume::OnBoxOverlap</span><span class="params">(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,</span></span></span><br><span class="line"><span class="params"><span class="function">	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, <span class="type">bool</span> bFromSweep, <span class="type">const</span> FHitResult&amp; SweepResult)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// 仅对玩家触发生成逻辑</span></span><br><span class="line">	<span class="keyword">if</span> (!OtherActor-&gt;<span class="built_in">Implements</span>&lt;UPlayerInterface&gt;()) <span class="keyword">return</span>;</span><br><span class="line">	</span><br><span class="line">	bReached = <span class="literal">true</span>; <span class="comment">// 标记为已探索</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 遍历所有关联的生成点，执行敌人生成</span></span><br><span class="line">	<span class="keyword">for</span> (ACustomEnemySpawnPoint* Point : SpawnPoints)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="built_in">IsValid</span>(Point))</span><br><span class="line">		&#123;</span><br><span class="line">			Point-&gt;<span class="built_in">SpawnEnemy</span>();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 关闭盒体碰撞，避免重复触发</span></span><br><span class="line">	Box-&gt;<span class="built_in">SetCollisionEnabled</span>(ECollisionEnabled::NoCollision);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-SpawnPoint（生成点位）"><a href="#2-SpawnPoint（生成点位）" class="headerlink" title="2. SpawnPoint（生成点位）"></a>2. SpawnPoint（生成点位）</h2><p>SpawnPoint继承自ATargetPoint，核心作用是定义敌人生成的具体信息：位置、敌人类型、等级、职业等，生成时需为敌人绑定AIController确保AI逻辑生效。</p>
+<h3 id="核心代码实现-1"><a href="#核心代码实现-1" class="headerlink" title="核心代码实现"></a>核心代码实现</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAS_Custom_API</span> ACustomEnemySpawnPoint : <span class="keyword">public</span> ATargetPoint</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="built_in">UFUNCTION</span>(BlueprintCallable)</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">SpawnEnemy</span><span class="params">()</span></span>;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 可在编辑器配置：生成的敌人类型</span></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(EditAnywhere , BlueprintReadOnly , Category = <span class="string">&quot;Enemy Class&quot;</span>)</span><br><span class="line">	TSubclassOf&lt;ACustomEnemy&gt; EnemyClass;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 可在编辑器配置：敌人等级</span></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(EditAnywhere , BlueprintReadOnly , Category = <span class="string">&quot;Enemy Class&quot;</span>)</span><br><span class="line">	int32 EnemyLevel = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 可在编辑器配置：敌人职业类型</span></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(EditAnywhere , BlueprintReadOnly , Category = <span class="string">&quot;Enemy Class&quot;</span>)</span><br><span class="line">	ECharacterClass CharacterClass = ECharacterClass::Warrior;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomEnemySpawnPoint::SpawnEnemy</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	FActorSpawnParameters SpawnParams;</span><br><span class="line">	<span class="comment">// 碰撞处理：尽可能调整位置，确保敌人必生成</span></span><br><span class="line">	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 延迟生成敌人，先配置属性再完成生成</span></span><br><span class="line">	ACustomEnemy* Enemy = <span class="built_in">GetWorld</span>()-&gt;<span class="built_in">SpawnActorDeferred</span>&lt;ACustomEnemy&gt;(EnemyClass , <span class="built_in">GetActorTransform</span>());</span><br><span class="line">	Enemy-&gt;<span class="built_in">SetLevel</span>(EnemyLevel);</span><br><span class="line">	Enemy-&gt;<span class="built_in">SetCharacterClass</span>(CharacterClass);</span><br><span class="line">	Enemy-&gt;<span class="built_in">FinishSpawning</span>(<span class="built_in">GetActorTransform</span>());</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 生成默认控制器，在内部会调用PossedBy函数，通常在那里修改了控制器为AIController</span></span><br><span class="line">	Enemy-&gt;<span class="built_in">SpawnDefaultController</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/ue5-blog/tags/SpawnVolume/" rel="tag"># SpawnVolume</a>
+              <a href="/ue5-blog/tags/SpawnPoint/" rel="tag"># SpawnPoint</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/17/SystemDesigns/VisualEffects/FadeActor/" rel="prev" title="Fade Actor">
+                  <i class="fa fa-angle-left"></i> Fade Actor
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/17/SystemDesigns/VisualEffects/DissolveEffect/" rel="next" title="Dissolve Effect">
+                  Dissolve Effect <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Larry-lyx</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
