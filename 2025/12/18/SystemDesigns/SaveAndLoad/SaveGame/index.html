@@ -19,26 +19,27 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
 
-    <meta name="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    <meta name="description" content="核心总结SaveGame是UE存档系统的核心数据载体，存档逻辑核心分为两步：将玩家进度、技能、世界状态等关键数据写入自定义SaveGame对象，再通过UE封装的函数完成对象与磁盘的读写交互；需自定义结构体封装技能、地图&#x2F;Actor等复杂数据，并为结构体重定义相等运算符，适配数组去重逻辑。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="UE5学习笔记博客">
+<meta property="og:title" content="SaveGame">
 <meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/SaveGame/index.html">
 <meta property="og:site_name" content="UE5学习笔记博客">
-<meta property="og:description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+<meta property="og:description" content="核心总结SaveGame是UE存档系统的核心数据载体，存档逻辑核心分为两步：将玩家进度、技能、世界状态等关键数据写入自定义SaveGame对象，再通过UE封装的函数完成对象与磁盘的读写交互；需自定义结构体封装技能、地图&#x2F;Actor等复杂数据，并为结构体重定义相等运算符，适配数组去重逻辑。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2025-12-18T05:46:39.719Z">
-<meta property="article:modified_time" content="2025-12-18T05:46:41.021Z">
+<meta property="article:published_time" content="2025-12-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-18T08:26:42.237Z">
 <meta property="article:author" content="Larry-lyx">
+<meta property="article:tag" content="SaveGame">
 <meta name="twitter:card" content="summary">
 
 
 <link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/SaveGame/">
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/SaveGame/","path":"2025/12/18/SystemDesigns/SaveAndLoad/SaveGame/","title":""}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/SaveGame/","path":"2025/12/18/SystemDesigns/SaveAndLoad/SaveGame/","title":"SaveGame"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title> | UE5学习笔记博客</title>
+<title>SaveGame | UE5学习笔记博客</title>
   
 
 
@@ -144,7 +145,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -157,6 +158,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SaveGame%E5%AF%B9%E8%B1%A1%EF%BC%88%E5%AD%98%E6%A1%A3%E6%A0%B8%E5%BF%83%E8%BD%BD%E4%BD%93%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">SaveGame对象（存档核心载体）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SaveGame%E4%B8%AD%E4%BF%9D%E5%AD%98%E7%9A%84%E6%A0%B8%E5%BF%83%E5%86%85%E5%AE%B9"><span class="nav-number">2.1.</span> <span class="nav-text">SaveGame中保存的核心内容</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%8E%A9%E5%AE%B6%E5%B1%9E%E6%80%A7%E4%B8%8E%E7%AD%89%E7%BA%A7"><span class="nav-number">2.1.1.</span> <span class="nav-text">1. 玩家属性与等级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%8E%A9%E5%AE%B6%E6%8A%80%E8%83%BD%E9%9B%86%E5%90%88"><span class="nav-number">2.1.2.</span> <span class="nav-text">2. 玩家技能集合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%B8%96%E7%95%8C%E4%BF%A1%E6%81%AF%EF%BC%88%E5%9C%B0%E5%9B%BE-Actor%E7%8A%B6%E6%80%81%EF%BC%89"><span class="nav-number">2.1.3.</span> <span class="nav-text">3. 世界信息（地图+Actor状态）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BB%93%E6%9E%84%E4%BD%93%E7%9A%84%E7%9B%B8%E7%AD%89%E8%BF%90%E7%AE%97%E7%AC%A6%E9%87%8D%E5%AE%9A%E4%B9%89"><span class="nav-number">2.2.</span> <span class="nav-text">自定义结构体的相等运算符重定义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E5%8E%9F%E5%9B%A0"><span class="nav-number">2.2.1.</span> <span class="nav-text">核心原因</span></a></li></ol></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -180,7 +182,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/ue5-blog/tags/">
-        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-count">46</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -220,12 +222,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | UE5学习笔记博客">
+      <meta itemprop="name" content="SaveGame | UE5学习笔记博客">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          
+          SaveGame
         </h1>
 
         <div class="post-meta-container">
@@ -237,7 +239,20 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2025-12-18 13:46:39 / 修改时间：13:46:41" itemprop="dateCreated datePublished" datetime="2025-12-18T13:46:39+08:00">2025-12-18</time>
+      <time title="创建时间：2025-12-18 00:00:00 / 修改时间：16:26:42" itemprop="dateCreated datePublished" datetime="2025-12-18T00:00:00+08:00">2025-12-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/SaveAndLoad/" itemprop="url" rel="index"><span itemprop="name">SaveAndLoad</span></a>
+        </span>
     </span>
 
   
@@ -249,7 +264,32 @@
     
     
     
-    <div class="post-body" itemprop="articleBody">
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>SaveGame是UE存档系统的核心数据载体，存档逻辑核心分为两步：将玩家进度、技能、世界状态等关键数据写入自定义SaveGame对象，再通过UE封装的函数完成对象与磁盘的读写交互；需自定义结构体封装技能、地图&#x2F;Actor等复杂数据，并为结构体重定义相等运算符，适配数组去重逻辑。</p>
+<span id="more"></span>
+
+<h1 id="SaveGame对象（存档核心载体）"><a href="#SaveGame对象（存档核心载体）" class="headerlink" title="SaveGame对象（存档核心载体）"></a>SaveGame对象（存档核心载体）</h1><p>存档的核心是把需持久化的动态数据写入SaveGame对象，再将该对象存储到磁盘；UE已封装好SaveGame对象与磁盘的交互函数，开发者只需完成“向SaveGame填入数据”和“从SaveGame读取数据”两类操作。</p>
+<h2 id="SaveGame中保存的核心内容"><a href="#SaveGame中保存的核心内容" class="headerlink" title="SaveGame中保存的核心内容"></a>SaveGame中保存的核心内容</h2><p>自定义SaveGame对象仅存储影响游戏进度的关键动态数据，核心包含三类内容：</p>
+<h3 id="1-玩家属性与等级"><a href="#1-玩家属性与等级" class="headerlink" title="1. 玩家属性与等级"></a>1. 玩家属性与等级</h3><p>这类信息为基础数值变量（如等级、经验、力量&#x2F;智力等属性值），直接在SaveGame中定义对应变量即可存储，无需复杂封装。</p>
+<h3 id="2-玩家技能集合"><a href="#2-玩家技能集合" class="headerlink" title="2. 玩家技能集合"></a>2. 玩家技能集合</h3><p>技能信息包含技能类、配置状态等多维度数据，需自定义结构体封装后完整存储：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">USTRUCT</span>(BlueprintType)</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">FSavedAbility</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(EditDefaultsOnly , BlueprintReadOnly , Category = <span class="string">&quot;ClassDefaults&quot;</span>)</span><br><span class="line">	TSubclassOf&lt;UGameplayAbility&gt; GameplayAbility;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(EditDefaultsOnly , BlueprintReadWrite)</span><br><span class="line">	FGameplayTag AbilityTag = <span class="built_in">FGameplayTag</span>();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(EditDefaultsOnly , BlueprintReadWrite)</span><br><span class="line">	FGameplayTag AbilityStatus = <span class="built_in">FGameplayTag</span>();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(EditDefaultsOnly , BlueprintReadWrite)</span><br><span class="line">	FGameplayTag AbilitySlot = <span class="built_in">FGameplayTag</span>();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(EditDefaultsOnly , BlueprintReadWrite)</span><br><span class="line">	FGameplayTag AbilityType = <span class="built_in">FGameplayTag</span>();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(EditDefaultsOnly , BlueprintReadWrite)</span><br><span class="line">	int32 AbilityLevel = <span class="number">1</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="type">bool</span> <span class="keyword">operator</span>==(<span class="type">const</span> FSavedAbility&amp; Left, <span class="type">const</span> FSavedAbility&amp; Right)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">return</span> Left.AbilityTag.<span class="built_in">MatchesTagExact</span>(Right.AbilityTag);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结构体除存储技能类（GameplayAbility）外，还需记录技能的核心配置信息：技能唯一标签、激活状态、绑定的输入槽位、技能类型、等级，确保读档时能完整还原技能的使用状态。</p>
+<h3 id="3-世界信息（地图-Actor状态）"><a href="#3-世界信息（地图-Actor状态）" class="headerlink" title="3. 世界信息（地图+Actor状态）"></a>3. 世界信息（地图+Actor状态）</h3><p>世界信息聚焦地图及地图内Actor的核心状态（如是否触发、位置等），仅存储Actor的唯一标识和需序列化的状态数据（非Actor全量信息）：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">USTRUCT</span>(BlueprintType)</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">FSavedActor</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	FName ActorName = <span class="built_in">FName</span>();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	FTransform Transform = <span class="built_in">FTransform</span>();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 仅序列化Actor中带SaveGame关键字的变量</span></span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	TArray&lt;uint8&gt; Bytes;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="type">bool</span> <span class="keyword">operator</span>==(<span class="type">const</span> FSavedActor&amp; Left, <span class="type">const</span> FSavedActor&amp; Right)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">return</span> Left.ActorName == Right.ActorName;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">USTRUCT</span>()</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">FSavedMap</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	FString MapAssetName = <span class="built_in">FString</span>();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	TArray&lt;FSavedActor&gt; SavedActors;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>FSavedActor：存储Actor的唯一名称（引擎生成，确保唯一性）、Transform（可选恢复位置），以及序列化后的核心状态字节流（仅含SaveGame关键字变量）；</li>
+<li>FSavedMap：按地图维度管理Actor状态，通过MapAssetName关联地图，SavedActors存储该地图下所有需存档的Actor状态。</li>
+</ul>
+<h2 id="自定义结构体的相等运算符重定义"><a href="#自定义结构体的相等运算符重定义" class="headerlink" title="自定义结构体的相等运算符重定义"></a>自定义结构体的相等运算符重定义</h2><p>为自定义结构体重定义&#x3D;&#x3D;运算符，核心适配UE数组的AddUnique方法（避免重复存储）：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="type">bool</span> <span class="keyword">operator</span>==(<span class="type">const</span> FSavedActor&amp; Left, <span class="type">const</span> FSavedActor&amp; Right)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">return</span> Left.ActorName == Right.ActorName;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="核心原因"><a href="#核心原因" class="headerlink" title="核心原因"></a>核心原因</h3><p>存储技能、Actor状态时，需将结构体实例添加到数组中，使用AddUnique可自动过滤重复数据；而AddUnique内置的相等判断逻辑依赖&#x3D;&#x3D;运算符，因此需为自定义结构体明确“相等判定规则”：</p>
+<ul>
+<li>FSavedAbility：通过AbilityTag（技能唯一标签）判断是否为同一技能；</li>
+<li>FSavedActor：通过ActorName（Actor唯一名称）判断是否为同一Actor；<br>确保数组中仅保留唯一的技能&#x2F;Actor状态，避免存档数据冗余。</li>
+</ul>
+
     </div>
 
     
@@ -257,16 +297,22 @@
     
 
     <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/ue5-blog/tags/SaveGame/" rel="tag"># SaveGame</a>
+          </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/GameMode/" rel="prev" title="GameMode">
-                  <i class="fa fa-angle-left"></i> GameMode
+                <a href="/ue5-blog/2025/12/17/SystemDesigns/Levels/WorldTransition/" rel="prev" title="WorldTransition">
+                  <i class="fa fa-angle-left"></i> WorldTransition
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/GameMode/" rel="next" title="GameMode">
+                  GameMode <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
