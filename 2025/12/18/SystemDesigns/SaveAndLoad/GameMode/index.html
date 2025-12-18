@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/ue5-blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/ue5-blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/ue5-blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/ue5-blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/ue5-blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
+
+    <meta name="description" content="核心总结GameMode是UE服务端独有的核心类（Client端无法访问），核心承担三大功能：配置玩家操控相关类、托管全局核心游戏数据、管理存档与读档逻辑；通过区分“固定游戏数据”（如敌人属性）和“玩家进度数据”（如等级、位置）实现数据分层管理，结合GameInstance的跨关卡生命周期特性完成多档位存档管控，需在每个Level的World Settings中配置对应GameMode以生效。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GameMode">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/GameMode/index.html">
+<meta property="og:site_name" content="UE5学习笔记博客">
+<meta property="og:description" content="核心总结GameMode是UE服务端独有的核心类（Client端无法访问），核心承担三大功能：配置玩家操控相关类、托管全局核心游戏数据、管理存档与读档逻辑；通过区分“固定游戏数据”（如敌人属性）和“玩家进度数据”（如等级、位置）实现数据分层管理，结合GameInstance的跨关卡生命周期特性完成多档位存档管控，需在每个Level的World Settings中配置对应GameMode以生效。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-12-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-18T07:33:48.458Z">
+<meta property="article:author" content="Larry-lyx">
+<meta property="article:tag" content="GameMode">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/GameMode/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/GameMode/","path":"2025/12/18/SystemDesigns/SaveAndLoad/GameMode/","title":"GameMode"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>GameMode | UE5学习笔记博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/utils.js" defer></script><script src="/ue5-blog/js/motion.js" defer></script><script src="/ue5-blog/js/sidebar.js" defer></script><script src="/ue5-blog/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/ue5-blog/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/ue5-blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">UE5学习笔记博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">从入门到精通，持续更新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/ue5-blog/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/ue5-blog/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/ue5-blog/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/ue5-blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GameMode-%E7%9A%84%E6%A0%B8%E5%BF%83%E5%AE%9A%E4%BD%8D%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%88%86"><span class="nav-number">2.</span> <span class="nav-text">GameMode 的核心定位与数据区分</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-%E9%85%8D%E7%BD%AE%E7%8E%A9%E5%AE%B6%E6%93%8D%E6%8E%A7"><span class="nav-number">3.</span> <span class="nav-text">1. 配置玩家操控</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE%E9%A1%B9"><span class="nav-number">3.1.</span> <span class="nav-text">1.1 核心配置项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E8%87%AA%E5%AE%9A%E4%B9%89%E7%8E%A9%E5%AE%B6%E5%88%9D%E5%A7%8B%E4%BD%8D%E7%BD%AE%EF%BC%88PlayerStart%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">1.2 自定义玩家初始位置（PlayerStart）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-%E4%BF%9D%E5%AD%98%E9%87%8D%E8%A6%81%E6%B8%B8%E6%88%8F%E6%95%B0%E6%8D%AE"><span class="nav-number">4.</span> <span class="nav-text">2. 保存重要游戏数据</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-%E5%AD%98%E6%A1%A3%E4%B8%8E%E8%AF%BB%E6%A1%A3"><span class="nav-number">5.</span> <span class="nav-text">3. 存档与读档</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-%E5%9F%BA%E7%A1%80%E5%AD%98%E6%A1%A3%E6%93%8D%E4%BD%9C%EF%BC%88%E5%88%A0%E6%A1%A3-%E8%AF%BB%E6%A1%A3-%E5%AD%98%E6%A1%A3%EF%BC%89"><span class="nav-number">5.1.</span> <span class="nav-text">3.1 基础存档操作（删档&#x2F;读档&#x2F;存档）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-GameInstance%EF%BC%9A%E5%A4%9A%E6%A1%A3%E4%BD%8D%E5%85%A8%E5%B1%80%E7%AE%A1%E6%8E%A7"><span class="nav-number">5.2.</span> <span class="nav-text">3.2 GameInstance：多档位全局管控</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-%E7%8E%A9%E5%AE%B6%E8%BF%9B%E5%BA%A6%EF%BC%88Progress%EF%BC%89%E7%9A%84%E5%AD%98%E6%A1%A3%E4%B8%8E%E8%AF%BB%E6%A1%A3"><span class="nav-number">5.3.</span> <span class="nav-text">3.3 玩家进度（Progress）的存档与读档</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-1-GameMode%E5%B1%82%EF%BC%9ASaveGame%E5%AF%B9%E8%B1%A1%E8%AF%BB%E5%86%99"><span class="nav-number">5.3.1.</span> <span class="nav-text">3.3.1 GameMode层：SaveGame对象读写</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-2-%E7%8E%A9%E5%AE%B6%E7%B1%BB%E5%B1%82%EF%BC%9A%E6%95%B0%E6%8D%AE%E6%98%A0%E5%B0%84"><span class="nav-number">5.3.2.</span> <span class="nav-text">3.3.2 玩家类层：数据映射</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%BB%E6%A1%A3%EF%BC%9A%E4%BB%8ESaveGame%E6%9B%B4%E6%96%B0%E7%8E%A9%E5%AE%B6%E7%8A%B6%E6%80%81"><span class="nav-number">5.3.2.1.</span> <span class="nav-text">读档：从SaveGame更新玩家状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%98%E6%A1%A3%EF%BC%9A%E5%B0%86%E7%8E%A9%E5%AE%B6%E7%8A%B6%E6%80%81%E5%86%99%E5%85%A5SaveGame"><span class="nav-number">5.3.2.2.</span> <span class="nav-text">存档：将玩家状态写入SaveGame</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-%E4%B8%96%E7%95%8C%E7%8A%B6%E6%80%81%EF%BC%88World-State%EF%BC%89%E7%9A%84%E5%AD%98%E6%A1%A3%E4%B8%8E%E8%AF%BB%E6%A1%A3"><span class="nav-number">5.4.</span> <span class="nav-text">3.4 世界状态（World State）的存档与读档</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-1-%E4%BF%9D%E5%AD%98%E4%B8%96%E7%95%8C%E7%8A%B6%E6%80%81"><span class="nav-number">5.4.1.</span> <span class="nav-text">3.4.1 保存世界状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-2-%E5%8A%A0%E8%BD%BD%E4%B8%96%E7%95%8C%E7%8A%B6%E6%80%81"><span class="nav-number">5.4.2.</span> <span class="nav-text">3.4.2 加载世界状态</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-%E5%8A%A0%E8%BD%BD%E8%A7%A6%E5%8F%91%E6%97%B6%E6%9C%BA"><span class="nav-number">5.5.</span> <span class="nav-text">3.5 加载触发时机</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-%E8%A7%92%E8%89%B2%E6%AD%BB%E4%BA%A1%E5%A4%84%E7%90%86"><span class="nav-number">6.</span> <span class="nav-text">4 角色死亡处理</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Larry-lyx</p>
+  <div class="site-description" itemprop="description">分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/ue5-blog/archives/">
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/ue5-blog/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/ue5-blog/tags/">
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/GameMode/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="GameMode | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          GameMode
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-18 00:00:00 / 修改时间：15:33:48" itemprop="dateCreated datePublished" datetime="2025-12-18T00:00:00+08:00">2025-12-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/SaveAndLoad/" itemprop="url" rel="index"><span itemprop="name">SaveAndLoad</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>GameMode是UE服务端独有的核心类（Client端无法访问），核心承担三大功能：配置玩家操控相关类、托管全局核心游戏数据、管理存档与读档逻辑；通过区分“固定游戏数据”（如敌人属性）和“玩家进度数据”（如等级、位置）实现数据分层管理，结合GameInstance的跨关卡生命周期特性完成多档位存档管控，需在每个Level的World Settings中配置对应GameMode以生效。</p>
+<span id="more"></span>
+
+<h1 id="GameMode-的核心定位与数据区分"><a href="#GameMode-的核心定位与数据区分" class="headerlink" title="GameMode 的核心定位与数据区分"></a>GameMode 的核心定位与数据区分</h1><p>GameMode仅存在于Server端，可安全存储核心数据，避免客户端作弊；使用前需明确两类数据的管理边界：</p>
+<ul>
+<li><strong>固定游戏数据</strong>：游戏内预设的静态数值（如敌人基础攻击力、奖励规则），无需存档，集中托管在DataAsset中；</li>
+<li><strong>玩家进度数据</strong>：随玩家游玩状态变化的动态信息（如等级、保存位置、已激活技能），需存入存档，仅保留必要内容。</li>
+</ul>
+<h1 id="1-配置玩家操控"><a href="#1-配置玩家操控" class="headerlink" title="1. 配置玩家操控"></a>1. 配置玩家操控</h1><p>GameMode在关卡加载时自动配置玩家核心操控类，同时支持自定义玩家初始生成位置：</p>
+<h3 id="1-1-核心配置项"><a href="#1-1-核心配置项" class="headerlink" title="1.1 核心配置项"></a>1.1 核心配置项</h3><p>GameMode可配置以下关键类，决定玩家的核心交互逻辑：</p>
+<ul>
+<li>Player Controller Class（玩家控制器）</li>
+<li>Player State Class（玩家状态，存储等级&#x2F;经验等）</li>
+<li>HUD Class（玩家界面）</li>
+<li>Default Pawn Class（默认操控角色）</li>
+</ul>
+<h3 id="1-2-自定义玩家初始位置（PlayerStart）"><a href="#1-2-自定义玩家初始位置（PlayerStart）" class="headerlink" title="1.2 自定义玩家初始位置（PlayerStart）"></a>1.2 自定义玩家初始位置（PlayerStart）</h3><p>默认情况下玩家随机生成在场景的PlayerStart位置，重写<code>ChoosePlayerStart</code>可精准指定生成位置（如匹配存档的检查点）：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">AActor* <span class="title">ACustomGameModeBase::ChoosePlayerStart_Implementation</span><span class="params">(AController* Player)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	UCustomGameInstance* CustomGameInstance = <span class="built_in">Cast</span>&lt;UCustomGameInstance&gt;(<span class="built_in">GetGameInstance</span>());</span><br><span class="line">	</span><br><span class="line">	TArray&lt;AActor*&gt; Actors;</span><br><span class="line">	UGameplayStatics::<span class="built_in">GetAllActorsOfClass</span>(<span class="built_in">GetWorld</span>() , APlayerStart::<span class="built_in">StaticClass</span>() , Actors);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (Actors.<span class="built_in">Num</span>() &gt; <span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		AActor* SelectedActor = Actors[<span class="number">0</span>];</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 查找与存档标签匹配的PlayerStart</span></span><br><span class="line">		<span class="keyword">for</span> (AActor* Actor : Actors)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (APlayerStart* PlayerStart = <span class="built_in">Cast</span>&lt;APlayerStart&gt;(Actor))</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="keyword">if</span> (PlayerStart-&gt;PlayerStartTag == CustomGameInstance-&gt;PlayerStartTag)</span><br><span class="line">				&#123;</span><br><span class="line">					SelectedActor = Actor;</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> SelectedActor;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该函数在GameMode初始化时自动调用，无需手动触发。</p>
+<h1 id="2-保存重要游戏数据"><a href="#2-保存重要游戏数据" class="headerlink" title="2. 保存重要游戏数据"></a>2. 保存重要游戏数据</h1><p>核心游戏数据（DataAsset）最终挂载在GameMode上，确保仅Server端可访问，避免客户端篡改：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UPROPERTY</span>(EditDefaultsOnly , Category = <span class="string">&quot;Character Class Defaults&quot;</span>)</span><br><span class="line">TObjectPtr&lt;UCharacterClassInfo&gt; CharacterClassInfo;</span><br><span class="line"></span><br><span class="line"><span class="built_in">UPROPERTY</span>(EditDefaultsOnly , Category = <span class="string">&quot;Ability Info&quot;</span>)</span><br><span class="line">TObjectPtr&lt;UAbilityInfo&gt; AbilityInfo;</span><br><span class="line"></span><br><span class="line"><span class="built_in">UPROPERTY</span>(EditDefaultsOnly , Category = <span class="string">&quot;Loot Tiers&quot;</span>)</span><br><span class="line">TObjectPtr&lt;ULootTiers&gt; LootTiers;</span><br></pre></td></tr></table></figure>
+<p>所有业务逻辑需通过GameMode获取DataAsset数据，保证数据权威性。</p>
+<h1 id="3-存档与读档"><a href="#3-存档与读档" class="headerlink" title="3. 存档与读档"></a>3. 存档与读档</h1><p>存档核心逻辑分为两层：<strong>游戏世界 ↔ SaveGame对象</strong>（自定义映射）、<strong>SaveGame对象 ↔ 磁盘</strong>（UE封装函数），磁盘文件通过SlotName和SlotIndex区分不同档位。</p>
+<h2 id="3-1-基础存档操作（删档-读档-存档）"><a href="#3-1-基础存档操作（删档-读档-存档）" class="headerlink" title="3.1 基础存档操作（删档&#x2F;读档&#x2F;存档）"></a>3.1 基础存档操作（删档&#x2F;读档&#x2F;存档）</h2><p>封装磁盘交互函数，仅处理SaveGame对象与磁盘的读写，不涉及游戏世界数据映射：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">AAuraGameModeBase::SaveSlotData</span><span class="params">(UMVVM_LoadSlot* LoadSlot, int32 SlotIndex)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">DeleteSlot</span>(LoadSlot-&gt;<span class="built_in">GetLoadSlotName</span>() , SlotIndex);</span><br><span class="line">	</span><br><span class="line">	USaveGame* SaveGameObject = UGameplayStatics::<span class="built_in">CreateSaveGameObject</span>(LoadScreenSaveDataClass);</span><br><span class="line">	ULoadScreenSaveGame* LoadScreenSaveGame = <span class="built_in">Cast</span>&lt;ULoadScreenSaveGame&gt;(SaveGameObject);</span><br><span class="line">	LoadScreenSaveGame-&gt;PlayerName = LoadSlot-&gt;<span class="built_in">GetPlayerName</span>();</span><br><span class="line">	LoadScreenSaveGame-&gt;SaveSlotStatus = Taken;</span><br><span class="line">	LoadScreenSaveGame-&gt;MapName = LoadSlot-&gt;<span class="built_in">GetMapName</span>();</span><br><span class="line">	LoadScreenSaveGame-&gt;PlayerStartTag = LoadSlot-&gt;PlayerStartTag;</span><br><span class="line"></span><br><span class="line">	UGameplayStatics::<span class="built_in">SaveGameToSlot</span>(LoadScreenSaveGame , LoadSlot-&gt;<span class="built_in">GetLoadSlotName</span>() , SlotIndex);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">ULoadScreenSaveGame* <span class="title">AAuraGameModeBase::GetSaveSlotData</span><span class="params">(<span class="type">const</span> FString&amp; SlotName, int32 SlotIndex)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	USaveGame* SaveGameObject  = <span class="literal">nullptr</span>;</span><br><span class="line">	<span class="keyword">if</span> (UGameplayStatics::<span class="built_in">DoesSaveGameExist</span>(SlotName, SlotIndex))</span><br><span class="line">	&#123;</span><br><span class="line">		SaveGameObject = UGameplayStatics::<span class="built_in">LoadGameFromSlot</span>(SlotName , SlotIndex);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">	&#123;</span><br><span class="line">		SaveGameObject = UGameplayStatics::<span class="built_in">CreateSaveGameObject</span>(LoadScreenSaveDataClass);</span><br><span class="line">	&#125;</span><br><span class="line">	ULoadScreenSaveGame* LoadScreenSaveGame = <span class="built_in">Cast</span>&lt;ULoadScreenSaveGame&gt;(SaveGameObject);</span><br><span class="line">	<span class="keyword">return</span> LoadScreenSaveGame;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AAuraGameModeBase::DeleteSlot</span><span class="params">(<span class="type">const</span> FString&amp; SlotName, int32 SlotIndex)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (UGameplayStatics::<span class="built_in">DoesSaveGameExist</span>(SlotName , SlotIndex))</span><br><span class="line">	&#123;</span><br><span class="line">		UGameplayStatics::<span class="built_in">DeleteGameInSlot</span>(SlotName , SlotIndex);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-2-GameInstance：多档位全局管控"><a href="#3-2-GameInstance：多档位全局管控" class="headerlink" title="3.2 GameInstance：多档位全局管控"></a>3.2 GameInstance：多档位全局管控</h2><p>GameInstance的生命周期跨关卡（游戏运行期间持续存在），核心存储当前游玩档位的<code>SlotName</code>和<code>SlotIndex</code>，解决“游戏世界识别当前生效SaveGame对象”的问题：</p>
+<ul>
+<li>档位切换（新建&#x2F;选择存档）仅在UI层对应位置修改GameInstance的档位信息；</li>
+<li>GameMode通过GameInstance获取当前档位，定位对应的SaveGame对象：</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">ULoadScreenSaveGame* <span class="title">AAuraGameModeBase::RetrieveInGameSaveData</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	UAuraGameInstance* AuraGameInstance = <span class="built_in">Cast</span>&lt;UAuraGameInstance&gt;(<span class="built_in">GetGameInstance</span>());</span><br><span class="line"></span><br><span class="line">	<span class="type">const</span> FString InGameLoadSlotName = AuraGameInstance-&gt;LoadSlotName;</span><br><span class="line">	<span class="type">const</span> int32 InGameLoadSlotIndex = AuraGameInstance-&gt;LoadSlotIndex;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">GetSaveSlotData</span>(InGameLoadSlotName, InGameLoadSlotIndex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-3-玩家进度（Progress）的存档与读档"><a href="#3-3-玩家进度（Progress）的存档与读档" class="headerlink" title="3.3 玩家进度（Progress）的存档与读档"></a>3.3 玩家进度（Progress）的存档与读档</h2><p>Progress包含玩家等级、技能、属性等动态信息，采用“解耦设计”：GameMode处理磁盘交互，玩家类处理数据映射（避免GameMode耦合GAS逻辑）。</p>
+<h3 id="3-3-1-GameMode层：SaveGame对象读写"><a href="#3-3-1-GameMode层：SaveGame对象读写" class="headerlink" title="3.3.1 GameMode层：SaveGame对象读写"></a>3.3.1 GameMode层：SaveGame对象读写</h3><p>GameMode层的核心职责是“桥梁作用”，不参与具体数据解析：</p>
+<ol>
+<li>从GameInstance获取当前生效的档位信息（SlotName、SlotIndex），定位到对应的SaveGame对象；</li>
+<li>仅执行两类核心操作：将填充好数据的SaveGame对象写入磁盘，或从磁盘读取对应档位的SaveGame对象；</li>
+<li>额外同步玩家起点标签（PlayerStartTag）到GameInstance，确保后续关卡切换时能精准定位玩家初始生成位置。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">AAuraGameModeBase::SaveInGameProgressData</span><span class="params">(ULoadScreenSaveGame* SaveObject)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	UAuraGameInstance* AuraGameInstance = <span class="built_in">Cast</span>&lt;UAuraGameInstance&gt;(<span class="built_in">GetGameInstance</span>());</span><br><span class="line"></span><br><span class="line">	<span class="type">const</span> FString InGameLoadSlotName = AuraGameInstance-&gt;LoadSlotName;</span><br><span class="line">	<span class="type">const</span> int32 InGameLoadSlotIndex = AuraGameInstance-&gt;LoadSlotIndex;</span><br><span class="line"></span><br><span class="line">	AuraGameInstance-&gt;PlayerStartTag = SaveObject-&gt;PlayerStartTag;</span><br><span class="line">	</span><br><span class="line">	UGameplayStatics::<span class="built_in">SaveGameToSlot</span>(SaveObject , InGameLoadSlotName , InGameLoadSlotIndex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-2-玩家类层：数据映射"><a href="#3-3-2-玩家类层：数据映射" class="headerlink" title="3.3.2 玩家类层：数据映射"></a>3.3.2 玩家类层：数据映射</h3><h4 id="读档：从SaveGame更新玩家状态"><a href="#读档：从SaveGame更新玩家状态" class="headerlink" title="读档：从SaveGame更新玩家状态"></a>读档：从SaveGame更新玩家状态</h4><p>读档逻辑区分“首次加载”和“非首次加载”，适配不同游玩阶段：</p>
+<ol>
+<li>首次加载：玩家无存档数据，执行默认初始化流程，包括初始化角色基础属性、添加初始技能；</li>
+<li>非首次加载（：从存档恢复完整状态，核心步骤：<ul>
+<li>技能恢复：通过ASC（Ability System Component）从存档数据中重新添加已激活的技能，还原技能配置；</li>
+<li>等级与资源恢复：同步PlayerState中存储的等级、经验值等到玩家当前状态；</li>
+<li>属性值恢复：借助AbilitySystemLibrary工具函数，通过临时创建GameplayEffect的方式，将存档中的核心属性同步到AttributeSet。</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">AAuraCharacter::LoadProgress</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	AAuraGameModeBase* AuraGameMode = <span class="built_in">Cast</span>&lt;AAuraGameModeBase&gt;(UGameplayStatics::<span class="built_in">GetGameMode</span>(<span class="keyword">this</span>));</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span> (AuraGameMode)</span><br><span class="line">	&#123;</span><br><span class="line">		ULoadScreenSaveGame* SaveData = AuraGameMode-&gt;<span class="built_in">RetrieveInGameSaveData</span>();</span><br><span class="line">		<span class="keyword">if</span> (SaveData == <span class="literal">nullptr</span>) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (SaveData-&gt;bFirstLoadIn)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">InitializeDefaultAttributes</span>();</span><br><span class="line">			<span class="built_in">AddCharacterAbilities</span>();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (UAuraAbilitySystemComponent* AuraASC = <span class="built_in">Cast</span>&lt;UAuraAbilitySystemComponent&gt;(AbilitySystemComponent))</span><br><span class="line">			&#123;</span><br><span class="line">				AuraASC-&gt;<span class="built_in">AddCharacterAbilitiesFromSaveData</span>(SaveData);</span><br><span class="line">			&#125;</span><br><span class="line">			</span><br><span class="line">			<span class="keyword">if</span> (AAuraPlayerState* AuraPlayerState = <span class="built_in">Cast</span>&lt;AAuraPlayerState&gt;(<span class="built_in">GetPlayerState</span>()))</span><br><span class="line">			&#123;</span><br><span class="line">				AuraPlayerState-&gt;<span class="built_in">SetLevel</span>(SaveData-&gt;PlayerLevel);</span><br><span class="line">				AuraPlayerState-&gt;<span class="built_in">SetXP</span>(SaveData-&gt;XP);</span><br><span class="line">				AuraPlayerState-&gt;<span class="built_in">SetAttributePoints</span>(SaveData-&gt;AttributePoints);</span><br><span class="line">				AuraPlayerState-&gt;<span class="built_in">SetSpellPoints</span>(SaveData-&gt;SpellPoints);</span><br><span class="line">			&#125;</span><br><span class="line">			</span><br><span class="line">            <span class="comment">// 通过临时GameplayEffect初始化存档属性</span></span><br><span class="line">			UAuraAbilitySystemLibrary::<span class="built_in">InitializeDefaultAttributesFromSaveData</span>(<span class="keyword">this</span> , AbilitySystemComponent , SaveData);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="存档：将玩家状态写入SaveGame"><a href="#存档：将玩家状态写入SaveGame" class="headerlink" title="存档：将玩家状态写入SaveGame"></a>存档：将玩家状态写入SaveGame</h4><p>存档逻辑完整收集玩家核心进度数据，其中技能数据通过委托机制高效遍历收集：</p>
+<ol>
+<li>基础数据收集：先同步玩家当前检查点标签、PlayerState中的等级&#x2F;经验&#x2F;属性点，以及AttributeSet中的力量、活力等属性值到SaveGame；</li>
+<li>技能数据收集（委托机制）：<ul>
+<li>定义遍历技能的委托（FForEachAbility），绑定回调函数；</li>
+<li>回调函数核心逻辑：提取技能标签、类型、等级、绑定输入插槽、技能状态等信息，封装为SavedAbility结构体并添加到SaveGame的技能列表；</li>
+<li>调用ASC的ForEachAbility方法触发委托，遍历所有已激活技能完成数据收集；</li>
+</ul>
+</li>
+<li>权限校验：仅在服务端（HasAuthority为true）执行技能数据收集，避免客户端篡改数据；</li>
+<li>最终保存：调用GameMode的存档方法，将填充完整数据的SaveGame对象写入磁盘，完成进度保存。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">AAuraCharacter::SaveProgress_Implementation</span><span class="params">(<span class="type">const</span> FName&amp; CheckPointTag)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	AAuraGameModeBase* AuraGameMode = <span class="built_in">Cast</span>&lt;AAuraGameModeBase&gt;(UGameplayStatics::<span class="built_in">GetGameMode</span>(<span class="keyword">this</span>));</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span> (AuraGameMode)</span><br><span class="line">	&#123;</span><br><span class="line">		ULoadScreenSaveGame* SaveData = AuraGameMode-&gt;<span class="built_in">RetrieveInGameSaveData</span>();</span><br><span class="line">		<span class="keyword">if</span> (SaveData == <span class="literal">nullptr</span>) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">		SaveData-&gt;PlayerStartTag = CheckPointTag;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (AAuraPlayerState* AuraPlayerState = <span class="built_in">Cast</span>&lt;AAuraPlayerState&gt;(<span class="built_in">GetPlayerState</span>()))</span><br><span class="line">		&#123;</span><br><span class="line">			SaveData-&gt;PlayerLevel = AuraPlayerState-&gt;<span class="built_in">GetPlayerLevel</span>();</span><br><span class="line">			SaveData-&gt;XP = AuraPlayerState-&gt;<span class="built_in">GetXP</span>();</span><br><span class="line">			SaveData-&gt;AttributePoints = AuraPlayerState-&gt;<span class="built_in">GetAttributePoints</span>();</span><br><span class="line">			SaveData-&gt;SpellPoints = AuraPlayerState-&gt;<span class="built_in">GetSpellPoints</span>();</span><br><span class="line">		&#125;</span><br><span class="line">		SaveData-&gt;Strength = UAuraAttributeSet::<span class="built_in">GetStrengthAttribute</span>().<span class="built_in">GetNumericValue</span>(<span class="built_in">GetAttributeSet</span>());</span><br><span class="line">		SaveData-&gt;Vigor = UAuraAttributeSet::<span class="built_in">GetVigorAttribute</span>().<span class="built_in">GetNumericValue</span>(<span class="built_in">GetAttributeSet</span>());</span><br><span class="line">		SaveData-&gt;Intelligence = UAuraAttributeSet::<span class="built_in">GetIntelligenceAttribute</span>().<span class="built_in">GetNumericValue</span>(<span class="built_in">GetAttributeSet</span>());</span><br><span class="line">		SaveData-&gt;Resilience = UAuraAttributeSet::<span class="built_in">GetResilienceAttribute</span>().<span class="built_in">GetNumericValue</span>(<span class="built_in">GetAttributeSet</span>());</span><br><span class="line"></span><br><span class="line">		SaveData-&gt;bFirstLoadIn = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (!<span class="built_in">HasAuthority</span>()) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">		UAuraAbilitySystemComponent* AuraASC = <span class="built_in">Cast</span>&lt;UAuraAbilitySystemComponent&gt;(AbilitySystemComponent);</span><br><span class="line">		FForEachAbility SaveAbilityDelegate;</span><br><span class="line">		SaveData-&gt;SavedAbilities.<span class="built_in">Empty</span>();</span><br><span class="line"></span><br><span class="line">		SaveAbilityDelegate.<span class="built_in">BindLambda</span>(</span><br><span class="line">			[<span class="keyword">this</span> , AuraASC , SaveData](<span class="type">const</span> FGameplayAbilitySpec&amp; AbilitySpec)</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="type">const</span> FGameplayTag AbilityTag = AuraASC-&gt;<span class="built_in">GetAbilityTagFromSpec</span>(AbilitySpec);</span><br><span class="line">				UAbilityInfo* AbilityInfo = UAuraAbilitySystemLibrary::<span class="built_in">GetAbilityInfo</span>(<span class="keyword">this</span>);</span><br><span class="line">				FAuraAbilityInfo Info = AbilityInfo-&gt;<span class="built_in">FindAbilityInfoForTag</span>(AbilityTag);</span><br><span class="line"></span><br><span class="line">				FSavedAbility SavedAbility;</span><br><span class="line">				SavedAbility.GameplayAbility = Info.Ability;</span><br><span class="line">				SavedAbility.AbilityType = Info.AbilityType;</span><br><span class="line">				SavedAbility.AbilityTag = AbilityTag;</span><br><span class="line">				SavedAbility.AbilityLevel = AbilitySpec.Level;</span><br><span class="line">				SavedAbility.AbilitySlot = AuraASC-&gt;<span class="built_in">GetInputTagFromAbilityTag</span>(AbilityTag);</span><br><span class="line">				SavedAbility.AbilityStatus = AuraASC-&gt;<span class="built_in">GetStatusFromAbilityTag</span>(AbilityTag);</span><br><span class="line"></span><br><span class="line">				SaveData-&gt;SavedAbilities.<span class="built_in">AddUnique</span>(SavedAbility);</span><br><span class="line">			&#125;</span><br><span class="line">			);</span><br><span class="line"></span><br><span class="line">		AuraASC-&gt;<span class="built_in">ForEachAbility</span>(SaveAbilityDelegate);</span><br><span class="line">		</span><br><span class="line">		AuraGameMode-&gt;<span class="built_in">SaveInGameProgressData</span>(SaveData);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-4-世界状态（World-State）的存档与读档"><a href="#3-4-世界状态（World-State）的存档与读档" class="headerlink" title="3.4 世界状态（World State）的存档与读档"></a>3.4 世界状态（World State）的存档与读档</h2><p>World State保存当前地图及地图内Actor的核心状态（非全量信息，如“是否触发”“宝箱是否开启”），仅序列化带<code>SaveGame</code>关键字的变量。</p>
+<h3 id="3-4-1-保存世界状态"><a href="#3-4-1-保存世界状态" class="headerlink" title="3.4.1 保存世界状态"></a>3.4.1 保存世界状态</h3><p>核心是收集当前地图及地图内关键Actor的核心状态，存入对应档位的SaveGame对象：</p>
+<ol>
+<li>地图信息预处理：提取当前地图的纯净名称（去除引擎自动添加的StreamingLevelsPrefix前缀），从GameInstance获取当前档位信息，定位到对应的SaveGame对象；</li>
+<li>地图状态初始化：若SaveGame中无当前地图的状态记录，创建新的SavedMap结构体并添加，保证每个地图的状态独立存储，互不干扰；</li>
+<li>Actor筛选与遍历：仅遍历地图内实现<code>USaveInterface</code>的Actor；</li>
+<li>Actor状态序列化：对目标Actor，先记录Actor名称、Transform（可选用于位置恢复），再通过内存写入器（FMemoryWriter）和存档代理（FObjectAndNameAsStringProxyArchive），将带<code>SaveGame</code>关键字的变量序列化为字节流，确保仅保存核心状态；</li>
+<li>数据更新与持久化：替换SaveGame中当前地图的旧状态（清空旧数据后重新填充），最后将更新后的SaveGame对象写入磁盘，完成世界状态保存。</li>
+</ol>
+<p>有关存档序列化的内容详见<a href="/ue5-blog/2025/12/10/ProgrammingSkills/Serialize">这里</a>。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">AAuraGameModeBase::SaveWorldState</span><span class="params">(UWorld* World, <span class="type">const</span> FString&amp; DestinationMapAssetName)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	FString WorldName = World-&gt;<span class="built_in">GetName</span>();</span><br><span class="line">	WorldName.<span class="built_in">RemoveFromStart</span>(World-&gt;StreamingLevelsPrefix);</span><br><span class="line"></span><br><span class="line">	UAuraGameInstance* AuraGI = <span class="built_in">Cast</span>&lt;UAuraGameInstance&gt;(<span class="built_in">GetGameInstance</span>());</span><br><span class="line">	<span class="built_in">check</span>(AuraGI);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (ULoadScreenSaveGame* SaveGame = <span class="built_in">GetSaveSlotData</span>(AuraGI-&gt;LoadSlotName , AuraGI-&gt;LoadSlotIndex))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (DestinationMapAssetName != <span class="built_in">FString</span>(<span class="string">&quot;&quot;</span>))</span><br><span class="line">		&#123;</span><br><span class="line">			SaveGame-&gt;MapAssetName = DestinationMapAssetName;</span><br><span class="line">			SaveGame-&gt;MapName = <span class="built_in">GetMapNameFromMapAssetName</span>(DestinationMapAssetName);</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">if</span> (!SaveGame-&gt;<span class="built_in">HasMap</span>(WorldName))</span><br><span class="line">		&#123;</span><br><span class="line">			FSavedMap NewSavedMap;</span><br><span class="line">			NewSavedMap.MapAssetName = WorldName;</span><br><span class="line">			SaveGame-&gt;SavedMaps.<span class="built_in">Add</span>(NewSavedMap);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		FSavedMap SavedMap = SaveGame-&gt;<span class="built_in">GetSavedMapWithMapName</span>(WorldName);</span><br><span class="line">		SavedMap.SavedActors.<span class="built_in">Empty</span>(); <span class="comment">// 清空旧数据，重新填充</span></span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> (FActorIterator <span class="built_in">It</span>(World) ; It ; ++It)</span><br><span class="line">		&#123;</span><br><span class="line">			AActor* Actor = *It;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">if</span> (!<span class="built_in">IsValid</span>(Actor) || !Actor-&gt;<span class="built_in">Implements</span>&lt;USaveInterface&gt;()) <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">			FSavedActor SavedActor;</span><br><span class="line">			SavedActor.ActorName = Actor-&gt;<span class="built_in">GetFName</span>();</span><br><span class="line">			SavedActor.Transform = Actor-&gt;<span class="built_in">GetTransform</span>();</span><br><span class="line"></span><br><span class="line">			<span class="function">FMemoryWriter <span class="title">MemoryWriter</span><span class="params">(SavedActor.Bytes)</span></span>;</span><br><span class="line"></span><br><span class="line">			<span class="function">FObjectAndNameAsStringProxyArchive <span class="title">Archive</span><span class="params">(MemoryWriter , <span class="literal">true</span>)</span></span>;</span><br><span class="line">			Archive.ArIsSaveGame = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">			Actor-&gt;<span class="built_in">Serialize</span>(Archive); <span class="comment">// 序列化SaveGame变量</span></span><br><span class="line"></span><br><span class="line">			SavedMap.SavedActors.<span class="built_in">AddUnique</span>(SavedActor);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> (FSavedMap&amp; MapToReplace : SaveGame-&gt;SavedMaps)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (MapToReplace.MapAssetName == WorldName)</span><br><span class="line">			&#123;</span><br><span class="line">				MapToReplace = SavedMap;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		UGameplayStatics::<span class="built_in">SaveGameToSlot</span>(SaveGame , AuraGI-&gt;LoadSlotName , AuraGI-&gt;LoadSlotIndex);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-4-2-加载世界状态"><a href="#3-4-2-加载世界状态" class="headerlink" title="3.4.2 加载世界状态"></a>3.4.2 加载世界状态</h3><p>核心是将存档中的世界状态还原到当前地图，恢复Actor的核心状态：</p>
+<ol>
+<li>存档加载校验：先检查当前档位的存档是否存在，不存在则直接返回并输出错误日志，避免空指针导致崩溃；</li>
+<li>Actor匹配与筛选：遍历当前地图内实现<code>USaveInterface</code>的Actor，通过Actor名称（ActorName）匹配存档中的SavedActor；</li>
+<li>状态反序列化：<ul>
+<li>位置恢复：通过<code>ShouldLoadTransform</code>接口判断是否需要恢复Actor的Transform（如移动平台、可交互物件需恢复位置，固定场景物件无需恢复）；</li>
+<li>变量还原：通过内存读取器（FMemoryReader）和存档代理，将序列化的字节流反序列化，还原Actor中带<code>SaveGame</code>关键字的变量；</li>
+</ul>
+</li>
+<li>自定义逻辑触发：调用<code>LoadActor</code>接口执行Actor的自定义加载逻辑（如宝箱已开启则隐藏宝物、触发过的敌人生成点不再生成敌人、机关已激活则保持开启状态），完成状态落地。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">AAuraGameModeBase::LoadWorldState</span><span class="params">(UWorld* World)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	FString WorldName = World-&gt;<span class="built_in">GetName</span>();</span><br><span class="line">	WorldName.<span class="built_in">RemoveFromStart</span>(World-&gt;StreamingLevelsPrefix);</span><br><span class="line"></span><br><span class="line">	UAuraGameInstance* AuraGI = <span class="built_in">Cast</span>&lt;UAuraGameInstance&gt;(<span class="built_in">GetGameInstance</span>());</span><br><span class="line">	<span class="built_in">check</span>(AuraGI);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (UGameplayStatics::<span class="built_in">DoesSaveGameExist</span>(AuraGI-&gt;LoadSlotName , AuraGI-&gt;LoadSlotIndex))</span><br><span class="line">	&#123;</span><br><span class="line">		ULoadScreenSaveGame* SaveGame = <span class="built_in">Cast</span>&lt;ULoadScreenSaveGame&gt;(UGameplayStatics::<span class="built_in">LoadGameFromSlot</span>(AuraGI-&gt;LoadSlotName , AuraGI-&gt;LoadSlotIndex));</span><br><span class="line">		<span class="keyword">if</span> (SaveGame == <span class="literal">nullptr</span>)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">UE_LOG</span>(LogAura , Error , <span class="built_in">TEXT</span>(<span class="string">&quot;Fail to load slot&quot;</span>));</span><br><span class="line">			<span class="keyword">return</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">for</span> (FActorIterator <span class="built_in">It</span>(World) ; It ; ++It)</span><br><span class="line">		&#123;</span><br><span class="line">			AActor* Actor = *It;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">if</span> (!Actor-&gt;<span class="built_in">Implements</span>&lt;USaveInterface&gt;()) <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">for</span> (FSavedActor SavedActor : SaveGame-&gt;<span class="built_in">GetSavedMapWithMapName</span>(WorldName).SavedActors)</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="keyword">if</span> (SavedActor.ActorName == Actor-&gt;<span class="built_in">GetFName</span>())</span><br><span class="line">				&#123;</span><br><span class="line">					<span class="keyword">if</span> (ISaveInterface::<span class="built_in">Execute_ShouldLoadTransform</span>(Actor))</span><br><span class="line">					&#123;</span><br><span class="line">						Actor-&gt;<span class="built_in">SetActorTransform</span>(SavedActor.Transform);</span><br><span class="line">					&#125;</span><br><span class="line"></span><br><span class="line">					<span class="function">FMemoryReader <span class="title">MemoryReader</span><span class="params">(SavedActor.Bytes)</span></span>;</span><br><span class="line"></span><br><span class="line">					<span class="function">FObjectAndNameAsStringProxyArchive <span class="title">Archive</span><span class="params">(MemoryReader , <span class="literal">true</span>)</span></span>;</span><br><span class="line">					Archive.ArIsSaveGame = <span class="literal">true</span>;</span><br><span class="line">					Actor-&gt;<span class="built_in">Serialize</span>(Archive); <span class="comment">// 反序列化恢复变量</span></span><br><span class="line"></span><br><span class="line">					ISaveInterface::<span class="built_in">Execute_LoadActor</span>(Actor); <span class="comment">// 执行Actor自定义加载逻辑</span></span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-5-加载触发时机"><a href="#3-5-加载触发时机" class="headerlink" title="3.5 加载触发时机"></a>3.5 加载触发时机</h2><p>选择在玩家被Controller接管（<code>PossessedBy</code>）后触发世界状态加载，保证数据恢复的完整性和逻辑合理性：</p>
+<ol>
+<li>时机合理性：<code>PossessedBy</code>是玩家进入关卡后Controller与角色绑定的核心节点，此时GAS（Ability System Component）、PlayerState、AttributeSet等核心系统已完成初始化，避免因依赖未就绪导致数据恢复失败；</li>
+<li>执行顺序：先初始化GAS相关组件（InitAbilityActorInfo），再加载玩家进度（LoadProgress），最后加载世界状态（LoadWorldState），确保玩家自身状态优先于场景状态恢复，符合游戏游玩逻辑；</li>
+<li>体验保障：在玩家可操作角色前完成世界状态加载，能让玩家进入关卡时直接看到符合存档进度的场景状态（如已开启的宝箱、已清理的敌人营地），避免场景状态与玩家进度不一致的违和感。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">AAuraCharacter::PossessedBy</span><span class="params">(AController* NewController)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Super::<span class="built_in">PossessedBy</span>(NewController);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">InitAbilityActorInfo</span>(); <span class="comment">// 初始化GAS相关信息</span></span><br><span class="line">	<span class="built_in">LoadProgress</span>(); <span class="comment">// 加载玩家进度</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (AAuraGameModeBase* AuraGameMode = <span class="built_in">Cast</span>&lt;AAuraGameModeBase&gt;(UGameplayStatics::<span class="built_in">GetGameMode</span>(<span class="keyword">this</span>)))</span><br><span class="line">	&#123;</span><br><span class="line">		AuraGameMode-&gt;<span class="built_in">LoadWorldState</span>(<span class="built_in">GetWorld</span>()); <span class="comment">// 加载世界状态</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AAuraCharacter::InitAbilityActorInfo</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	AAuraPlayerState* AuraPlayerState = <span class="built_in">GetPlayerState</span>&lt;AAuraPlayerState&gt;();</span><br><span class="line">	<span class="built_in">check</span>(AuraPlayerState);</span><br><span class="line">	AuraPlayerState-&gt;<span class="built_in">GetAbilitySystemComponent</span>()-&gt;<span class="built_in">InitAbilityActorInfo</span>(AuraPlayerState , <span class="keyword">this</span>);</span><br><span class="line">	<span class="built_in">Cast</span>&lt;UAuraAbilitySystemComponent&gt;(AuraPlayerState-&gt;<span class="built_in">GetAbilitySystemComponent</span>())-&gt;<span class="built_in">AbilityActorInfoSet</span>();</span><br><span class="line">	</span><br><span class="line">	AbilitySystemComponent = AuraPlayerState-&gt;<span class="built_in">GetAbilitySystemComponent</span>();</span><br><span class="line">	AttributeSet = AuraPlayerState-&gt;<span class="built_in">GetAttributeSet</span>();</span><br><span class="line"></span><br><span class="line">	OnASCRegistered.<span class="built_in">Broadcast</span>(AbilitySystemComponent);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span> (AAuraPlayerController* AuraPlayerController = <span class="built_in">Cast</span>&lt;AAuraPlayerController&gt;(<span class="built_in">GetController</span>()))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (AAuraHUD*  AuraHUD = <span class="built_in">Cast</span>&lt;AAuraHUD&gt;(AuraPlayerController-&gt;<span class="built_in">GetHUD</span>()))</span><br><span class="line">		&#123;</span><br><span class="line">			AuraHUD-&gt;<span class="built_in">InitOverlay</span>(AuraPlayerController , AuraPlayerState , AbilitySystemComponent , AttributeSet);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="4-角色死亡处理"><a href="#4-角色死亡处理" class="headerlink" title="4 角色死亡处理"></a>4 角色死亡处理</h1><p>角色死亡后加载最近存档的关卡，恢复玩家状态：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">AAuraGameModeBase::PlayerDied</span><span class="params">(ACharacter* DeadCharacter)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	ULoadScreenSaveGame* SaveGame = <span class="built_in">RetrieveInGameSaveData</span>();</span><br><span class="line">	<span class="keyword">if</span> (!<span class="built_in">IsValid</span>(SaveGame)) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">	UGameplayStatics::<span class="built_in">OpenLevel</span>(DeadCharacter , <span class="built_in">FName</span>(SaveGame-&gt;MapAssetName));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/ue5-blog/tags/GameMode/" rel="tag"># GameMode</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/17/SystemDesigns/Levels/SpawnVolume/" rel="prev" title="SpawnVolume and SpawnPoint">
+                  <i class="fa fa-angle-left"></i> SpawnVolume and SpawnPoint
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/SaveGame/" rel="next" title="">
+                   <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Larry-lyx</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

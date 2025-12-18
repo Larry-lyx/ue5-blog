@@ -178,7 +178,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/ue5-blog/tags/">
-        <span class="site-state-item-count">48</span>
+        <span class="site-state-item-count">45</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -204,7 +204,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/17/SystemDesigns/Levels/WorldTransition/">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/SaveGame/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
@@ -222,7 +222,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/17/SystemDesigns/Levels/WorldTransition/" class="post-title-link" itemprop="url">WorldTransition</a>
+          <a href="/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/SaveGame/" class="post-title-link" itemprop="url">未命名</a>
         </h2>
 
         <div class="post-meta-container">
@@ -234,7 +234,76 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2025-12-17 00:00:00 / 修改时间：16:03:30" itemprop="dateCreated datePublished" datetime="2025-12-17T00:00:00+08:00">2025-12-17</time>
+      <time title="创建时间：2025-12-18 13:46:39 / 修改时间：13:46:41" itemprop="dateCreated datePublished" datetime="2025-12-18T13:46:39+08:00">2025-12-18</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/GameMode/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/GameMode/" class="post-title-link" itemprop="url">GameMode</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-18 00:00:00 / 修改时间：15:33:48" itemprop="dateCreated datePublished" datetime="2025-12-18T00:00:00+08:00">2025-12-18</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -246,7 +315,7 @@
         </span>
           ，
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/ue5-blog/categories/SystemDesigns/Levels/" itemprop="url" rel="index"><span itemprop="name">Levels</span></a>
+          <a href="/ue5-blog/categories/SystemDesigns/SaveAndLoad/" itemprop="url" rel="index"><span itemprop="name">SaveAndLoad</span></a>
         </span>
     </span>
 
@@ -260,10 +329,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>WorldTransition（关卡转换）是实现多关卡无缝切换的核心逻辑，主要包含UI触发、地图入口触发两种方式，核心依赖<code>UGameplayStatics::OpenLevelBySoftObjectPtr</code>实现关卡跳转；同时通过重写GameMode的<code>ChoosePlayerStart</code>函数指定玩家新关卡初始位置，结合存档保存关卡状态、进度和玩家起点标签，保证关卡切换的连贯性。</p>
+          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>GameMode是UE服务端独有的核心类（Client端无法访问），核心承担三大功能：配置玩家操控相关类、托管全局核心游戏数据、管理存档与读档逻辑；通过区分“固定游戏数据”（如敌人属性）和“玩家进度数据”（如等级、位置）实现数据分层管理，结合GameInstance的跨关卡生命周期特性完成多档位存档管控，需在每个Level的World Settings中配置对应GameMode以生效。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/ue5-blog/2025/12/17/SystemDesigns/Levels/WorldTransition/#more" rel="contents">
+              <a class="btn" href="/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/GameMode/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -384,6 +453,96 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/17/SystemDesigns/VisualEffects/DissolveEffect/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content=" | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/ue5-blog/2025/12/17/SystemDesigns/VisualEffects/DissolveEffect/" class="post-title-link" itemprop="url">Dissolve Effect</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-17 00:00:00 / 修改时间：08:53:29" itemprop="dateCreated datePublished" datetime="2025-12-17T00:00:00+08:00">2025-12-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/VisualEffects/" itemprop="url" rel="index"><span itemprop="name">VisualEffects</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>Dissolve Effect（溶解效果）是提升游戏视觉表现力的经典动态材质效果，核心通过<code>UMaterialInstanceDynamic</code>（动态材质实例）结合Timeline时间线，动态修改材质参数（如溶解阈值），实现Mesh（角色&#x2F;武器）随时间渐进式溶解，并在溶解边缘生成高亮效果，典型应用于角色死亡、道具消失等场景。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/ue5-blog/2025/12/17/SystemDesigns/VisualEffects/DissolveEffect/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/17/SystemDesigns/VisualEffects/FadeActor/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -474,7 +633,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/17/SystemDesigns/VisualEffects/DissolveEffect/">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/17/SystemDesigns/Levels/WorldTransition/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
@@ -492,7 +651,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/17/SystemDesigns/VisualEffects/DissolveEffect/" class="post-title-link" itemprop="url">Dissolve Effect</a>
+          <a href="/ue5-blog/2025/12/17/SystemDesigns/Levels/WorldTransition/" class="post-title-link" itemprop="url">WorldTransition</a>
         </h2>
 
         <div class="post-meta-container">
@@ -504,7 +663,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2025-12-17 00:00:00 / 修改时间：08:53:29" itemprop="dateCreated datePublished" datetime="2025-12-17T00:00:00+08:00">2025-12-17</time>
+      <time title="创建时间：2025-12-17 00:00:00 / 修改时间：16:03:30" itemprop="dateCreated datePublished" datetime="2025-12-17T00:00:00+08:00">2025-12-17</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -516,7 +675,7 @@
         </span>
           ，
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/ue5-blog/categories/SystemDesigns/VisualEffects/" itemprop="url" rel="index"><span itemprop="name">VisualEffects</span></a>
+          <a href="/ue5-blog/categories/SystemDesigns/Levels/" itemprop="url" rel="index"><span itemprop="name">Levels</span></a>
         </span>
     </span>
 
@@ -530,10 +689,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>Dissolve Effect（溶解效果）是提升游戏视觉表现力的经典动态材质效果，核心通过<code>UMaterialInstanceDynamic</code>（动态材质实例）结合Timeline时间线，动态修改材质参数（如溶解阈值），实现Mesh（角色&#x2F;武器）随时间渐进式溶解，并在溶解边缘生成高亮效果，典型应用于角色死亡、道具消失等场景。</p>
+          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>WorldTransition（关卡转换）是实现多关卡无缝切换的核心逻辑，主要包含UI触发、地图入口触发两种方式，核心依赖<code>UGameplayStatics::OpenLevelBySoftObjectPtr</code>实现关卡跳转；同时通过重写GameMode的<code>ChoosePlayerStart</code>函数指定玩家新关卡初始位置，结合存档保存关卡状态、进度和玩家起点标签，保证关卡切换的连贯性。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/ue5-blog/2025/12/17/SystemDesigns/VisualEffects/DissolveEffect/#more" rel="contents">
+              <a class="btn" href="/ue5-blog/2025/12/17/SystemDesigns/Levels/WorldTransition/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -903,186 +1062,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/ue5-blog/2025/12/15/SystemDesigns/AI/BTService/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/15/SystemDesigns/AI/BTTask/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
-      <meta itemprop="name" content="Larry-lyx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="UE5学习笔记博客">
-      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | UE5学习笔记博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/15/SystemDesigns/AI/BTTask/" class="post-title-link" itemprop="url">BehaviorTree Task</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2025-12-15 00:00:00 / 修改时间：09:36:32" itemprop="dateCreated datePublished" datetime="2025-12-15T00:00:00+08:00">2025-12-15</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/ue5-blog/categories/SystemDesigns/AI/" itemprop="url" rel="index"><span itemprop="name">AI</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>BTTask（BehaviorTree Task）是行为树（BehaviorTree）的核心执行单元，承担“指令落地”的核心职责：行为树仅负责AI状态逻辑的流转（如从“休息”切换为“进攻”），而具体的执行逻辑（如选定攻击目标、释放技能、移动走位）均封装在BTTask中，既保证行为树结构简洁，又实现执行逻辑的复用。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/ue5-blog/2025/12/15/SystemDesigns/AI/BTTask/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/15/SystemDesigns/DataDriven/Data/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
-      <meta itemprop="name" content="Larry-lyx">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="UE5学习笔记博客">
-      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=" | UE5学习笔记博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/ue5-blog/2025/12/15/SystemDesigns/DataDriven/Data/" class="post-title-link" itemprop="url">数据驱动系统 (DataDriven)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2025-12-15 00:00:00 / 修改时间：19:28:03" itemprop="dateCreated datePublished" datetime="2025-12-15T00:00:00+08:00">2025-12-15</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/ue5-blog/categories/SystemDesigns/DataDriven/" itemprop="url" rel="index"><span itemprop="name">DataDriven</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>数据驱动系统是复杂游戏系统的核心支撑，通过CurveTable（曲线表）、DataAsset（数据资产）等工具实现游戏数据的集中统一管理，替代C++硬编码和分散的蓝图配置模式，大幅提升数据维护效率与系统扩展性。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/ue5-blog/2025/12/15/SystemDesigns/DataDriven/Data/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
