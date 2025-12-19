@@ -19,27 +19,29 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
 
-    <meta name="description" content="核心总结">
+    <meta name="description" content="核心总结以技能冷却（Cooldown）为例，AsyncTask（异步任务）是实现UI与游戏逻辑解耦的关键方案：通过继承UBlueprintAsyncActionBase创建专属异步任务，监听GAS框架中技能冷却相关的委托事件，向UI层广播冷却开始&#x2F;结束信号；UI端仅需处理倒计时展示逻辑，无需频繁同步游戏内冷却数据，同时支持技能槽动态绑定技能的场景。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="AsyncTask">
+<meta property="og:title" content="AsyncTask ，以Cooldown为例">
 <meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/UI/AsyncTask/index.html">
 <meta property="og:site_name" content="UE5学习笔记博客">
-<meta property="og:description" content="核心总结">
+<meta property="og:description" content="核心总结以技能冷却（Cooldown）为例，AsyncTask（异步任务）是实现UI与游戏逻辑解耦的关键方案：通过继承UBlueprintAsyncActionBase创建专属异步任务，监听GAS框架中技能冷却相关的委托事件，向UI层广播冷却开始&#x2F;结束信号；UI端仅需处理倒计时展示逻辑，无需频繁同步游戏内冷却数据，同时支持技能槽动态绑定技能的场景。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://larry-lyx.github.io/ue5-blog/2025/12/19/SystemDesigns/UI/AsyncTask/image.png">
 <meta property="article:published_time" content="2025-12-07T16:00:00.000Z">
-<meta property="article:modified_time" content="2025-12-15T00:23:36.351Z">
+<meta property="article:modified_time" content="2025-12-19T09:17:31.508Z">
 <meta property="article:author" content="Larry-lyx">
-<meta property="article:tag" content="AsyncTasks">
+<meta property="article:tag" content="AsyncTask">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://larry-lyx.github.io/ue5-blog/2025/12/19/SystemDesigns/UI/AsyncTask/image.png">
 
 
 <link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/UI/AsyncTask/">
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/UI/AsyncTask/","path":"2025/12/08/SystemDesigns/UI/AsyncTask/","title":"AsyncTask"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/08/SystemDesigns/UI/AsyncTask/","path":"2025/12/08/SystemDesigns/UI/AsyncTask/","title":"AsyncTask ，以Cooldown为例"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>AsyncTask | UE5学习笔记博客</title>
+<title>AsyncTask ，以Cooldown为例 | UE5学习笔记博客</title>
   
 
 
@@ -158,7 +160,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8A%80%E8%83%BD%E5%86%B7%E5%8D%B4%E7%9A%84UI%E6%8F%90%E7%A4%BA%E9%9C%80%E6%B1%82"><span class="nav-number">2.</span> <span class="nav-text">技能冷却的UI提示需求</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AsyncTask-%E5%AE%9E%E7%8E%B0%E5%86%B7%E5%8D%B4UI%E6%8F%90%E7%A4%BA"><span class="nav-number">3.</span> <span class="nav-text">AsyncTask 实现冷却UI提示</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%88%9B%E5%BB%BAAsyncTask%EF%BC%88%E5%BC%82%E6%AD%A5%E4%BB%BB%E5%8A%A1%E7%B1%BB%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">1. 创建AsyncTask（异步任务类）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E8%AF%B4%E6%98%8E"><span class="nav-number">3.1.1.</span> <span class="nav-text">核心设计说明</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E7%BB%91%E5%AE%9A%E5%86%B7%E5%8D%B4%E7%9B%91%E5%90%AC%E4%BA%8B%E4%BB%B6"><span class="nav-number">3.2.</span> <span class="nav-text">2. 绑定冷却监听事件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%91%E5%90%AC%E9%80%BB%E8%BE%91%E8%AF%B4%E6%98%8E"><span class="nav-number">3.2.1.</span> <span class="nav-text">监听逻辑说明</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%86%B7%E5%8D%B4%E5%BC%80%E5%A7%8B%EF%BC%88CooldownStart%EF%BC%89%E9%80%BB%E8%BE%91"><span class="nav-number">3.3.</span> <span class="nav-text">3. 冷却开始（CooldownStart）逻辑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E9%80%BB%E8%BE%91%E8%AF%B4%E6%98%8E"><span class="nav-number">3.3.1.</span> <span class="nav-text">核心逻辑说明</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#UI%E7%AB%AF%E5%9B%9E%E8%B0%83%E5%A4%84%E7%90%86"><span class="nav-number">3.3.1.1.</span> <span class="nav-text">UI端回调处理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%86%B7%E5%8D%B4%E7%BB%93%E6%9D%9F%EF%BC%88CooldownEnd%EF%BC%89%E9%80%BB%E8%BE%91"><span class="nav-number">3.4.</span> <span class="nav-text">4. 冷却结束（CooldownEnd）逻辑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#UI%E7%AB%AF%E5%9B%9E%E8%B0%83%E5%A4%84%E7%90%86-1"><span class="nav-number">3.4.1.</span> <span class="nav-text">UI端回调处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E4%BB%BB%E5%8A%A1%E9%94%80%E6%AF%81%EF%BC%88EndTask%EF%BC%89"><span class="nav-number">3.5.</span> <span class="nav-text">5. 任务销毁（EndTask）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%80%E6%AF%81%E6%97%B6%E6%9C%BA%E8%AF%B4%E6%98%8E"><span class="nav-number">3.5.1.</span> <span class="nav-text">销毁时机说明</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E8%93%9D%E5%9B%BE%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.6.</span> <span class="nav-text">6. 蓝图使用示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E9%80%BB%E8%BE%91%E8%AF%B4%E6%98%8E"><span class="nav-number">3.6.1.</span> <span class="nav-text">调用逻辑说明</span></a></li></ol></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -171,7 +173,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/ue5-blog/archives/">
-          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-count">37</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -222,12 +224,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="AsyncTask | UE5学习笔记博客">
+      <meta itemprop="name" content="AsyncTask ，以Cooldown为例 | UE5学习笔记博客">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          AsyncTask
+          AsyncTask ，以Cooldown为例
         </h1>
 
         <div class="post-meta-container">
@@ -245,7 +247,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-12-15 08:23:36" itemprop="dateModified" datetime="2025-12-15T08:23:36+08:00">2025-12-15</time>
+      <time title="修改时间：2025-12-19 17:17:31" itemprop="dateModified" datetime="2025-12-19T17:17:31+08:00">2025-12-19</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -266,7 +268,70 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><span id="more"></span>
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>以技能冷却（Cooldown）为例，AsyncTask（异步任务）是实现UI与游戏逻辑解耦的关键方案：通过继承<code>UBlueprintAsyncActionBase</code>创建专属异步任务，监听GAS框架中技能冷却相关的委托事件，向UI层广播冷却开始&#x2F;结束信号；UI端仅需处理倒计时展示逻辑，无需频繁同步游戏内冷却数据，同时支持技能槽动态绑定技能的场景。</p>
+<span id="more"></span>
+
+<h1 id="技能冷却的UI提示需求"><a href="#技能冷却的UI提示需求" class="headerlink" title="技能冷却的UI提示需求"></a>技能冷却的UI提示需求</h1><p>GAS框架中可通过GE_Cooldown（冷却GameplayEffect）实现技能冷却的核心逻辑，仅能在游戏层面阻止玩家释放冷却中的技能；为提升体验，需在UI层展示技能冷却剩余时间，并适配以下核心诉求：</p>
+<ol>
+<li>UI需感知技能冷却的开始&#x2F;结束状态，通过委托接收冷却剩余时间；</li>
+<li>UI端独立处理倒计时逻辑，避免与游戏内冷却逻辑耦合，减少无效数据传输；</li>
+<li>技能槽绑定的技能可动态变更，需支持冷却监听委托的动态绑定&#x2F;解绑。</li>
+</ol>
+<p>因技能槽监听的冷却标签（CooldownTag）随绑定技能动态变化，无法在Widget初始化阶段完成委托回调绑定；需借助<code>AsyncTask</code>实现委托的动态绑定，其具备独立的生命周期，且支持蓝图端灵活绑定回调逻辑。</p>
+<h1 id="AsyncTask-实现冷却UI提示"><a href="#AsyncTask-实现冷却UI提示" class="headerlink" title="AsyncTask 实现冷却UI提示"></a>AsyncTask 实现冷却UI提示</h1><h2 id="1-创建AsyncTask（异步任务类）"><a href="#1-创建AsyncTask（异步任务类）" class="headerlink" title="1. 创建AsyncTask（异步任务类）"></a>1. 创建AsyncTask（异步任务类）</h2><p>自定义异步任务类继承<code>UBlueprintAsyncActionBase</code>，封装冷却监听的核心委托与逻辑，暴露给蓝图端可绑定的冷却开始&#x2F;结束信号：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam</span>(FCooldownChangeSignature, <span class="type">float</span>, TimeRemaining);</span><br><span class="line"></span><br><span class="line"><span class="built_in">UCLASS</span>(BlueprintType , meta = (ExposedAsyncProxy = <span class="string">&quot;AsyncTask&quot;</span>))</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAS_Custom_API</span> UWaitCooldownChange : <span class="keyword">public</span> UBlueprintAsyncActionBase</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="built_in">UPROPERTY</span>(BlueprintAssignable)</span><br><span class="line">	FCooldownChangeSignature CooldownStart;</span><br><span class="line">	<span class="built_in">UPROPERTY</span>(BlueprintAssignable)</span><br><span class="line">	FCooldownChangeSignature CooldownEnd;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UFUNCTION</span>(BlueprintCallable , meta = (BlueprintInternalUseOnly = <span class="string">&quot;true&quot;</span>))</span><br><span class="line">	<span class="function"><span class="type">static</span> UWaitCooldownChange* <span class="title">WaitForCooldownChange</span><span class="params">(UAbilitySystemComponent* InASC , <span class="type">const</span> FGameplayTag&amp; InCooldownTag)</span></span>;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UFUNCTION</span>(BlueprintCallable)</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">EndTask</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="built_in">UPROPERTY</span>()</span><br><span class="line">	UAbilitySystemComponent* ASC;</span><br><span class="line"></span><br><span class="line">	FGameplayTag CooldownTag;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">CooldownTagChanged</span><span class="params">(<span class="type">const</span> FGameplayTag InCooldownTag , int32 NewCount)</span></span>;</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">OnActiveEffectAdded</span><span class="params">(UAbilitySystemComponent* TargetASC , <span class="type">const</span> FGameplayTag&amp; SpecApplied , FActiveGameplayEffectHandle ActiveEffectHandle)</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="核心设计说明"><a href="#核心设计说明" class="headerlink" title="核心设计说明"></a>核心设计说明</h3><ul>
+<li><code>CooldownStart</code>&#x2F;<code>CooldownEnd</code>：多播委托，蓝图端可直接绑定回调，分别响应冷却开始、冷却结束事件；</li>
+<li><code>WaitForCooldownChange</code>：静态构建函数，初始化异步任务并绑定GAS监听事件；</li>
+<li><code>EndTask</code>：任务销毁函数，清理委托绑定，避免内存泄漏。</li>
+</ul>
+<p>蓝图端可直接看到<code>CooldownStart</code>和<code>CooldownEnd</code>节点，无需额外封装即可绑定UI回调逻辑。</p>
+<h2 id="2-绑定冷却监听事件"><a href="#2-绑定冷却监听事件" class="headerlink" title="2. 绑定冷却监听事件"></a>2. 绑定冷却监听事件</h2><p>在静态构建函数<code>WaitForCooldownChange</code>中，完成GAS内置委托的绑定，实现对冷却GE（GameplayEffect）施加&#x2F;移除的监听：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">UWaitCooldownChange* <span class="title">UWaitCooldownChange::WaitForCooldownChange</span><span class="params">(UAbilitySystemComponent* InASC,</span></span></span><br><span class="line"><span class="params"><span class="function">                                                                <span class="type">const</span> FGameplayTag&amp; InCooldownTag)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	UWaitCooldownChange* WaitCooldownChange = <span class="built_in">NewObject</span>&lt;UWaitCooldownChange&gt;();</span><br><span class="line">	WaitCooldownChange-&gt;ASC = InASC;</span><br><span class="line">	WaitCooldownChange-&gt;CooldownTag = InCooldownTag;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!<span class="built_in">IsValid</span>(InASC) || !InCooldownTag.<span class="built_in">IsValid</span>())</span><br><span class="line">	&#123;</span><br><span class="line">		WaitCooldownChange-&gt;<span class="built_in">EndTask</span>();</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 监听冷却Tag的增减，判断冷却是否结束</span></span><br><span class="line">	InASC-&gt;<span class="built_in">RegisterGameplayTagEvent</span>(</span><br><span class="line">		InCooldownTag,</span><br><span class="line">		EGameplayTagEventType::NewOrRemoved).<span class="built_in">AddUObject</span>(</span><br><span class="line">			WaitCooldownChange ,</span><br><span class="line">			&amp;UWaitCooldownChange::CooldownTagChanged);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 监听冷却GE的施加，判断冷却是否开始</span></span><br><span class="line">	InASC-&gt;OnActiveGameplayEffectAddedDelegateToSelf.<span class="built_in">AddUObject</span>(WaitCooldownChange , &amp;UWaitCooldownChange::OnActiveEffectAdded);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> WaitCooldownChange;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="监听逻辑说明"><a href="#监听逻辑说明" class="headerlink" title="监听逻辑说明"></a>监听逻辑说明</h3><ul>
+<li><code>RegisterGameplayTagEvent</code>：监听ASC上指定CooldownTag的数量变化，Tag数量归0时表示冷却结束；</li>
+<li><code>OnActiveGameplayEffectAddedDelegateToSelf</code>：监听所有Duration类型GE的施加，捕获冷却GE的生效时机。</li>
+</ul>
+<h2 id="3-冷却开始（CooldownStart）逻辑"><a href="#3-冷却开始（CooldownStart）逻辑" class="headerlink" title="3. 冷却开始（CooldownStart）逻辑"></a>3. 冷却开始（CooldownStart）逻辑</h2><p>当冷却GE被施加时，校验GE的标签是否匹配目标CooldownTag，计算剩余冷却时间并广播<code>CooldownStart</code>委托：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UWaitCooldownChange::OnActiveEffectAdded</span><span class="params">(UAbilitySystemComponent* TargetASC,</span></span></span><br><span class="line"><span class="params"><span class="function">	<span class="type">const</span> FGameplayEffectSpec&amp; SpecApplied, FActiveGameplayEffectHandle ActiveEffectHandle)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	FGameplayTagContainer AssetTags;</span><br><span class="line">	SpecApplied.<span class="built_in">GetAllAssetTags</span>(AssetTags);</span><br><span class="line">	FGameplayTagContainer GrantedTags;</span><br><span class="line">	SpecApplied.<span class="built_in">GetAllGrantedTags</span>(GrantedTags);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (AssetTags.<span class="built_in">HasTagExact</span>(CooldownTag) || GrantedTags.<span class="built_in">HasTagExact</span>(CooldownTag))</span><br><span class="line">	&#123;</span><br><span class="line">		FGameplayEffectQuery GameplayEffectQuery = FGameplayEffectQuery::<span class="built_in">MakeQuery_MatchAnyOwningTags</span>(CooldownTag.<span class="built_in">GetSingleTagContainer</span>());</span><br><span class="line">		TArray&lt;<span class="type">float</span>&gt; TimesRemaining = ASC-&gt;<span class="built_in">GetActiveEffectsTimeRemaining</span>(GameplayEffectQuery);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (TimesRemaining.<span class="built_in">Num</span>() &gt; <span class="number">0</span>)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="type">float</span> TimeRemaining = TimesRemaining[<span class="number">0</span>];</span><br><span class="line">			<span class="keyword">for</span> (int32 i = <span class="number">0</span>; i &lt; TimesRemaining.<span class="built_in">Num</span>(); i++)</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="keyword">if</span> (TimesRemaining[i] &gt; TimeRemaining)</span><br><span class="line">				&#123;</span><br><span class="line">					TimeRemaining = TimesRemaining[i];</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			CooldownStart.<span class="built_in">Broadcast</span>(TimeRemaining);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="核心逻辑说明"><a href="#核心逻辑说明" class="headerlink" title="核心逻辑说明"></a>核心逻辑说明</h3><ol>
+<li>提取GE的AssetTags和GrantedTags，校验是否包含目标CooldownTag；</li>
+<li>通过<code>FGameplayEffectQuery</code>查询当前生效的冷却GE，获取所有剩余冷却时间；</li>
+<li>取最长剩余时间作为冷却总时长，通过<code>CooldownStart</code>广播给UI层，这里是为了防止叠加了多个GE。</li>
+</ol>
+<h4 id="UI端回调处理"><a href="#UI端回调处理" class="headerlink" title="UI端回调处理"></a>UI端回调处理</h4><p>Widget接收到<code>CooldownStart</code>信号后，执行以下逻辑：</p>
+<ul>
+<li>切换技能槽为“冷却显示模式”（如灰度遮罩、进度条）；</li>
+<li>启动计时器，从广播的剩余时间开始，每0.1秒更新一次冷却剩余时间显示；</li>
+<li>计时器归零时，恢复技能槽为正常显示模式。</li>
+</ul>
+<h2 id="4-冷却结束（CooldownEnd）逻辑"><a href="#4-冷却结束（CooldownEnd）逻辑" class="headerlink" title="4. 冷却结束（CooldownEnd）逻辑"></a>4. 冷却结束（CooldownEnd）逻辑</h2><p>通过监听CooldownTag的数量变化，当Tag数量归0时，广播<code>CooldownEnd</code>委托：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UWaitCooldownChange::CooldownTagChanged</span><span class="params">(<span class="type">const</span> FGameplayTag InCooldownTag, int32 NewCount)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (NewCount == <span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		CooldownEnd.<span class="built_in">Broadcast</span>(<span class="number">0.f</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="UI端回调处理-1"><a href="#UI端回调处理-1" class="headerlink" title="UI端回调处理"></a>UI端回调处理</h3><p>理论上UI端通过计时器归零即可恢复技能显示，无需依赖<code>CooldownEnd</code>信号；但为保证UI与游戏内冷却状态一致（如冷却被主动清除、时长缩短等异常场景），<code>CooldownEnd</code>可作为兜底逻辑：</p>
+<ul>
+<li>立即终止UI端计时器；</li>
+<li>恢复技能槽正常显示，清除冷却相关视觉效果。</li>
+</ul>
+<h2 id="5-任务销毁（EndTask）"><a href="#5-任务销毁（EndTask）" class="headerlink" title="5. 任务销毁（EndTask）"></a>5. 任务销毁（EndTask）</h2><p>因技能槽可动态绑定不同技能，需在切换技能时销毁旧的异步任务，避免多个任务同时监听冷却事件：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UWaitCooldownChange::EndTask</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (!<span class="built_in">IsValid</span>(ASC)) <span class="keyword">return</span>;</span><br><span class="line">	ASC-&gt;<span class="built_in">RegisterGameplayTagEvent</span>(CooldownTag , EGameplayTagEventType::NewOrRemoved).<span class="built_in">RemoveAll</span>(<span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">SetReadyToDestroy</span>();</span><br><span class="line">	<span class="built_in">MarkAsGarbage</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="销毁时机说明"><a href="#销毁时机说明" class="headerlink" title="销毁时机说明"></a>销毁时机说明</h3><ul>
+<li>技能槽绑定新技能前，调用旧任务的<code>EndTask</code>清理委托；</li>
+<li>异步任务创建失败时（ASC无效&#x2F;Tag无效），自动调用<code>EndTask</code>；</li>
+<li>Widget销毁时，需主动调用<code>EndTask</code>释放资源。</li>
+</ul>
+<h2 id="6-蓝图使用示例"><a href="#6-蓝图使用示例" class="headerlink" title="6. 蓝图使用示例"></a>6. 蓝图使用示例</h2><p>异步任务的调用需在“技能槽分配新技能”的时机执行（如<code>AbilityInfoDelegate</code>回调中），确保监听的CooldownTag与当前技能匹配：<br><img src="/ue5-blog/2025/12/19/SystemDesigns/UI/AsyncTask/image.png" alt="alt text"></p>
+<h3 id="调用逻辑说明"><a href="#调用逻辑说明" class="headerlink" title="调用逻辑说明"></a>调用逻辑说明</h3><ol>
+<li>技能槽绑定新技能后，获取该技能的CooldownTag，在<code>Receive Ability Info</code>中实现；</li>
+<li>先销毁当前技能槽已有的异步任务（若存在）；</li>
+<li>调用<code>WaitForCooldownChange</code>创建新任务，传入ASC和目标CooldownTag；</li>
+<li>绑定<code>CooldownStart</code>&#x2F;<code>CooldownEnd</code>的UI回调，完成冷却提示逻辑。</li>
+</ol>
+
     </div>
 
     
@@ -275,20 +340,20 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/ue5-blog/tags/AsyncTasks/" rel="tag"># AsyncTasks</a>
+              <a href="/ue5-blog/tags/AsyncTask/" rel="tag"># AsyncTask</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/08/SystemDesigns/UI/MVVM/" rel="prev" title="Model View ViewModel (MVVM)">
-                  <i class="fa fa-angle-left"></i> Model View ViewModel (MVVM)
+                <a href="/ue5-blog/2025/12/08/SystemDesigns/UI/HUD/" rel="prev" title="Head Up Display (HUD)">
+                  <i class="fa fa-angle-left"></i> Head Up Display (HUD)
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/ue5-blog/2025/12/08/SystemDesigns/UI/HUD/" rel="next" title="Head Up Display (HUD)">
-                  Head Up Display (HUD) <i class="fa fa-angle-right"></i>
+                <a href="/ue5-blog/2025/12/09/ProgrammingSkills/Interface/" rel="next" title="接口 (Interface)">
+                  接口 (Interface) <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
