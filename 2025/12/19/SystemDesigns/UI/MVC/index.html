@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/ue5-blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/ue5-blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/ue5-blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/ue5-blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/ue5-blog/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"larry-lyx.github.io","root":"/ue5-blog/","images":"/ue5-blog/images","scheme":"Gemini","darkmode":false,"version":"8.26.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/ue5-blog/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/ue5-blog/js/config.js" defer></script>
+
+    <meta name="description" content="核心总结MVC架构是实现UI系统，核心是将“数据展示&#x2F;交互”与“数据获取&#x2F;修改”解耦：Widget作为View层负责UI渲染和用户输入响应，WidgetController作为Controller层承接游戏逻辑与UI的交互，统一管理数据获取、广播和修改；通过委托（Delegate）实现数据的单向流动，既保证UI模块的独立性，又能高效同步游戏内动态数据。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Model View Controller (MVC)">
+<meta property="og:url" content="https://larry-lyx.github.io/ue5-blog/2025/12/19/SystemDesigns/UI/MVC/index.html">
+<meta property="og:site_name" content="UE5学习笔记博客">
+<meta property="og:description" content="核心总结MVC架构是实现UI系统，核心是将“数据展示&#x2F;交互”与“数据获取&#x2F;修改”解耦：Widget作为View层负责UI渲染和用户输入响应，WidgetController作为Controller层承接游戏逻辑与UI的交互，统一管理数据获取、广播和修改；通过委托（Delegate）实现数据的单向流动，既保证UI模块的独立性，又能高效同步游戏内动态数据。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://larry-lyx.github.io/ue5-blog/image.png">
+<meta property="og:image" content="https://larry-lyx.github.io/ue5-blog/image1.png">
+<meta property="article:published_time" content="2025-12-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-19T05:46:59.779Z">
+<meta property="article:author" content="Larry-lyx">
+<meta property="article:tag" content="MVC">
+<meta property="article:tag" content="Widget">
+<meta property="article:tag" content="WidgetController">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://larry-lyx.github.io/ue5-blog/image.png">
+
+
+<link rel="canonical" href="https://larry-lyx.github.io/ue5-blog/2025/12/19/SystemDesigns/UI/MVC/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://larry-lyx.github.io/ue5-blog/2025/12/19/SystemDesigns/UI/MVC/","path":"2025/12/19/SystemDesigns/UI/MVC/","title":"Model View Controller (MVC)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Model View Controller (MVC) | UE5学习笔记博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/utils.js" defer></script><script src="/ue5-blog/js/motion.js" defer></script><script src="/ue5-blog/js/sidebar.js" defer></script><script src="/ue5-blog/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/ue5-blog/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/ue5-blog/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/ue5-blog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">UE5学习笔记博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">从入门到精通，持续更新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/ue5-blog/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/ue5-blog/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/ue5-blog/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/ue5-blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">核心总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MVC-%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">MVC 架构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Widget-Controller%EF%BC%88%E6%A0%B8%E5%BF%83%E4%B8%AD%E9%97%B4%E5%B1%82%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">Widget Controller（核心中间层）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%95%B0%E6%8D%AE%E8%8E%B7%E5%8F%96%EF%BC%88%E5%AF%B9%E6%8E%A5%E6%B8%B8%E6%88%8F%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">1. 数据获取（对接游戏核心数据）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%9C%A8-Widget-%E4%B8%AD%E7%BB%91%E5%AE%9A-WidgetController"><span class="nav-number">3.2.</span> <span class="nav-text">2. 在 Widget 中绑定 WidgetController</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-WidgetController%E7%9A%84%E5%AE%9E%E4%BE%8B%E5%8C%96%E8%A7%84%E5%88%99"><span class="nav-number">3.2.1.</span> <span class="nav-text">2.1 WidgetController的实例化规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-Widget%E4%B8%8EWidgetController%E7%9A%84%E7%BB%91%E5%AE%9A%E9%80%BB%E8%BE%91"><span class="nav-number">3.2.2.</span> <span class="nav-text">2.2 Widget与WidgetController的绑定逻辑</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E6%95%B0%E6%8D%AE%E5%B9%BF%E6%92%AD%EF%BC%88%E5%90%91Widget%E5%90%8C%E6%AD%A5%E6%95%B0%E6%8D%AE%EF%BC%89"><span class="nav-number">3.3.</span> <span class="nav-text">3. 数据广播（向Widget同步数据）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E5%88%9D%E5%A7%8B%E6%95%B0%E6%8D%AE%E5%B9%BF%E6%92%AD"><span class="nav-number">3.3.1.</span> <span class="nav-text">3.1 初始数据广播</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">3.3.1.1.</span> <span class="nav-text">关键注意事项</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E5%8F%98%E5%8C%96%E6%95%B0%E6%8D%AE%E5%B9%BF%E6%92%AD%EF%BC%88%E5%AE%9E%E6%97%B6%E5%90%8C%E6%AD%A5%EF%BC%89"><span class="nav-number">3.3.2.</span> <span class="nav-text">3.2 变化数据广播（实时同步）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A7%94%E6%89%98%E7%BB%91%E5%AE%9A%E6%97%B6%E6%9C%BA"><span class="nav-number">3.3.2.1.</span> <span class="nav-text">委托绑定时机</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A7%94%E6%89%98%E7%B1%BB%E5%9E%8B%E8%AF%B4%E6%98%8E"><span class="nav-number">3.3.2.2.</span> <span class="nav-text">委托类型说明</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E6%95%B0%E6%8D%AE%E4%BF%AE%E6%94%B9%EF%BC%88%E5%93%8D%E5%BA%94%E7%94%A8%E6%88%B7%E8%BE%93%E5%85%A5%EF%BC%89"><span class="nav-number">3.4.</span> <span class="nav-text">4. 数据修改（响应用户输入）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Overlay-Message%EF%BC%88%E5%85%A8%E5%B1%80%E6%8F%90%E7%A4%BA%E4%BF%A1%E6%81%AF%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">Overlay Message（全局提示信息）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0%E9%80%BB%E8%BE%91"><span class="nav-number">4.1.</span> <span class="nav-text">核心实现逻辑</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Larry-lyx</p>
+  <div class="site-description" itemprop="description">分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/ue5-blog/archives/">
+          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/ue5-blog/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/ue5-blog/tags/">
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://larry-lyx.github.io/ue5-blog/2025/12/19/SystemDesigns/UI/MVC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/ue5-blog/images/avatar.gif">
+      <meta itemprop="name" content="Larry-lyx">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="UE5学习笔记博客">
+      <meta itemprop="description" content="分享 UE5 实用编程技巧，以及各种游戏系统的设计思路，方便查询和回顾">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Model View Controller (MVC) | UE5学习笔记博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Model View Controller (MVC)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2025-12-19 00:00:00 / 修改时间：13:46:59" itemprop="dateCreated datePublished" datetime="2025-12-19T00:00:00+08:00">2025-12-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/" itemprop="url" rel="index"><span itemprop="name">SystemDesigns</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/ue5-blog/categories/SystemDesigns/UI/" itemprop="url" rel="index"><span itemprop="name">UI</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="核心总结"><a href="#核心总结" class="headerlink" title="核心总结"></a>核心总结</h1><p>MVC架构是实现UI系统，核心是将“数据展示&#x2F;交互”与“数据获取&#x2F;修改”解耦：Widget作为View层负责UI渲染和用户输入响应，WidgetController作为Controller层承接游戏逻辑与UI的交互，统一管理数据获取、广播和修改；通过委托（Delegate）实现数据的单向流动，既保证UI模块的独立性，又能高效同步游戏内动态数据。</p>
+<span id="more"></span>
+
+<h1 id="MVC-架构"><a href="#MVC-架构" class="headerlink" title="MVC 架构"></a>MVC 架构</h1><p>UI的核心功能分为两类：展示游戏内动态数据、响应用户输入操作。Widget承担UI可视化与交互入口的角色（如按钮、文本显示），但直接让Widget对接游戏逻辑会导致耦合过高，因此引入WidgetController作为中间层：</p>
+<ul>
+<li>Widget：专注View层职责，仅负责数据展示和暴露交互接口，不直接操作游戏数据；</li>
+<li>WidgetController：专注Controller层职责，统一处理数据的获取、更新、修改，作为Widget与游戏世界（PlayerController、PlayerState等）的唯一交互桥梁；</li>
+<li>每个Widget绑定专属的WidgetController，所有游戏数据均通过WidgetController获取或修改。</li>
+</ul>
+<h1 id="Widget-Controller（核心中间层）"><a href="#Widget-Controller（核心中间层）" class="headerlink" title="Widget Controller（核心中间层）"></a>Widget Controller（核心中间层）</h1><h2 id="1-数据获取（对接游戏核心数据）"><a href="#1-数据获取（对接游戏核心数据）" class="headerlink" title="1. 数据获取（对接游戏核心数据）"></a>1. 数据获取（对接游戏核心数据）</h2><p>GAS框架下，UI所需核心数据来源于四类对象：PlayerController（PC）、PlayerState（PS）、AbilitySystemComponent（ASC）、AttributeSet（AS），四类对象存在明确的从属关系：</p>
+<ul>
+<li>PC是基础载体，可获取所属PS；</li>
+<li>PS管理玩家核心数据，其中属性相关数据托管给AS，技能相关数据托管给ASC，等级、经验等关键数值直接存储在PS中。</li>
+</ul>
+<p>基于该从属关系，封装通用的数据获取方法：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">UCustomAbilitySystemLibrary::MakeWidgetControllerParams</span><span class="params">(<span class="type">const</span> UObject* WorldContextObject , FWidgetControllerParams&amp; OutWidgetControllerParams, ACustomHUD*&amp; OutCustomHUD)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (APlayerController* PC = UGameplayStatics::<span class="built_in">GetPlayerController</span>(WorldContextObject , <span class="number">0</span>))</span><br><span class="line">	&#123;</span><br><span class="line">		OutCustomHUD = <span class="built_in">Cast</span>&lt;ACustomHUD&gt;(PC-&gt;<span class="built_in">GetHUD</span>());</span><br><span class="line">		<span class="keyword">if</span> (OutCustomHUD)</span><br><span class="line">		&#123;</span><br><span class="line">			ACustomPlayerState* PS = PC-&gt;<span class="built_in">GetPlayerState</span>&lt;ACustomPlayerState&gt;();</span><br><span class="line">			UAbilitySystemComponent* ASC = PS-&gt;<span class="built_in">GetAbilitySystemComponent</span>();</span><br><span class="line">			UAttributeSet* AS = PS-&gt;<span class="built_in">GetAttributeSet</span>();</span><br><span class="line">			</span><br><span class="line">			OutWidgetControllerParams.AttributeSet = AS;</span><br><span class="line">			OutWidgetControllerParams.AbilitySystemComponent = ASC;</span><br><span class="line">			OutWidgetControllerParams.PlayerController = PC;</span><br><span class="line">			OutWidgetControllerParams.PlayerState = PS;</span><br><span class="line">			</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-在-Widget-中绑定-WidgetController"><a href="#2-在-Widget-中绑定-WidgetController" class="headerlink" title="2. 在 Widget 中绑定 WidgetController"></a>2. 在 Widget 中绑定 WidgetController</h2><h3 id="2-1-WidgetController的实例化规则"><a href="#2-1-WidgetController的实例化规则" class="headerlink" title="2.1 WidgetController的实例化规则"></a>2.1 WidgetController的实例化规则</h3><p>WidgetController遵循“实例化一次、共享复用”原则：</p>
+<ul>
+<li>同类子控件（如多个属性显示控件）共享同一个WidgetController，无需为每个子控件单独创建；</li>
+<li>WidgetController统一托管在HUD中，Widget获取时优先从HUD读取已有实例，无实例时再创建并初始化。</li>
+</ul>
+<p>WidgetController按“业务类型”分类（如属性类、技能类），不同类型对应不同的委托（Delegate），适配不同的数据传输需求：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">UAttributeMenuWidgetController* <span class="title">UCustomAbilitySystemLibrary::GetAttributeMenuWidgetController</span><span class="params">(<span class="type">const</span> UObject* WorldContextObject)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	FWidgetControllerParams WCParams;</span><br><span class="line">	ACustomHUD* CustomHUD = <span class="literal">nullptr</span>;</span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">MakeWidgetControllerParams</span>(WorldContextObject , WCParams , CustomHUD))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">return</span> CustomHUD-&gt;<span class="built_in">GetAttributeMenuWidgetController</span>(WCParams);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">UAttributeMenuWidgetController* <span class="title">ACustomHUD::GetAttributeMenuWidgetController</span><span class="params">(<span class="type">const</span> FWidgetControllerParams&amp; WCparams)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (AttributeMenuWidgetController == <span class="literal">nullptr</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		AttributeMenuWidgetController = <span class="built_in">NewObject</span>&lt;UAttributeMenuWidgetController&gt;(<span class="keyword">this</span> , AttributeMenuWidgetControllerClass);</span><br><span class="line">		AttributeMenuWidgetController-&gt;<span class="built_in">SetWidgetControllerParams</span>(WCparams);</span><br><span class="line">		AttributeMenuWidgetController-&gt;<span class="built_in">BindCallbacksToDependencies</span>();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> AttributeMenuWidgetController;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-Widget与WidgetController的绑定逻辑"><a href="#2-2-Widget与WidgetController的绑定逻辑" class="headerlink" title="2.2 Widget与WidgetController的绑定逻辑"></a>2.2 Widget与WidgetController的绑定逻辑</h3><ul>
+<li>父Widget在Construct阶段调用<code>GetXXWidgetController</code>获取实例，子Widget无需重复获取，直接复用父Widget的WidgetController；</li>
+<li>子Widget的回调逻辑不绑定在Construct中，而是通过<code>WidgetControllerSet</code>虚函数触发，确保Controller绑定完成后再执行逻辑：</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UCLASS</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">GAS_Custom_API</span> UCustomUserWidget : <span class="keyword">public</span> UUserWidget</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line">	</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="built_in">UFUNCTION</span>(BlueprintCallable)</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">SetWidgetController</span><span class="params">(UObject* InWidgetController)</span></span>;</span><br><span class="line">	</span><br><span class="line">	<span class="built_in">UPROPERTY</span>(BlueprintReadOnly)</span><br><span class="line">	TObjectPtr&lt;UObject&gt; WidgetController;</span><br><span class="line">	</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="built_in">UFUNCTION</span>(BlueprintImplementableEvent)</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">WidgetControllerSet</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomUserWidget::SetWidgetController</span><span class="params">(UObject* InWidgetController)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	WidgetController = InWidgetController;</span><br><span class="line">	<span class="built_in">WidgetControllerSet</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-数据广播（向Widget同步数据）"><a href="#3-数据广播（向Widget同步数据）" class="headerlink" title="3. 数据广播（向Widget同步数据）"></a>3. 数据广播（向Widget同步数据）</h2><p>WidgetController通过多播委托（Multicast Delegate）向Widget传输数据，核心分为“初始数据广播”和“变化数据广播”两类：</p>
+<h3 id="3-1-初始数据广播"><a href="#3-1-初始数据广播" class="headerlink" title="3.1 初始数据广播"></a>3.1 初始数据广播</h3><p>WidgetController初始化完成后，一次性广播所有初始数据，核心设计特点：</p>
+<ul>
+<li>多播委托：同一类数据通过一个委托管道传输，所有绑定该Controller的Widget均可接收，适配多控件共享数据的场景；</li>
+<li>空间换时间：即使Widget仅需部分数据（如仅显示生命值），仍接收全量数据（如体力、智力等），以减少委托管道数量，降低维护成本。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam</span>(FAttributeInfoSignature, <span class="type">const</span> FCustomAttributeInfo&amp; , Info);</span><br><span class="line"></span><br><span class="line"><span class="built_in">UPROPERTY</span>(BlueprintAssignable , Category = <span class="string">&quot;GAS|Attributes&quot;</span>)</span><br><span class="line">AttributeInfoSignature AttributeInfoDelegate;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAttributeMenuWidgetController::BroadcastInitValues</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">check</span>(AttributeInfo)</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">auto</span>&amp; Pair : <span class="built_in">GetCustomAS</span>()-&gt;TagToAttribute)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">BroadCastAttributeInfo</span>(Pair.Key , Pair.<span class="built_in">Value</span>());</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	AttributePointsChangedDelegate.<span class="built_in">Broadcast</span>(<span class="built_in">GetCustomPS</span>()-&gt;<span class="built_in">GetAttributePoints</span>());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAttributeMenuWidgetController::BroadCastAttributeInfo</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; AttributeTag,</span></span></span><br><span class="line"><span class="params"><span class="function">                                                            <span class="type">const</span> FGameplayAttribute&amp; Attribute)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	FCustomAttributeInfo Info = AttributeInfo-&gt;<span class="built_in">FindAttributeInfoForTag</span>(AttributeTag);</span><br><span class="line">	Info.AttributeValue = Attribute.<span class="built_in">GetNumericValue</span>(AttributeSet);</span><br><span class="line">	AttributeInfoDelegate.<span class="built_in">Broadcast</span>(Info);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="关键注意事项"><a href="#关键注意事项" class="headerlink" title="关键注意事项"></a>关键注意事项</h4><p>需保证“先绑定回调，后广播数据”：<code>BroadcastInitValues</code>需在所有Widget构建完成后执行，通常放在WidgetController初始化的最后阶段，避免数据广播时Widget未完成回调绑定。<br>Widget中绑定回调的方式：<br><img src="/ue5-blog/image.png" alt="alt text"></p>
+<h3 id="3-2-变化数据广播（实时同步）"><a href="#3-2-变化数据广播（实时同步）" class="headerlink" title="3.2 变化数据广播（实时同步）"></a>3.2 变化数据广播（实时同步）</h3><p>为监控数据动态变化，采用“嵌套委托”机制：</p>
+<ol>
+<li>第一层委托：数据源头（如ASC、PS）的变化通知委托，用于告知WidgetController“数据已更新”；</li>
+<li>第二层委托：WidgetController的广播委托，将更新后的数据同步给所有绑定的Widget。</li>
+</ol>
+<h4 id="委托绑定时机"><a href="#委托绑定时机" class="headerlink" title="委托绑定时机"></a>委托绑定时机</h4><p>第一层委托的回调需在WidgetController初始化完成后立即绑定（<code>BindCallbacksToDependencies</code>函数），确保数据变化前完成监听：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAttributeMenuWidgetController::BindCallbacksToDependencies</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">check</span>(AttributeInfo)</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">auto</span>&amp; Pair : <span class="built_in">GetCustomAS</span>()-&gt;TagToAttribute)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// GAS内置委托：监听GE修改属性的变化</span></span><br><span class="line">		AbilitySystemComponent-&gt;<span class="built_in">GetGameplayAttributeValueChangeDelegate</span>(Pair.<span class="built_in">Value</span>()).<span class="built_in">AddLambda</span>(</span><br><span class="line">			[<span class="keyword">this</span> , Pair](<span class="type">const</span> FOnAttributeChangeData&amp; Data)</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="built_in">BroadCastAttributeInfo</span>(Pair.Key , Pair.<span class="built_in">Value</span>());</span><br><span class="line">			&#125;</span><br><span class="line">			);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 自定义委托：监听手动修改的属性点变化</span></span><br><span class="line">	<span class="built_in">GetCustomPS</span>()-&gt;OnAttributePointsChangedDelegate.<span class="built_in">AddLambda</span>(</span><br><span class="line">		[<span class="keyword">this</span>](int32 Points)</span><br><span class="line">		&#123;</span><br><span class="line">			AttributePointsChangedDelegate.<span class="built_in">Broadcast</span>(Points);</span><br><span class="line">		&#125;</span><br><span class="line">	);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ACustomPlayerState::AddToAttributePoints</span><span class="params">(int32 InAttributePoints)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	AttributePoints += InAttributePoints;</span><br><span class="line">	OnAttributePointsChangedDelegate.<span class="built_in">Broadcast</span>(AttributePoints);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="委托类型说明"><a href="#委托类型说明" class="headerlink" title="委托类型说明"></a>委托类型说明</h4><ul>
+<li>GAS内置委托：通过<code>GetGameplayAttributeValueChangeDelegate</code>监听由GameplayEffect修改的属性值变化；</li>
+<li>自定义委托：监听手动修改的数值（如属性点）变化，需自行定义并触发广播。</li>
+</ul>
+<h2 id="4-数据修改（响应用户输入）"><a href="#4-数据修改（响应用户输入）" class="headerlink" title="4. 数据修改（响应用户输入）"></a>4. 数据修改（响应用户输入）</h2><p>Widget接收用户输入后，通过WidgetController调用游戏逻辑接口修改数据，避免Widget直接操作核心数据：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UAttributeMenuWidgetController::UpgradeAttribute</span><span class="params">(<span class="type">const</span> FGameplayTag&amp; AttributeTag)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">GetCustomASC</span>()-&gt;<span class="built_in">UpgradeAttribute</span>(AttributeTag);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">UCustomAbilitySystemComponent* <span class="title">UCustomWidgetController::GetCustomASC</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (CustomAbilitySystemComponent == <span class="literal">nullptr</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		CustomAbilitySystemComponent = <span class="built_in">Cast</span>&lt;UCustomAbilitySystemComponent&gt;(AbilitySystemComponent);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> CustomAbilitySystemComponent;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="Overlay-Message（全局提示信息）"><a href="#Overlay-Message（全局提示信息）" class="headerlink" title="Overlay Message（全局提示信息）"></a>Overlay Message（全局提示信息）</h1><p>Overlay Message是UI的典型场景：触发游戏事件时向屏幕发送提示信息，核心逻辑仍基于“WidgetController+委托”实现：</p>
+<ol>
+<li>消息载体：提示信息以Widget形式展示，在Overlay Widget中动态创建；</li>
+<li>数据传递：通过嵌套委托实现“游戏事件→WidgetController→Overlay Widget”的信息传递；</li>
+<li>数据管理：通过DataTable管理不同类型的提示信息（文本、图片、Widget模板），按Tag匹配调用。</li>
+</ol>
+<h2 id="核心实现逻辑"><a href="#核心实现逻辑" class="headerlink" title="核心实现逻辑"></a>核心实现逻辑</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">UCustomAbilitySystemComponent::ClientEffectApplied_Implementation</span><span class="params">(UAbilitySystemComponent* AbilitySystemComponent,</span></span></span><br><span class="line"><span class="params"><span class="function">                                                                     <span class="type">const</span> FGameplayEffectSpec&amp; EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	FGameplayTagContainer TagContainer;</span><br><span class="line">	EffectSpec.<span class="built_in">GetAllAssetTags</span>(TagContainer);</span><br><span class="line"></span><br><span class="line">	EffectAssetTags.<span class="built_in">Broadcast</span>(TagContainer);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">UOverlayWidgetController::BindCallbacksToDependencies</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">GetCustomASC</span>()-&gt;EffectAssetTags.<span class="built_in">AddLambda</span>(</span><br><span class="line">		[<span class="keyword">this</span>](<span class="type">const</span> FGameplayTagContainer&amp; AssetTags)</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="keyword">for</span> (<span class="type">const</span> FGameplayTag&amp; Tag : AssetTags)</span><br><span class="line">				&#123;</span><br><span class="line">					FGameplayTag MessageTag = FGameplayTag::<span class="built_in">RequestGameplayTag</span>(<span class="built_in">FName</span>(<span class="string">&quot;Message&quot;</span>));</span><br><span class="line">					<span class="keyword">if</span> (Tag.<span class="built_in">MatchesTag</span>(MessageTag))</span><br><span class="line">					&#123;</span><br><span class="line">						<span class="type">const</span> FUIWidgetRow* Row = <span class="built_in">GetDataTableRowByTag</span>&lt;FUIWidgetRow&gt;(MessageWidgetDataTable , Tag);</span><br><span class="line">						MessageWidgetRowDelegate.<span class="built_in">Broadcast</span>(*Row);</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 通用DataTable查表模板函数</span></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function">T* <span class="title">GetDataTableRowByTag</span><span class="params">(UDataTable* DataTable , <span class="type">const</span> FGameplayTag&amp; Tag )</span> <span class="type">const</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function">T* <span class="title">UOverlayWidgetController::GetDataTableRowByTag</span><span class="params">(UDataTable* DataTable, <span class="type">const</span> FGameplayTag&amp; Tag)</span> <span class="type">const</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> DataTable-&gt;<span class="built_in">FindRow</span>&lt;T&gt;(Tag.<span class="built_in">GetTagName</span>() , <span class="built_in">TEXT</span>(<span class="string">&quot;&quot;</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 提示信息数据结构（关联DataTable）</span></span><br><span class="line"><span class="built_in">USTRUCT</span>(BlueprintType)</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">FUIWidgetRow</span> : <span class="keyword">public</span> FTableRowBase</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">GENERATED_BODY</span>()</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(EditAnywhere, BlueprintReadOnly)</span><br><span class="line">	FGameplayTag MessageTag = <span class="built_in">FGameplayTag</span>();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(EditAnywhere, BlueprintReadOnly)</span><br><span class="line">	FText Message = <span class="built_in">FText</span>();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(EditAnywhere, BlueprintReadOnly)</span><br><span class="line">	TSubclassOf&lt;UCustomUserWidget&gt; MessageWidget;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">UPROPERTY</span>(editAnywhere, BlueprintReadOnly)</span><br><span class="line">	UTexture2D* Image = <span class="literal">nullptr</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>Widget中接收并显示提示信息的逻辑：<br><img src="/ue5-blog/image1.png" alt="alt text"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/ue5-blog/tags/MVC/" rel="tag"># MVC</a>
+              <a href="/ue5-blog/tags/Widget/" rel="tag"># Widget</a>
+              <a href="/ue5-blog/tags/WidgetController/" rel="tag"># WidgetController</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/18/SystemDesigns/SaveAndLoad/GameMode/" rel="prev" title="GameMode">
+                  <i class="fa fa-angle-left"></i> GameMode
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/ue5-blog/2025/12/19/SystemDesigns/UI/DamageText/" rel="next" title="">
+                   <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Larry-lyx</span>
+  </div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
